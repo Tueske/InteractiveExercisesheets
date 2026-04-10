@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="VA 2014 Mathe">
+  <title>VA 2014 – Mathematik</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="cover-page">
+    <div class="header-bar">
+      <span class="header-title">Senatsverwaltung für Bildung</span>
+    </div>
+
+    <div class="cover-content">
+      <h1>Vergleichende Arbeit 2014</h1>
+      <h2>Fach Mathematik</h2>
+      <div class="cover-meta">
+        <p>Donnerstag, 12. Juni 2014 – Nachschreibtermin</p>
+        <p>Bearbeitungszeit: <strong>90 Minuten</strong></p>
+      </div>
+
+      <div class="info-box">
+        <h3>Hinweise zur Bearbeitung</h3>
+        <ul>
+          <li>Gib bei jeder Teilaufgabe deine Lösung ein und drücke <strong>„Antwort prüfen"</strong>.</li>
+          <li>Punkte werden nur für den <strong>ersten Versuch</strong> vergeben.</li>
+          <li>Bei falscher Antwort erhältst du einen Hinweis.</li>
+          <li>Es sind insgesamt <strong>51 Punkte</strong> erreichbar.</li>
+        </ul>
+      </div>
+
+      <div class="name-field">
+        <label for="student-name">Name, Vorname:</label>
+        <input type="text" id="student-name" placeholder="Dein Name...">
+        <label for="student-class">Klasse:</label>
+        <input type="text" id="student-class" placeholder="z.B. 9a" style="width:80px">
+      </div>
+
+      <div class="task-overview">
+        <h3>Aufgaben</h3>
+        <div class="task-grid">
+          <a href="aufgabe1.html" class="task-card">
+            <span class="task-number">1</span>
+            <span class="task-title">Basisaufgaben</span>
+            <span class="task-points">10 Punkte</span>
+          </a>
+          <a href="aufgabe2.html" class="task-card">
+            <span class="task-number">2</span>
+            <span class="task-title">Geburtstage</span>
+            <span class="task-points">7 Punkte</span>
+          </a>
+          <a href="aufgabe3.html" class="task-card">
+            <span class="task-number">3</span>
+            <span class="task-title">Zeitplanung</span>
+            <span class="task-points">6 Punkte</span>
+          </a>
+          <a href="aufgabe4.html" class="task-card">
+            <span class="task-number">4</span>
+            <span class="task-title">Cafeteria</span>
+            <span class="task-points">9 Punkte</span>
+          </a>
+          <a href="aufgabe5.html" class="task-card">
+            <span class="task-number">5</span>
+            <span class="task-title">Gläser</span>
+            <span class="task-points">5 Punkte</span>
+          </a>
+          <a href="aufgabe6.html" class="task-card">
+            <span class="task-number">6</span>
+            <span class="task-title">Fernseher</span>
+            <span class="task-points">7 Punkte</span>
+          </a>
+          <a href="aufgabe7.html" class="task-card">
+            <span class="task-number">7</span>
+            <span class="task-title">Kaugummi</span>
+            <span class="task-points">7 Punkte</span>
+          </a>
+        </div>
+      </div>
+
+      <a href="aufgabe1.html" class="start-button">
+        Prüfung beginnen →
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Save name/class to localStorage
+    const nameInput = document.getElementById('student-name');
+    const classInput = document.getElementById('student-class');
+
+    // Load saved values
+    nameInput.value = localStorage.getItem('studentName') || '';
+    classInput.value = localStorage.getItem('studentClass') || '';
+
+    nameInput.addEventListener('input', () => {
+      localStorage.setItem('studentName', nameInput.value);
+    });
+    classInput.addEventListener('input', () => {
+      localStorage.setItem('studentClass', classInput.value);
+    });
+  </script>
+</body>
+</html>
