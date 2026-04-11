@@ -4,134 +4,109 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Aufgabe 1 – Basisaufgaben</title>
+  <title>Aufgabe 2 – Geburtstage</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ── Task-1-specific styles ── */
 
-    /* 1a comparison rows */
-    .comparison-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin: 10px 0;
-    }
-    .comparison-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      font-size: 20px;
-    }
-    .comparison-box {
-      border: 2px solid #999;
-      border-radius: 6px;
-      width: 56px;
-      height: 46px;
-      text-align: center;
-      font-size: 20px;
-      font-family: Arial, sans-serif;
-      -webkit-appearance: none;
-    }
-    .comparison-box.correct  { border-color:#27ae60; background:#f0fff4; }
-    .comparison-box.incorrect{ border-color:#c0392b; background:#fff5f5; }
-    .comparison-box.locked   { background:#f5f5f5; color:#666; pointer-events:none; }
-
-    /* 1b fraction input hint */
-    .fraction-hint {
-      font-size: 14px;
-      color: #666;
-      margin-top: 4px;
-      font-style: italic;
+    .chart-wrap {
+      margin: 16px 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
-    /* 1e shape + MC layout */
-    .shape-mc-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .mc-options-inline {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .mc-option-1e {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      -webkit-user-select: none;
-      user-select: none;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .mc-option-1e.selected  { border-color:#2980b9; background:#eaf4fb; }
-    .mc-option-1e.correct   { border-color:#27ae60; background:#f0fff4; }
-    .mc-option-1e.incorrect { border-color:#c0392b; background:#fff5f5; }
-    .mc-checkbox-1e {
-      width: 26px;
-      height: 26px;
-      border: 2px solid #999;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: 16px;
-    }
-
-    /* 1f body naming */
-    .bodies-row {
-      display: flex;
-      gap: 16px;
-      justify-content: space-around;
-      flex-wrap: wrap;
+    /* ── True/False table ── */
+    .tf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
       margin: 14px 0;
     }
-    .body-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
+    .tf-table th {
+      background: #1a1a1a;
+      color: white;
+      padding: 10px 8px;
+      font-size: 14px;
     }
-    .body-input {
+    .tf-table th.col-statement   { text-align: left;   width: 40%; }
+    .tf-table th.col-wahr,
+    .tf-table th.col-falsch      { text-align: center; width: 11%; }
+    .tf-table th.col-begruendung { text-align: left;   width: 38%; }
+
+    .tf-table td {
+      padding: 10px 8px;
+      border: 1px solid #ccc;
+      vertical-align: middle;
+    }
+    .tf-table tr:nth-child(even) td { background: #fafafa; }
+
+    /* ── Wahr/Falsch buttons ── */
+    .tf-btn-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    .tf-btn {
+      width: 46px;
+      height: 38px;
       border: 2px solid #999;
       border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 15px;
+      background: white;
+      font-size: 13px;
       font-family: Arial, sans-serif;
-      width: 145px;
-      text-align: center;
+      font-weight: bold;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
       -webkit-appearance: none;
     }
-    .body-input.correct   { border-color:#27ae60; background:#f0fff4; }
-    .body-input.incorrect { border-color:#c0392b; background:#fff5f5; }
-    .body-input.locked    { background:#f5f5f5; color:#666; pointer-events:none; }
-
-    /* 1g wheel layout */
-    .wheel-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin: 10px 0;
+    .tf-btn.selected {
+      border-color: #2980b9;
+      background: #eaf4fb;
+    }
+    .tf-btn.result-correct {
+      border-color: #27ae60;
+      background: #f0fff4;
+    }
+    .tf-btn.result-incorrect {
+      border-color: #c0392b;
+      background: #fff5f5;
     }
 
-    /* inline math fraction */
-    .frac {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      vertical-align: middle;
-      margin: 0 2px;
-      font-size: 15px;
-      line-height: 1.2;
+    /* ── Reasoning textarea ── */
+    .begruendung-input {
+      border: 2px solid #999;
+      border-radius: 6px;
+      padding: 7px 9px;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      width: 100%;
+      resize: vertical;
+      min-height: 56px;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
     }
-    .frac .num { border-bottom: 1.5px solid currentColor; padding: 0 3px; }
-    .frac .den { padding: 0 3px; }
+    .begruendung-input.correct   { border-color: #27ae60; background: #f0fff4; }
+    .begruendung-input.incorrect { border-color: #c0392b; background: #fff5f5; }
+
+    /* ── Per-row hint shown after submission ── */
+    .row-hint {
+      font-size: 13px;
+      color: #7b241c;
+      font-style: italic;
+      margin-top: 6px;
+      line-height: 1.4;
+      display: none;
+    }
+
+    /* ── scored-notice (reuse from aufgabe1) ── */
+    .scored-notice {
+      display: inline-block;
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+      margin-left: 8px;
+    }
+    .scored-notice.earned     { color: #27ae60; font-weight: bold; }
+    .scored-notice.not-earned { color: #c0392b; }
+
   </style>
 </head>
 <body>
@@ -145,441 +120,371 @@
   <!-- ── Progress ── -->
   <div class="progress-container">
     <div class="progress-bar">
-      <div class="progress-fill" style="width: 14%"></div>
+      <div class="progress-fill" style="width: 28%"></div>
     </div>
-    <span class="progress-text">Aufgabe 1 von 7</span>
+    <span class="progress-text">Aufgabe 2 von 7</span>
   </div>
 
   <!-- ── Task Header ── -->
   <div class="task-header">
-    <h1>Aufgabe 1 – Basisaufgaben</h1>
-    <span class="points-badge">10 Punkte</span>
+    <h1>Aufgabe 2 – Geburtstage</h1>
+    <span class="points-badge">7 Punkte</span>
   </div>
 
-  <!-- ══════════════════════════════════════
-       TASK CONTENT
-       ══════════════════════════════════════ -->
   <div class="task-content">
 
+    <p class="exercise-text">
+      Die Abbildung zeigt, wie viele Schülerinnen und Schüler einer
+      9.&nbsp;Klasse in den einzelnen Monaten Geburtstag haben.
+    </p>
+
+    <!-- ══════════════════════════════════════
+         SVG Bar Chart
+         Data:
+           Jan=2, Feb=3, Mär=1, Apr=5, Mai=1,
+           Jun=2, Jul=1, Aug=2, Sep=0, Okt=2,
+           Nov=3, Dez=3   →  Total = 25
+         Winter  (Dez+Jan+Feb) = 3+2+3 = 8
+         Frühjahr(Mär+Apr+Mai) = 1+5+1 = 7
+         → Winter > Frühjahr  ✓
+         Feb (3) ≠ highest bar (Apr = 5)  ✓
+         Sep = 0  ✓
+         ══════════════════════════════════════ -->
+    <div class="chart-wrap">
+      <!--
+        Layout:
+          canvas  : 740 × 260
+          y-axis  : x = 52
+          x-axis  : y = 210
+          unit px : 32 px per pupil (0→210, 1→178, …, 6→18)
+          bar width: 36 px
+          slot width: (740-52)/12 ≈ 57 px  → bar starts at slot_left+10
+      -->
+      <svg width="740" height="260" viewBox="0 0 740 260"
+           aria-label="Säulendiagramm: Geburtstage der Klasse pro Monat">
+
+        <!-- y-axis label -->
+        <text x="13" y="130" text-anchor="middle"
+              font-family="Arial" font-size="13"
+              transform="rotate(-90,13,130)">Anzahl</text>
+
+        <!-- axes -->
+        <line x1="52" y1="10"  x2="52"  y2="210"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+        <line x1="52" y1="210" x2="736" y2="210"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+
+        <!-- y gridlines + ticks + labels  (0–6) -->
+        <!-- y=0→210  y=1→178  y=2→146  y=3→114
+             y=4→82   y=5→50   y=6→18              -->
+        <line x1="48" y1="210" x2="52" y2="210"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+        <text x="44" y="214" text-anchor="end"
+              font-family="Arial" font-size="12">0</text>
+
+        <line x1="52" y1="178" x2="736" y2="178"
+              stroke="#e0e0e0" stroke-width="1"/>
+        <line x1="48" y1="178" x2="52"  y2="178"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+        <text x="44" y="182" text-anchor="end"
+              font-family="Arial" font-size="12">1</text>
+
+        <line x1="52" y1="146" x2="736" y2="146"
+              stroke="#e0e0e0" stroke-width="1"/>
+        <line x1="48" y1="146" x2="52"  y2="146"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+        <text x="44" y="150" text-anchor="end"
+              font-family="Arial" font-size="12">2</text>
+
+        <line x1="52" y1="114" x2="736" y2="114"
+              stroke="#e0e0e0" stroke-width="1"/>
+        <line x1="48" y1="114" x2="52"  y2="114"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+        <text x="44" y="118" text-anchor="end"
+              font-family="Arial" font-size="12">3</text>
+
+        <line x1="52" y1="82"  x2="736" y2="82"
+              stroke="#e0e0e0" stroke-width="1"/>
+        <line x1="48" y1="82"  x2="52"  y2="82"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+        <text x="44" y="86"  text-anchor="end"
+              font-family="Arial" font-size="12">4</text>
+
+        <line x1="52" y1="50"  x2="736" y2="50"
+              stroke="#e0e0e0" stroke-width="1"/>
+        <line x1="48" y1="50"  x2="52"  y2="50"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+        <text x="44" y="54"  text-anchor="end"
+              font-family="Arial" font-size="12">5</text>
+
+        <line x1="52" y1="18"  x2="736" y2="18"
+              stroke="#e0e0e0" stroke-width="1"/>
+        <line x1="48" y1="18"  x2="52"  y2="18"
+              stroke="#1a1a1a" stroke-width="1.5"/>
+        <text x="44" y="22"  text-anchor="end"
+              font-family="Arial" font-size="12">6</text>
+
+        <!--
+          Slot centres (bar width 36, slot 57 px):
+          Slot 1  Jan : left=52,  bar_x=62
+          Slot 2  Feb : left=109, bar_x=119
+          Slot 3  Mär : left=166, bar_x=176
+          Slot 4  Apr : left=223, bar_x=233
+          Slot 5  Mai : left=280, bar_x=290
+          Slot 6  Jun : left=337, bar_x=347
+          Slot 7  Jul : left=394, bar_x=404
+          Slot 8  Aug : left=451, bar_x=461
+          Slot 9  Sep : left=508, bar_x=518  (value=0, no bar)
+          Slot 10 Okt : left=565, bar_x=575
+          Slot 11 Nov : left=622, bar_x=632
+          Slot 12 Dez : left=679, bar_x=689
+        -->
+
+        <!-- Jan = 2  → h=64,  y=146 -->
+        <rect x="62"  y="146" width="36" height="64"
+              fill="#444" stroke="none"/>
+        <!-- Feb = 3  → h=96,  y=114 -->
+        <rect x="119" y="114" width="36" height="96"
+              fill="#444" stroke="none"/>
+        <!-- Mär = 1  → h=32,  y=178 -->
+        <rect x="176" y="178" width="36" height="32"
+              fill="#444" stroke="none"/>
+        <!-- Apr = 5  → h=160, y=50  -->
+        <rect x="233" y="50"  width="36" height="160"
+              fill="#444" stroke="none"/>
+        <!-- Mai = 1  → h=32,  y=178 -->
+        <rect x="290" y="178" width="36" height="32"
+              fill="#444" stroke="none"/>
+        <!-- Jun = 2  → h=64,  y=146 -->
+        <rect x="347" y="146" width="36" height="64"
+              fill="#444" stroke="none"/>
+        <!-- Jul = 1  → h=32,  y=178 -->
+        <rect x="404" y="178" width="36" height="32"
+              fill="#444" stroke="none"/>
+        <!-- Aug = 2  → h=64,  y=146 -->
+        <rect x="461" y="146" width="36" height="64"
+              fill="#444" stroke="none"/>
+        <!-- Sep = 0  → no bar -->
+        <!-- Okt = 2  → h=64,  y=146 -->
+        <rect x="575" y="146" width="36" height="64"
+              fill="#444" stroke="none"/>
+        <!-- Nov = 3  → h=96,  y=114 -->
+        <rect x="632" y="114" width="36" height="96"
+              fill="#444" stroke="none"/>
+        <!-- Dez = 3  → h=96,  y=114 -->
+        <rect x="689" y="114" width="36" height="96"
+              fill="#444" stroke="none"/>
+
+        <!-- x-axis labels (rotated −45°, anchored at bar centre) -->
+        <text transform="rotate(-45, 80,224)"
+              x="80" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">Januar</text>
+        <text transform="rotate(-45,137,224)"
+              x="137" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">Februar</text>
+        <text transform="rotate(-45,194,224)"
+              x="194" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">März</text>
+        <text transform="rotate(-45,251,224)"
+              x="251" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">April</text>
+        <text transform="rotate(-45,308,224)"
+              x="308" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">Mai</text>
+        <text transform="rotate(-45,365,224)"
+              x="365" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">Juni</text>
+        <text transform="rotate(-45,422,224)"
+              x="422" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">Juli</text>
+        <text transform="rotate(-45,479,224)"
+              x="479" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">August</text>
+        <text transform="rotate(-45,536,224)"
+              x="536" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">September</text>
+        <text transform="rotate(-45,593,224)"
+              x="593" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">Oktober</text>
+        <text transform="rotate(-45,650,224)"
+              x="650" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">November</text>
+        <text transform="rotate(-45,707,224)"
+              x="707" y="224" text-anchor="end"
+              font-family="Arial" font-size="11">Dezember</text>
+
+      </svg>
+    </div><!-- /chart-wrap -->
+
+
     <!-- ────────────────────────────────────
-         1a  Vergleichszeichen   (2 BE)
+         2a  Klassengröße  (1 BE)
          ──────────────────────────────────── -->
-    <div class="sub-exercise" id="block-1a">
+    <div class="sub-exercise" id="block-2a">
       <div class="sub-label">a)</div>
       <p class="exercise-text">
-        Setze das richtige Zeichen ein (&lt;&nbsp;;&nbsp;=&nbsp;;&nbsp;&gt;).
+        Gib an, aus wie vielen Schülerinnen und Schülern
+        diese Klasse besteht.
       </p>
 
-      <div class="comparison-grid">
-        <div class="comparison-row">
-          <span>3,6</span>
-          <input class="comparison-box"
-                 id="ans-1a-1"
-                 data-sub="1a"
-                 type="text"
-                 maxlength="1"
-                 inputmode="text"
-                 autocomplete="off"
-                 placeholder="?">
-          <span>−4,9</span>
-        </div>
-        <div class="comparison-row">
-          <span>−5</span>
-          <input class="comparison-box"
-                 id="ans-1a-2"
-                 data-sub="1a"
-                 type="text"
-                 maxlength="1"
-                 inputmode="text"
-                 autocomplete="off"
-                 placeholder="?">
-          <span>−6</span>
-        </div>
-      </div>
-
-      <button class="submit-btn" id="btn-1a" onclick="check1a()">
-        Antwort prüfen
-      </button>
-      <div class="feedback-box" id="feedback-1a"></div>
-    </div><!-- /1a -->
-
-
-    <!-- ────────────────────────────────────
-         1b  50 % als gekürzter Bruch  (1 BE)
-         ──────────────────────────────────── -->
-    <div class="sub-exercise" id="block-1b">
-      <div class="sub-label">b)</div>
-      <p class="exercise-text">
-        Gib 50&nbsp;% als gekürzten Bruch an.
-      </p>
-
-      <input class="answer-input"
-             id="ans-1b"
-             data-sub="1b"
-             type="text"
-             placeholder="z.B. 1/2"
-             autocomplete="off">
-      <p class="fraction-hint">Schreibe den Bruch als Zähler/Nenner, z.&thinsp;B. 1/2</p>
-
-      <button class="submit-btn" id="btn-1b" onclick="check1b()">
-        Antwort prüfen
-      </button>
-      <div class="feedback-box" id="feedback-1b"></div>
-    </div><!-- /1b -->
-
-
-    <!-- ────────────────────────────────────
-         1c  Antiproportionalität LKW  (1 BE)
-         ──────────────────────────────────── -->
-    <div class="sub-exercise" id="block-1c">
-      <div class="sub-label">c)</div>
-      <p class="exercise-text">
-        Ein Sandberg kann von 5&nbsp;LKW in 20&nbsp;Stunden abgefahren werden.
-        Wie viele Stunden benötigen 4&nbsp;LKW dafür?
-      </p>
-
-      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center;
+                  gap:8px; flex-wrap:wrap;">
         <input class="answer-input"
-               id="ans-1c"
-               data-sub="1c"
+               id="ans-2a"
+               data-sub="2a"
                type="number"
-               inputmode="decimal"
-               placeholder="Stunden"
-               style="max-width:160px;"
-               autocomplete="off">
-        <span style="font-size:16px;">Stunden</span>
-      </div>
-
-      <button class="submit-btn" id="btn-1c" onclick="check1c()">
-        Antwort prüfen
-      </button>
-      <div class="feedback-box" id="feedback-1c"></div>
-    </div><!-- /1c -->
-
-
-    <!-- ────────────────────────────────────
-         1d  Lineare Gleichung  (1 BE)
-         ──────────────────────────────────── -->
-    <div class="sub-exercise" id="block-1d">
-      <div class="sub-label">d)</div>
-      <p class="exercise-text">
-        Ermittle die Lösung der Gleichung&nbsp;&nbsp;<strong>x − 17 = 53</strong>.
-      </p>
-
-      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <span style="font-size:18px;">x =</span>
-        <input class="answer-input"
-               id="ans-1d"
-               data-sub="1d"
-               type="number"
-               inputmode="decimal"
-               placeholder=""
+               inputmode="numeric"
+               placeholder="Anzahl"
                style="max-width:140px;"
                autocomplete="off">
+        <span style="font-size:16px;">Schüler/innen</span>
       </div>
 
-      <button class="submit-btn" id="btn-1d" onclick="check1d()">
-        Antwort prüfen
-      </button>
-      <div class="feedback-box" id="feedback-1d"></div>
-    </div><!-- /1d -->
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-2a" onclick="check2a()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-2a"></span>
+      </div>
+      <div class="feedback-box" id="feedback-2a"></div>
+    </div>
 
 
     <!-- ────────────────────────────────────
-         1e  Umfang Trapez (MC)  (1 BE)
+         2b  Wahr / Falsch  (6 BE)
+         2 BE per row: 1 for W/F, 1 for reasoning
          ──────────────────────────────────── -->
-    <div class="sub-exercise" id="block-1e">
-      <div class="sub-label">e)</div>
+    <div class="sub-exercise" id="block-2b">
+      <div class="sub-label">b)</div>
       <p class="exercise-text">
-        Mit welchem Term kann der Umfang der Figur berechnet werden?
-        Kreuze an.
+        Entscheide anhand des Diagramms, ob die folgenden Aussagen
+        <strong>wahr</strong> oder <strong>falsch</strong> sind.
+        Begründe jeweils deine Entscheidung.
       </p>
 
-      <!-- SVG: labeled trapezoid -->
-      <div class="diagram-container">
-        <svg width="260" height="110" viewBox="0 0 260 110"
-             aria-label="Trapez mit Seiten a (unten), b (links), b (rechts), c (oben)">
-          <!-- trapezoid shape -->
-          <polygon points="20,90 240,90 200,20 60,20"
-                   fill="#f0f0f0" stroke="#1a1a1a" stroke-width="2"/>
-          <!-- side labels -->
-          <!-- bottom: a -->
-          <text x="130" y="108" text-anchor="middle"
-                font-family="Arial" font-size="16" font-style="italic">a</text>
-          <!-- left: b -->
-          <text x="22" y="60" text-anchor="middle"
-                font-family="Arial" font-size="16" font-style="italic">b</text>
-          <!-- right: b -->
-          <text x="238" y="60" text-anchor="middle"
-                font-family="Arial" font-size="16" font-style="italic">b</text>
-          <!-- top: c -->
-          <text x="130" y="15" text-anchor="middle"
-                font-family="Arial" font-size="16" font-style="italic">c</text>
-        </svg>
+      <table class="tf-table">
+        <thead>
+          <tr>
+            <th class="col-statement">Aussage</th>
+            <th class="col-wahr">Wahr</th>
+            <th class="col-falsch">Falsch</th>
+            <th class="col-begruendung">Begründung</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Row 1 -->
+          <tr id="tf-row-1">
+            <td>
+              Die meisten Schülerinnen und Schüler
+              sind im Februar geboren.
+              <div class="row-hint" id="hint-2b-1"></div>
+            </td>
+            <td>
+              <div class="tf-btn-wrap">
+                <button class="tf-btn"
+                        id="tfbtn-1-w"
+                        onclick="selectTF(1,'w')">W</button>
+              </div>
+            </td>
+            <td>
+              <div class="tf-btn-wrap">
+                <button class="tf-btn"
+                        id="tfbtn-1-f"
+                        onclick="selectTF(1,'f')">F</button>
+              </div>
+            </td>
+            <td>
+              <textarea class="begruendung-input"
+                        id="bgr-2b-1"
+                        data-sub="2b"
+                        placeholder="Begründung …"></textarea>
+            </td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr id="tf-row-2">
+            <td>
+              Keiner aus der Klasse wurde
+              im September geboren.
+              <div class="row-hint" id="hint-2b-2"></div>
+            </td>
+            <td>
+              <div class="tf-btn-wrap">
+                <button class="tf-btn"
+                        id="tfbtn-2-w"
+                        onclick="selectTF(2,'w')">W</button>
+              </div>
+            </td>
+            <td>
+              <div class="tf-btn-wrap">
+                <button class="tf-btn"
+                        id="tfbtn-2-f"
+                        onclick="selectTF(2,'f')">F</button>
+              </div>
+            </td>
+            <td>
+              <textarea class="begruendung-input"
+                        id="bgr-2b-2"
+                        data-sub="2b"
+                        placeholder="Begründung …"></textarea>
+            </td>
+          </tr>
+
+          <!-- Row 3 -->
+          <tr id="tf-row-3">
+            <td>
+              In den Wintermonaten Dezember, Januar
+              und Februar haben mehr Schüler/innen
+              Geburtstag als in den Frühjahrsmonaten
+              März, April und Mai.
+              <div class="row-hint" id="hint-2b-3"></div>
+            </td>
+            <td>
+              <div class="tf-btn-wrap">
+                <button class="tf-btn"
+                        id="tfbtn-3-w"
+                        onclick="selectTF(3,'w')">W</button>
+              </div>
+            </td>
+            <td>
+              <div class="tf-btn-wrap">
+                <button class="tf-btn"
+                        id="tfbtn-3-f"
+                        onclick="selectTF(3,'f')">F</button>
+              </div>
+            </td>
+            <td>
+              <textarea class="begruendung-input"
+                        id="bgr-2b-3"
+                        data-sub="2b"
+                        placeholder="Begründung …"></textarea>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px;">
+        <button class="submit-btn" id="btn-2b" onclick="check2b()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-2b"></span>
       </div>
-
-      <div class="mc-options-inline" id="mc-1e">
-        <div class="mc-option-1e" data-val="A" onclick="selectMC1e(this)">
-          <div class="mc-checkbox-1e" id="cb-1e-A"></div>
-          <span>a · b · c · b</span>
-        </div>
-        <div class="mc-option-1e" data-val="B" onclick="selectMC1e(this)">
-          <div class="mc-checkbox-1e" id="cb-1e-B"></div>
-          <span>a − b − c − b</span>
-        </div>
-        <div class="mc-option-1e" data-val="C" onclick="selectMC1e(this)">
-          <div class="mc-checkbox-1e" id="cb-1e-C"></div>
-          <span>a + b + c + b</span>
-        </div>
-      </div>
-
-      <button class="submit-btn" id="btn-1e" onclick="check1e()">
-        Antwort prüfen
-      </button>
-      <div class="feedback-box" id="feedback-1e"></div>
-    </div><!-- /1e -->
-
-
-    <!-- ────────────────────────────────────
-         1f  Körper benennen  (3 BE)
-         ──────────────────────────────────── -->
-    <div class="sub-exercise" id="block-1f">
-      <div class="sub-label">f)</div>
-      <p class="exercise-text">
-        Benenne die drei geometrischen Körper.
-      </p>
-
-      <div class="bodies-row">
-
-        <!-- Body 1: Quader -->
-        <div class="body-item">
-          <svg width="110" height="90" viewBox="0 0 110 90"
-               aria-label="Quader">
-            <!-- back faces (lighter) -->
-            <polygon points="30,10 90,10 90,55 30,55"
-                     fill="#e8e8e8" stroke="#999" stroke-width="1"
-                     stroke-dasharray="4,3"/>
-            <!-- right back vertical -->
-            <line x1="90" y1="10" x2="100" y2="22"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- top back horizontal -->
-            <line x1="30" y1="10" x2="40" y2="22"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- back-right vertical -->
-            <line x1="40" y1="22" x2="100" y2="22"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-
-            <!-- front face -->
-            <polygon points="20,22 80,22 80,68 20,68"
-                     fill="#f8f8f8" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- top face -->
-            <polygon points="20,22 30,10 90,10 80,22"
-                     fill="#efefef" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- right face -->
-            <polygon points="80,22 90,10 100,22 100,68 80,68"
-                     fill="#e0e0e0" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- bottom-right connector -->
-            <line x1="80" y1="68" x2="100" y2="68"
-                  stroke="#1a1a1a" stroke-width="2"/>
-          </svg>
-          <input class="body-input"
-                 id="ans-1f-1"
-                 data-sub="1f"
-                 type="text"
-                 placeholder="Name des Körpers"
-                 autocomplete="off">
-        </div>
-
-        <!-- Body 2: Pyramide -->
-        <div class="body-item">
-          <svg width="110" height="90" viewBox="0 0 110 90"
-               aria-label="Pyramide">
-            <!-- base edges (dashed back) -->
-            <line x1="25" y1="72" x2="85" y2="72"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="85" y1="72" x2="70" y2="60"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="25" y1="72" x2="40" y2="60"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="40" y1="60" x2="70" y2="60"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- apex to base corners -->
-            <line x1="55" y1="10" x2="25" y2="72"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="55" y1="10" x2="85" y2="72"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="55" y1="10" x2="40" y2="60"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="55" y1="10" x2="70" y2="60"
-                  stroke="#1a1a1a" stroke-width="2"/>
-          </svg>
-          <input class="body-input"
-                 id="ans-1f-2"
-                 data-sub="1f"
-                 type="text"
-                 placeholder="Name des Körpers"
-                 autocomplete="off">
-        </div>
-
-        <!-- Body 3: Dreiseitiges Prisma -->
-        <div class="body-item">
-          <svg width="110" height="90" viewBox="0 0 110 90"
-               aria-label="Dreiseitiges Prisma">
-            <!-- back triangle (dashed) -->
-            <line x1="55" y1="12" x2="90" y2="65"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="20" y1="65" x2="55" y2="12"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="20" y1="65" x2="90" y2="65"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- connecting edges (dashed back-left) -->
-            <line x1="20" y1="65" x2="10" y2="78"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- front triangle -->
-            <polygon points="45,25 100,78 10,78"
-                     fill="#f8f8f8" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- connecting edges (front) -->
-            <line x1="45" y1="25" x2="55" y2="12"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="100" y1="78" x2="90" y2="65"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <!-- top face -->
-            <polygon points="45,25 55,12 90,65 100,78"
-                     fill="#e8e8e8" stroke="#1a1a1a" stroke-width="2"/>
-          </svg>
-          <input class="body-input"
-                 id="ans-1f-3"
-                 data-sub="1f"
-                 type="text"
-                 placeholder="Name des Körpers"
-                 autocomplete="off">
-        </div>
-
-      </div><!-- /bodies-row -->
-
-      <button class="submit-btn" id="btn-1f" onclick="check1f()">
-        Antwort prüfen
-      </button>
-      <div class="feedback-box" id="feedback-1f"></div>
-    </div><!-- /1f -->
-
-
-    <!-- ────────────────────────────────────
-         1g  Glücksrad  (1 BE)
-         ──────────────────────────────────── -->
-    <div class="sub-exercise" id="block-1g">
-      <div class="sub-label">g)</div>
-      <p class="exercise-text">
-        Ein Glücksrad ist in gleich große Felder eingeteilt.
-        Man dreht es und es bleibt zufällig auf einer <strong>„2"</strong> stehen.<br>
-        Gib dafür die Wahrscheinlichkeit an.
-      </p>
-
-      <!-- SVG Glücksrad: 12 equal sectors, numbers 3,1,1,2,2,3,2,3,1,4,1,3 -->
-      <div class="wheel-wrap">
-        <svg width="200" height="200" viewBox="0 0 200 200"
-             aria-label="Glücksrad mit 12 gleich großen Feldern">
-          <g transform="translate(100,100)">
-            <!-- 12 sectors, each 30° -->
-            <!-- Numbers reading clockwise from top:
-                 3,1,1,2,2,3,2,3,1,4,1,3  (from original diagram) -->
-            <path d="M0,0 L0,-90 A90,90 0 0,1 45,-77.9 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L45,-77.9 A90,90 0 0,1 77.9,-45 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L77.9,-45 A90,90 0 0,1 90,0 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L90,0 A90,90 0 0,1 77.9,45 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L77.9,45 A90,90 0 0,1 45,77.9 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L45,77.9 A90,90 0 0,1 0,90 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L0,90 A90,90 0 0,1 -45,77.9 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-45,77.9 A90,90 0 0,1 -77.9,45 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-77.9,45 A90,90 0 0,1 -90,0 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-90,0 A90,90 0 0,1 -77.9,-45 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-77.9,-45 A90,90 0 0,1 -45,-77.9 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-45,-77.9 A90,90 0 0,1 0,-90 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-
-            <!-- Sector labels at radius ~65, mid-angle of each sector -->
-            <!-- Sector 1:  0°–30°  mid=15°   number=3 -->
-            <text x="17"  y="-61" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">3</text>
-            <!-- Sector 2: 30°–60°  mid=45°   number=1 -->
-            <text x="46"  y="-46" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">1</text>
-            <!-- Sector 3: 60°–90°  mid=75°   number=1 -->
-            <text x="63"  y="-17" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">1</text>
-            <!-- Sector 4: 90°–120° mid=105°  number=2 -->
-            <text x="63"  y="20"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">2</text>
-            <!-- Sector 5: 120°–150° mid=135° number=2 -->
-            <text x="46"  y="50"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">2</text>
-            <!-- Sector 6: 150°–180° mid=165° number=3 -->
-            <text x="17"  y="65"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">3</text>
-            <!-- Sector 7: 180°–210° mid=195° number=2 -->
-            <text x="-17" y="65"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">2</text>
-            <!-- Sector 8: 210°–240° mid=225° number=3 -->
-            <text x="-46" y="50"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">3</text>
-            <!-- Sector 9: 240°–270° mid=255° number=1 -->
-            <text x="-63" y="20"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">1</text>
-            <!-- Sector 10: 270°–300° mid=285° number=4 -->
-            <text x="-63" y="-17" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">4</text>
-            <!-- Sector 11: 300°–330° mid=315° number=1 -->
-            <text x="-46" y="-46" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">1</text>
-            <!-- Sector 12: 330°–360° mid=345° number=3 -->
-            <text x="-17" y="-61" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">3</text>
-
-            <!-- Centre dot -->
-            <circle cx="0" cy="0" r="5"
-                    fill="#1a1a1a"/>
-          </g>
-        </svg>
-      </div>
-
-      <p class="exercise-text mt-8">
-        Schreibe die Wahrscheinlichkeit als gekürzten Bruch.
-      </p>
-      <input class="answer-input"
-             id="ans-1g"
-             data-sub="1g"
-             type="text"
-             placeholder="z.B. 1/4"
-             style="max-width:160px;"
-             autocomplete="off">
-      <p class="fraction-hint">Zähler/Nenner, z.&thinsp;B. 3/12</p>
-
-      <button class="submit-btn" id="btn-1g" onclick="check1g()">
-        Antwort prüfen
-      </button>
-      <div class="feedback-box" id="feedback-1g"></div>
-    </div><!-- /1g -->
+      <div class="feedback-box" id="feedback-2b"></div>
+    </div>
 
   </div><!-- /task-content -->
 
   <!-- ── Navigation Footer ── -->
   <div class="nav-footer">
-    <button class="nav-btn" onclick="navigateTo('index.html')">
-      ← Übersicht
+    <button class="nav-btn" onclick="navigateTo('aufgabe1.html')">
+      ← Zurück
     </button>
     <span class="score-display" id="score-footer">Punkte: 0 / 51</span>
-    <button class="nav-btn next" onclick="navigateTo('aufgabe2.html')">
+    <button class="nav-btn next" onclick="navigateTo('aufgabe3.html')">
       Weiter →
     </button>
   </div>
@@ -589,312 +494,209 @@
 <script src="exam.js"></script>
 <script>
 /* ══════════════════════════════════════════
-   Aufgabe 1 – Answer checking & scoring
+   Aufgabe 2 – checking & scoring
+
+   Chart values:
+     Jan=2, Feb=3, Mär=1, Apr=5, Mai=1,
+     Jun=2, Jul=1, Aug=2, Sep=0,
+     Okt=2, Nov=3, Dez=3   → Total=25
+
+   Correct answers:
+     2a)   25
+     2b-1) FALSCH  (April=5 ist höchste Säule, nicht Feb=3)
+     2b-2) WAHR    (Sep=0, keine Säule)
+     2b-3) WAHR    (Winter: 3+2+3=8 > Frühjahr: 1+5+1=7)
    ══════════════════════════════════════════ */
 
 let state = ExamState.load();
 
-/* ── helpers ── */
 function saveAndRefresh() {
   ExamState.save(state);
   updateScoreDisplay();
 }
 
-function isLocked(subId) {
-  return state.scores[subId] && state.scores[subId].attempts > 0;
-}
-
-/* ─────────────────────────
-   1a  Vergleichszeichen  (2 BE)
-   ───────────────────────── */
-function check1a() {
-  if (isLocked('1a')) return;
-
-  const v1 = document.getElementById('ans-1a-1').value.trim();
-  const v2 = document.getElementById('ans-1a-2').value.trim();
-
-  const ok1 = (v1 === '>');
-  const ok2 = (v2 === '>');
-  const bothOk = ok1 && ok2;
-
-  // Visual feedback on each box
-  const box1 = document.getElementById('ans-1a-1');
-  const box2 = document.getElementById('ans-1a-2');
-  box1.classList.add(ok1 ? 'correct' : 'incorrect');
-  box2.classList.add(ok2 ? 'correct' : 'incorrect');
-
-  // Award points: 1 BE per correct comparison
-  const earned = (ok1 ? 1 : 0) + (ok2 ? 1 : 0);
-
-  if (!state.scores['1a']) {
-    state.scores['1a'] = { earned: 0, max: 2, attempts: 0 };
-  }
-  if (state.scores['1a'].attempts === 0) {
-    state.scores['1a'].earned = earned;
-  }
-  state.scores['1a'].attempts += 1;
-
-  lockInput('1a');
-
-  const fb = document.getElementById('feedback-1a');
-  fb.classList.add('show');
-  if (bothOk) {
-    fb.className = 'feedback-box show correct';
-    fb.innerHTML = `<span class="feedback-icon">✅</span>
-      <strong>Richtig!</strong> Beide Zeichen sind korrekt. (2/2 Punkte)`;
-  } else if (earned === 1) {
-    fb.className = 'feedback-box show incorrect';
-    fb.innerHTML = `<span class="feedback-icon">⚠️</span>
-      <strong>Teilweise richtig.</strong> (1/2 Punkte)
-      <div class="hint-text">💡 Hinweis: Vergleiche die Zahlen auf dem Zahlenstrahl.
-      Negative Zahlen werden größer, je näher sie an der 0 sind.
-      Also: −5 &gt; −6, weil −5 weiter rechts auf dem Zahlenstrahl liegt.</div>`;
+/* ── scored-notice helper ── */
+function updateNotice(subId) {
+  const el = document.getElementById(`notice-${subId}`);
+  if (!el) return;
+  const s = state.scores[subId];
+  if (!s || s.attempts === 0) { el.textContent = ''; return; }
+  if (s.earned > 0) {
+    el.className = 'scored-notice earned';
+    el.textContent =
+      `✓ ${s.earned}/${s.max} Punkt(e) bereits vergeben`;
   } else {
-    fb.className = 'feedback-box show incorrect';
-    fb.innerHTML = `<span class="feedback-icon">❌</span>
-      <strong>Leider falsch.</strong> (0/2 Punkte)
-      <div class="hint-text">💡 Hinweis: 3,6 ist positiv, −4,9 ist negativ –
-      positive Zahlen sind immer größer als negative.
-      Bei negativen Zahlen gilt: Je kleiner der Betrag, desto größer die Zahl.</div>`;
+    el.className = 'scored-notice not-earned';
+    el.textContent =
+      `0/${s.max} Punkt(e) – weiteres Üben möglich`;
   }
-
-  saveAndRefresh();
 }
 
 /* ─────────────────────────
-   1b  50 % als Bruch  (1 BE)
+   2a  Klassengröße  (1 BE)
    ───────────────────────── */
-function check1b() {
-  if (isLocked('1b')) return;
-
-  const raw = document.getElementById('ans-1b').value.trim();
-  // Accept: 1/2, 2/4 (not reduced), but must be 1/2 reduced
-  const ok = fractionCheck(raw, 1, 2);
-
-  // Also specifically reject non-reduced forms
-  const isReduced = (() => {
-    const m = raw.replace(/\s/g,'').match(/^(\d+)\/(\d+)$/);
-    if (m) return parseInt(m[1]) === 1 && parseInt(m[2]) === 2;
-    return ok; // decimal form counts
-  })();
-
-  state = recordScore('1b', 1, isReduced, state);
-  markInput('1b', isReduced);
-  lockInput('1b');
-
-  showFeedback('1b', isReduced,
-    isReduced ? '' :
-    '50 % = 50/100. Kürze den Bruch: 50 ÷ 50 = 1, 100 ÷ 50 = 2. Ergebnis: 1/2.');
-
-  saveAndRefresh();
-}
-
-/* ─────────────────────────
-   1c  LKW-Aufgabe  (1 BE)
-   ───────────────────────── */
-function check1c() {
-  if (isLocked('1c')) return;
-
-  const raw = document.getElementById('ans-1c').value;
+function check2a() {
+  const raw = document.getElementById('ans-2a').value;
   const ok  = numericCheck(raw, 25, 0.01);
 
-  state = recordScore('1c', 1, ok, state);
-  markInput('1c', ok);
-  lockInput('1c');
+  const inp = document.getElementById('ans-2a');
+  inp.classList.remove('correct', 'incorrect');
+  inp.classList.add(ok ? 'correct' : 'incorrect');
 
-  showFeedback('1c', ok,
+  state = recordScore('2a', 1, ok, state);
+
+  showFeedback('2a', ok,
     ok ? '' :
-    'Das ist eine antiproportionale Zuordnung: ' +
-    '5 LKW × 20 h = 4 LKW × ? h → ? = (5 × 20) ÷ 4 = 25 Stunden.');
+    'Addiere alle Balkenwerte im Diagramm: ' +
+    'Jan + Feb + Mär + Apr + Mai + Jun + ' +
+    'Jul + Aug + Sep + Okt + Nov + Dez.');
 
+  updateNotice('2a');
   saveAndRefresh();
 }
 
 /* ─────────────────────────
-   1d  Gleichung  (1 BE)
+   2b  Wahr / Falsch  (6 BE)
    ───────────────────────── */
-function check1d() {
-  if (isLocked('1d')) return;
 
-  const raw = document.getElementById('ans-1d').value;
-  const ok  = numericCheck(raw, 70, 0.01);
+/* Track current W/F selection per row */
+const tfSel = { 1: null, 2: null, 3: null };
 
-  state = recordScore('1d', 1, ok, state);
-  markInput('1d', ok);
-  lockInput('1d');
+/* Correct W/F answers */
+const TF_CORRECT = { 1: 'f', 2: 'w', 3: 'w' };
 
-  showFeedback('1d', ok,
-    ok ? '' :
-    'x − 17 = 53 → addiere 17 auf beiden Seiten: x = 53 + 17 = 70.');
+/*
+  Keywords for reasoning validation.
+  At least one keyword must appear in the student text.
+*/
+const REASONING_KW = {
+  1: ['april', 'höchste', 'höchst', 'meisten', 'grösste',
+      'größte', 'nicht februar', '5', 'fünf', 'am meisten'],
+  2: ['september', 'keine säule', 'kein schüler', 'niemand',
+      'null', '0', 'leer', 'keine bar'],
+  3: ['8', 'acht', 'winter', '7', 'sieben', 'frühjahr',
+      'mehr', 'grösser', 'größer', 'dezember', 'januar',
+      'februar', 'märz', 'april', 'mai']
+};
 
-  saveAndRefresh();
+function reasoningOk(row, text) {
+  const clean = s =>
+    s.toLowerCase()
+     .replace(/ä/g,'ae').replace(/ö/g,'oe')
+     .replace(/ü/g,'ue').replace(/ß/g,'ss');
+  const t = clean(text);
+  return text.trim().length > 5 &&
+         REASONING_KW[row].some(kw => t.includes(clean(kw)));
 }
 
-/* ─────────────────────────
-   1e  Umfang Trapez MC  (1 BE)
-   ───────────────────────── */
-let selected1e = null;
+function selectTF(row, choice) {
+  tfSel[row] = choice;
 
-function selectMC1e(el) {
-  if (isLocked('1e')) return;
-
-  // Deselect all
-  document.querySelectorAll('.mc-option-1e').forEach(o => {
-    o.classList.remove('selected');
-    o.querySelector('.mc-checkbox-1e').textContent = '';
+  /* Reset both buttons for the row */
+  ['w','f'].forEach(c => {
+    const btn = document.getElementById(`tfbtn-${row}-${c}`);
+    btn.classList.remove('selected','result-correct','result-incorrect');
   });
 
-  // Select clicked
-  el.classList.add('selected');
-  el.querySelector('.mc-checkbox-1e').textContent = '✓';
-  selected1e = el.dataset.val;
+  /* Highlight chosen */
+  document.getElementById(`tfbtn-${row}-${choice}`)
+    .classList.add('selected');
 }
 
-function check1e() {
-  if (isLocked('1e')) return;
-  if (!selected1e) {
-    alert('Bitte wähle eine Antwort aus.');
-    return;
-  }
-
-  const ok = (selected1e === 'C'); // a + b + c + b
-
-  // Mark options
-  document.querySelectorAll('.mc-option-1e').forEach(o => {
-    if (o.dataset.val === 'C') {
-      o.classList.add('correct');
-    } else if (o.dataset.val === selected1e && !ok) {
-      o.classList.add('incorrect');
+function check2b() {
+  /* Require all three rows to be answered */
+  for (let r = 1; r <= 3; r++) {
+    if (tfSel[r] === null) {
+      alert(`Bitte wähle für Aussage ${r} wahr oder falsch aus.`);
+      return;
     }
-    o.style.pointerEvents = 'none';
-  });
-
-  state = recordScore('1e', 1, ok, state);
-  lockInput('1e');
-  document.getElementById('btn-1e').disabled = true;
-
-  showFeedback('1e', ok,
-    ok ? '' :
-    'Der Umfang eines Vierecks ist die Summe aller Seiten: ' +
-    'U = a + b + c + b. Multiplizieren wäre für den Flächeninhalt, ' +
-    'Subtraktion ergibt keinen Sinn für einen Umfang.');
-
-  saveAndRefresh();
-}
-
-/* ─────────────────────────
-   1f  Körper benennen  (3 BE)
-   ───────────────────────── */
-function check1f() {
-  if (isLocked('1f')) return;
-
-  const answers = [
-    document.getElementById('ans-1f-1').value,
-    document.getElementById('ans-1f-2').value,
-    document.getElementById('ans-1f-3').value,
-  ];
-
-  const correct = [
-    ['quader', 'rechteckige säule', 'rechtquader', 'cuboid'],
-    ['pyramide', 'quadratische pyramide', 'vierseitige pyramide'],
-    ['prisma', 'dreiseitiges prisma', 'dreieckiges prisma',
-     'dreiecksprisma', 'triangulares prisma', 'dreiseitige prisma'],
-  ];
-
-  const results = answers.map((ans, i) =>
-    stringCheck(ans, correct[i])
-  );
-
-  const earned = results.filter(Boolean).length;
-
-  // Per-input visual feedback
-  ['ans-1f-1','ans-1f-2','ans-1f-3'].forEach((id, i) => {
-    const el = document.getElementById(id);
-    el.classList.add(results[i] ? 'correct' : 'incorrect');
-    el.disabled = true;
-    el.classList.add('locked');
-  });
-
-  // Record score (partial credit: 1 BE per correct body)
-  if (!state.scores['1f']) {
-    state.scores['1f'] = { earned: 0, max: 3, attempts: 0 };
   }
-  if (state.scores['1f'].attempts === 0) {
-    state.scores['1f'].earned = earned;
+
+  let earned = 0;
+
+  const hintTexts = {
+    1: '💡 April hat die höchste Säule (5 Schüler/innen), ' +
+       'nicht Februar (3). → Die Aussage ist falsch.',
+    2: '💡 Für September gibt es keine Säule – ' +
+       'der Wert ist 0. → Die Aussage ist wahr.',
+    3: '💡 Winter: Dez(3) + Jan(2) + Feb(3) = 8; ' +
+       'Frühjahr: Mär(1) + Apr(5) + Mai(1) = 7. ' +
+       '8 > 7 → Die Aussage ist wahr.'
+  };
+
+  for (let r = 1; r <= 3; r++) {
+    const tfOk  = (tfSel[r] === TF_CORRECT[r]);
+    const bgrEl = document.getElementById(`bgr-2b-${r}`);
+    const bgrOk = reasoningOk(r, bgrEl.value);
+
+    /* Points */
+    if (tfOk)  earned += 1;
+    if (bgrOk) earned += 1;
+
+    /* Visual: TF buttons */
+    ['w','f'].forEach(c => {
+      document.getElementById(`tfbtn-${r}-${c}`)
+        .classList.remove('selected','result-correct','result-incorrect');
+    });
+    /* Always show the correct answer in green */
+    document.getElementById(`tfbtn-${r}-${TF_CORRECT[r]}`)
+      .classList.add('result-correct');
+    /* If wrong, also mark the chosen button red */
+    if (!tfOk) {
+      document.getElementById(`tfbtn-${r}-${tfSel[r]}`)
+        .classList.add('result-incorrect');
+    }
+
+    /* Visual: reasoning textarea */
+    bgrEl.classList.remove('correct','incorrect');
+    bgrEl.classList.add(bgrOk ? 'correct' : 'incorrect');
+
+    /* Per-row hint if anything wrong */
+    const hintEl = document.getElementById(`hint-2b-${r}`);
+    if (!tfOk || !bgrOk) {
+      hintEl.textContent = hintTexts[r];
+      hintEl.style.display = 'block';
+    } else {
+      hintEl.style.display = 'none';
+    }
   }
-  state.scores['1f'].attempts += 1;
 
-  document.getElementById('btn-1f').disabled = true;
+  /* Record score – points only on first attempt */
+  if (!state.scores['2b']) {
+    state.scores['2b'] = { earned: 0, max: 6, attempts: 0 };
+  }
+  if (state.scores['2b'].attempts === 0) {
+    state.scores['2b'].earned = earned;
+  }
+  state.scores['2b'].attempts += 1;
 
-  const fb = document.getElementById('feedback-1f');
+  /* Overall feedback */
+  const fb = document.getElementById('feedback-2b');
   fb.classList.add('show');
-
-  if (earned === 3) {
+  if (earned === 6) {
     fb.className = 'feedback-box show correct';
     fb.innerHTML = `<span class="feedback-icon">✅</span>
-      <strong>Alle drei Körper richtig!</strong> (3/3 Punkte)`;
+      <strong>Alle Aussagen richtig bewertet und begründet!
+      </strong> (6/6 Punkte)`;
   } else {
     fb.className = 'feedback-box show incorrect';
-    const names = ['Quader', 'Pyramide', 'Dreiseitiges Prisma'];
-    const hints = results.map((ok, i) =>
-      ok ? '' : `• Körper ${i+1}: <strong>${names[i]}</strong>`
-    ).filter(Boolean).join('<br>');
     fb.innerHTML = `<span class="feedback-icon">⚠️</span>
-      <strong>${earned}/3 Punkte.</strong>
-      <div class="hint-text">💡 Korrekte Antworten:<br>${hints}</div>`;
+      <strong>${earned}/6 Punkte.</strong>
+      <div class="hint-text">Schau dir die markierten Zeilen an –
+      dort findest du Hinweise zur richtigen Lösung.</div>`;
   }
 
+  markTaskCompleted('task2');
+  updateNotice('2b');
   saveAndRefresh();
 }
 
-/* ─────────────────────────
-   1g  Glücksrad  (1 BE)
-   ───────────────────────── */
-function check1g() {
-  if (isLocked('1g')) return;
-
-  const raw = document.getElementById('ans-1g').value.trim();
-
-  // Count the 2s on the wheel: sectors 4,5,7 → 4 twos
-  // Wheel numbers: 3,1,1,2,2,3,2,3,1,4,1,3 → count of 2s = 4
-  // P(2) = 4/12 = 1/3
-  const ok = fractionCheck(raw, 1, 3) ||
-             fractionCheck(raw, 4, 12);
-
-  // Also accept "4/12"
-  const cleanRaw = raw.replace(/\s/g,'');
-  const is4_12 = cleanRaw === '4/12';
-  const final  = ok || is4_12;
-
-  state = recordScore('1g', 1, final, state);
-  markInput('1g', final);
-  lockInput('1g');
-
-  showFeedback('1g', final,
-    final ? '' :
-    'Zähle die Felder mit „2": es sind 4 von insgesamt 12 Feldern. ' +
-    'P(2) = 4/12 = 1/3.');
-
-  saveAndRefresh();
-}
-
-/* ── On load: restore locked state if already answered ── */
-(function restoreState() {
-  const subs = ['1a','1b','1c','1d','1e','1f','1g'];
-  subs.forEach(id => {
-    if (state.scores[id] && state.scores[id].attempts > 0) {
-      // Re-lock inputs visually
-      document.querySelectorAll(`[data-sub="${id}"]`).forEach(el => {
-        el.disabled = true;
-        el.classList.add('locked');
-      });
-      const btn = document.getElementById(`btn-${id}`);
-      if (btn) btn.disabled = true;
-    }
-  });
+/* ── Restore notices on reload ── */
+(function restoreNotices() {
+  state = ExamState.load();
+  ['2a','2b'].forEach(id => updateNotice(id));
+  updateScoreDisplay();
 })();
-
-updateScoreDisplay();
 </script>
 </body>
 </html>
