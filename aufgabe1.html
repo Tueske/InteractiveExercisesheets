@@ -7,7 +7,6 @@
   <title>Aufgabe 1 – Basisaufgaben</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ── Task-1-specific styles ── */
 
     .comparison-grid {
       display: flex;
@@ -30,11 +29,10 @@
       font-size: 20px;
       font-family: Arial, sans-serif;
       -webkit-appearance: none;
+      transition: border-color 0.2s;
     }
     .comparison-box.correct   { border-color: #27ae60; background: #f0fff4; }
     .comparison-box.incorrect { border-color: #c0392b; background: #fff5f5; }
-    .comparison-box.locked    { background: #f5f5f5; color: #666;
-                                 pointer-events: none; }
 
     .input-hint {
       font-size: 13px;
@@ -43,7 +41,23 @@
       font-style: italic;
     }
 
-    /* 1c unit row */
+    /* already-scored notice */
+    .scored-notice {
+      display: inline-block;
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+      margin-left: 8px;
+    }
+    .scored-notice.earned {
+      color: #27ae60;
+      font-weight: bold;
+    }
+    .scored-notice.not-earned {
+      color: #c0392b;
+    }
+
+    /* 1c */
     .answer-unit-row {
       display: flex;
       align-items: center;
@@ -63,13 +77,6 @@
     }
     .unit-input.correct   { border-color: #27ae60; background: #f0fff4; }
     .unit-input.incorrect { border-color: #c0392b; background: #fff5f5; }
-    .unit-input.locked    { background: #f5f5f5; color: #666;
-                            pointer-events: none; }
-    .unit-label {
-      font-size: 16px;
-      color: #333;
-    }
-    /* unit selector */
     .unit-select {
       border: 2px solid #999;
       border-radius: 6px;
@@ -80,11 +87,10 @@
       -webkit-appearance: none;
       min-width: 130px;
       cursor: pointer;
+      transition: border-color 0.2s;
     }
     .unit-select.correct   { border-color: #27ae60; background: #f0fff4; }
     .unit-select.incorrect { border-color: #c0392b; background: #fff5f5; }
-    .unit-select.locked    { background: #f5f5f5; color: #666;
-                             pointer-events: none; }
 
     /* 1e MC */
     .mc-options-inline {
@@ -120,7 +126,7 @@
       font-size: 16px;
     }
 
-    /* 1f body naming */
+    /* 1f body images */
     .bodies-row {
       display: flex;
       gap: 16px;
@@ -134,6 +140,15 @@
       align-items: center;
       gap: 10px;
     }
+    .body-img {
+      width: 120px;
+      height: 100px;
+      object-fit: contain;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background: #fafafa;
+      padding: 6px;
+    }
     .body-input {
       border: 2px solid #999;
       border-radius: 6px;
@@ -143,11 +158,10 @@
       width: 150px;
       text-align: center;
       -webkit-appearance: none;
+      transition: border-color 0.2s;
     }
     .body-input.correct   { border-color: #27ae60; background: #f0fff4; }
     .body-input.incorrect { border-color: #c0392b; background: #fff5f5; }
-    .body-input.locked    { background: #f5f5f5; color: #666;
-                            pointer-events: none; }
 
     /* 1g wheel */
     .wheel-wrap {
@@ -162,12 +176,10 @@
 <body>
 <div class="page">
 
-  <!-- ── Header ── -->
   <div class="header-bar">
     <span class="header-title">VA 2014 Mathematik</span>
   </div>
 
-  <!-- ── Progress ── -->
   <div class="progress-container">
     <div class="progress-bar">
       <div class="progress-fill" style="width: 14%"></div>
@@ -175,7 +187,6 @@
     <span class="progress-text">Aufgabe 1 von 7</span>
   </div>
 
-  <!-- ── Task Header ── -->
   <div class="task-header">
     <h1>Aufgabe 1 – Basisaufgaben</h1>
     <span class="points-badge">10 Punkte</span>
@@ -183,9 +194,7 @@
 
   <div class="task-content">
 
-    <!-- ────────────────────────────────────
-         1a  Vergleichszeichen   (2 BE)
-         ──────────────────────────────────── -->
+    <!-- ── 1a ── -->
     <div class="sub-exercise" id="block-1a">
       <div class="sub-label">a)</div>
       <p class="exercise-text">
@@ -199,8 +208,7 @@
           <input class="comparison-box"
                  id="ans-1a-1"
                  data-sub="1a"
-                 type="text"
-                 maxlength="1"
+                 type="text" maxlength="1"
                  inputmode="text"
                  autocomplete="off"
                  placeholder="?">
@@ -211,8 +219,7 @@
           <input class="comparison-box"
                  id="ans-1a-2"
                  data-sub="1a"
-                 type="text"
-                 maxlength="1"
+                 type="text" maxlength="1"
                  inputmode="text"
                  autocomplete="off"
                  placeholder="?">
@@ -220,16 +227,17 @@
         </div>
       </div>
 
-      <button class="submit-btn" id="btn-1a" onclick="check1a()">
-        Antwort prüfen
-      </button>
+      <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+        <button class="submit-btn" id="btn-1a" onclick="check1a()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-1a"></span>
+      </div>
       <div class="feedback-box" id="feedback-1a"></div>
     </div>
 
 
-    <!-- ────────────────────────────────────
-         1b  50 % als gekürzter Bruch  (1 BE)
-         ──────────────────────────────────── -->
+    <!-- ── 1b ── -->
     <div class="sub-exercise" id="block-1b">
       <div class="sub-label">b)</div>
       <p class="exercise-text">
@@ -246,24 +254,25 @@
         Schreibe den Bruch in der Form Zähler/Nenner.
       </p>
 
-      <button class="submit-btn" id="btn-1b" onclick="check1b()">
-        Antwort prüfen
-      </button>
+      <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+        <button class="submit-btn" id="btn-1b" onclick="check1b()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-1b"></span>
+      </div>
       <div class="feedback-box" id="feedback-1b"></div>
     </div>
 
 
-    <!-- ────────────────────────────────────
-         1c  Antiproportionalität LKW  (1 BE)
-         ──────────────────────────────────── -->
+    <!-- ── 1c ── -->
     <div class="sub-exercise" id="block-1c">
       <div class="sub-label">c)</div>
       <p class="exercise-text">
-        Ein Sandberg kann von 5&nbsp;LKW in 20&nbsp;Stunden abgefahren werden.
-        Wie viele Stunden benötigen 4&nbsp;LKW dafür?
+        Ein Sandberg kann von 5&nbsp;LKW in 20&nbsp;Stunden abgefahren
+        werden. Wie viele Stunden benötigen 4&nbsp;LKW dafür?
       </p>
       <p class="input-hint">
-        Gib die Zahl und die Einheit an (z.&thinsp;B. „30 Minuten").
+        Gib die Zahl und die Einheit an.
       </p>
 
       <div class="answer-unit-row">
@@ -284,24 +293,26 @@
         </select>
       </div>
 
-      <button class="submit-btn" id="btn-1c" onclick="check1c()">
-        Antwort prüfen
-      </button>
+      <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+        <button class="submit-btn" id="btn-1c" onclick="check1c()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-1c"></span>
+      </div>
       <div class="feedback-box" id="feedback-1c"></div>
     </div>
 
 
-    <!-- ────────────────────────────────────
-         1d  Lineare Gleichung  (1 BE)
-         ──────────────────────────────────── -->
+    <!-- ── 1d ── -->
     <div class="sub-exercise" id="block-1d">
       <div class="sub-label">d)</div>
       <p class="exercise-text">
-        Ermittle die Lösung der Gleichung&nbsp;&nbsp;
+        Ermittle die Lösung der Gleichung&nbsp;
         <strong>x − 17 = 53</strong>.
       </p>
 
-      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center;
+                  gap:8px; flex-wrap:wrap;">
         <span style="font-size:18px;">x&nbsp;=</span>
         <input class="answer-input"
                id="ans-1d"
@@ -313,16 +324,18 @@
                autocomplete="off">
       </div>
 
-      <button class="submit-btn" id="btn-1d" onclick="check1d()">
-        Antwort prüfen
-      </button>
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-1d" onclick="check1d()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-1d"></span>
+      </div>
       <div class="feedback-box" id="feedback-1d"></div>
     </div>
 
 
-    <!-- ────────────────────────────────────
-         1e  Umfang Trapez (MC)  (1 BE)
-         ──────────────────────────────────── -->
+    <!-- ── 1e ── -->
     <div class="sub-exercise" id="block-1e">
       <div class="sub-label">e)</div>
       <p class="exercise-text">
@@ -332,7 +345,7 @@
 
       <div class="diagram-container">
         <svg width="260" height="110" viewBox="0 0 260 110"
-             aria-label="Trapez mit Seiten a unten, b links, b rechts, c oben">
+             aria-label="Trapez mit Seiten a, b, c, b">
           <polygon points="20,90 240,90 200,20 60,20"
                    fill="#f0f0f0" stroke="#1a1a1a" stroke-width="2"/>
           <text x="130" y="108" text-anchor="middle"
@@ -365,16 +378,18 @@
         </div>
       </div>
 
-      <button class="submit-btn" id="btn-1e" onclick="check1e()">
-        Antwort prüfen
-      </button>
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-1e" onclick="check1e()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-1e"></span>
+      </div>
       <div class="feedback-box" id="feedback-1e"></div>
     </div>
 
 
-    <!-- ────────────────────────────────────
-         1f  Körper benennen  (3 BE)
-         ──────────────────────────────────── -->
+    <!-- ── 1f ── -->
     <div class="sub-exercise" id="block-1f">
       <div class="sub-label">f)</div>
       <p class="exercise-text">
@@ -383,40 +398,14 @@
 
       <div class="bodies-row">
 
-        <!-- Body 1: Quader (rectangular cuboid)
-             A proper box drawn with three visible faces -->
         <div class="body-item">
-          <svg width="120" height="100" viewBox="0 0 120 100"
-               aria-label="Geometrischer Körper 1">
-            <!--
-              Front face:  (10,35)-(70,35)-(70,85)-(10,85)
-              Top face:    (10,35)-(70,35)-(90,15)-(30,15)
-              Right face:  (70,35)-(90,15)-(90,65)-(70,85)
-              Hidden edges dashed
-            -->
-            <!-- hidden back-left vertical -->
-            <line x1="30" y1="15" x2="30" y2="65"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-            <!-- hidden back-bottom horizontal -->
-            <line x1="30" y1="65" x2="90" y2="65"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-            <!-- hidden back-left to front-left bottom -->
-            <line x1="30" y1="65" x2="10" y2="85"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-
-            <!-- top face -->
-            <polygon points="10,35 70,35 90,15 30,15"
-                     fill="#e8e8e8" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- front face -->
-            <polygon points="10,35 70,35 70,85 10,85"
-                     fill="#f8f8f8" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- right face -->
-            <polygon points="70,35 90,15 90,65 70,85"
-                     fill="#d8d8d8" stroke="#1a1a1a" stroke-width="2"/>
-          </svg>
+          <!--
+            Place your image at: images/koerper_quader.png
+            Recommended size: 240×200 px or larger (2× for Retina)
+          -->
+          <img class="body-img"
+               src="images/koerper_quader.png"
+               alt="Geometrischer Körper 1">
           <input class="body-input"
                  id="ans-1f-1"
                  data-sub="1f"
@@ -425,44 +414,13 @@
                  autocomplete="off">
         </div>
 
-        <!-- Body 2: Quadratische Pyramide
-             Square base visible at bottom, apex at top,
-             four triangular faces, dashed hidden base edges -->
         <div class="body-item">
-          <svg width="120" height="100" viewBox="0 0 120 100"
-               aria-label="Geometrischer Körper 2">
-            <!--
-              Square base corners (perspective):
-              front-left=(15,80), front-right=(85,80),
-              back-right=(75,65), back-left=(25,65)
-              Apex=(50,10)
-            -->
-            <!-- hidden base edges (back) -->
-            <line x1="25" y1="65" x2="75" y2="65"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-            <line x1="25" y1="65" x2="15" y2="80"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-            <!-- hidden lateral edge (back-left) -->
-            <line x1="50" y1="10" x2="25" y2="65"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-
-            <!-- visible base edges (front) -->
-            <line x1="15" y1="80" x2="85" y2="80"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="85" y1="80" x2="75" y2="65"
-                  stroke="#1a1a1a" stroke-width="2"/>
-
-            <!-- lateral faces -->
-            <!-- front face -->
-            <polygon points="50,10 15,80 85,80"
-                     fill="#f0f0f0" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- right face -->
-            <polygon points="50,10 85,80 75,65"
-                     fill="#d8d8d8" stroke="#1a1a1a" stroke-width="2"/>
-          </svg>
+          <!--
+            Place your image at: images/koerper_pyramide.png
+          -->
+          <img class="body-img"
+               src="images/koerper_pyramide.png"
+               alt="Geometrischer Körper 2">
           <input class="body-input"
                  id="ans-1f-2"
                  data-sub="1f"
@@ -471,52 +429,13 @@
                  autocomplete="off">
         </div>
 
-        <!-- Body 3: Dreiseitiges Prisma (triangular prism)
-             Two triangular faces (front/back),
-             three rectangular faces,
-             dashed hidden edges -->
         <div class="body-item">
-          <svg width="120" height="100" viewBox="0 0 120 100"
-               aria-label="Geometrischer Körper 3">
-            <!--
-              Front triangle:  A=(15,85) B=(75,85) C=(45,25)
-              Back triangle (offset +20,−15):
-                               A'=(35,70) B'=(95,70) C'=(65,10)
-            -->
-            <!-- hidden back edges -->
-            <line x1="35" y1="70" x2="95" y2="70"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-            <line x1="35" y1="70" x2="65" y2="10"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-            <line x1="95" y1="70" x2="65" y2="10"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-            <!-- hidden connecting edge A–A' -->
-            <line x1="15" y1="85" x2="35" y2="70"
-                  stroke="#999" stroke-width="1.2"
-                  stroke-dasharray="4,3"/>
-
-            <!-- visible connecting edges -->
-            <!-- B–B' (bottom right) -->
-            <line x1="75" y1="85" x2="95" y2="70"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <!-- C–C' (top) -->
-            <line x1="45" y1="25" x2="65" y2="10"
-                  stroke="#1a1a1a" stroke-width="2"/>
-
-            <!-- front triangle -->
-            <polygon points="15,85 75,85 45,25"
-                     fill="#f8f8f8" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- right rectangular face -->
-            <polygon points="75,85 95,70 65,10 45,25"
-                     fill="#e0e0e0" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- bottom rectangular face (partial) -->
-            <polygon points="15,85 75,85 95,70 35,70"
-                     fill="#ececec" stroke="#1a1a1a" stroke-width="2"
-                     opacity="0.6"/>
-          </svg>
+          <!--
+            Place your image at: images/koerper_prisma.png
+          -->
+          <img class="body-img"
+               src="images/koerper_prisma.png"
+               alt="Geometrischer Körper 3">
           <input class="body-input"
                  id="ans-1f-3"
                  data-sub="1f"
@@ -525,18 +444,20 @@
                  autocomplete="off">
         </div>
 
-      </div><!-- /bodies-row -->
+      </div>
 
-      <button class="submit-btn" id="btn-1f" onclick="check1f()">
-        Antwort prüfen
-      </button>
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px;">
+        <button class="submit-btn" id="btn-1f" onclick="check1f()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-1f"></span>
+      </div>
       <div class="feedback-box" id="feedback-1f"></div>
     </div>
 
 
-    <!-- ────────────────────────────────────
-         1g  Glücksrad  (1 BE)
-         ──────────────────────────────────── -->
+    <!-- ── 1g ── -->
     <div class="sub-exercise" id="block-1g">
       <div class="sub-label">g)</div>
       <p class="exercise-text">
@@ -546,113 +467,75 @@
         Gib dafür die Wahrscheinlichkeit als gekürzten Bruch an.
       </p>
 
-      <!-- SVG Glücksrad: 12 equal sectors -->
       <div class="wheel-wrap">
         <svg width="210" height="210" viewBox="0 0 210 210"
-             aria-label="Glücksrad mit 12 gleich großen Feldern,
-             Zahlen: 3,1,1,2,2,3,2,3,1,4,1,3">
+             aria-label="Glücksrad mit 12 gleich großen Feldern">
           <g transform="translate(105,105)">
-
-            <!-- 12 sectors at 30° each, alternating fill -->
-            <!-- Angles measured clockwise from top (−90° offset) -->
-
-            <!-- Sector 1:  −90° to −60°  (top, slightly right) -->
-            <path d="M0,0 L0,-92
-                     A92,92 0 0,1 46,-79.7 Z"
+            <path d="M0,0 L0,-92 A92,92 0 0,1 46,-79.7 Z"
                   fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 2:  −60° to −30° -->
-            <path d="M0,0 L46,-79.7
-                     A92,92 0 0,1 79.7,-46 Z"
+            <path d="M0,0 L46,-79.7 A92,92 0 0,1 79.7,-46 Z"
                   fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 3:  −30° to 0° -->
-            <path d="M0,0 L79.7,-46
-                     A92,92 0 0,1 92,0 Z"
+            <path d="M0,0 L79.7,-46 A92,92 0 0,1 92,0 Z"
                   fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 4:  0° to 30° -->
-            <path d="M0,0 L92,0
-                     A92,92 0 0,1 79.7,46 Z"
+            <path d="M0,0 L92,0 A92,92 0 0,1 79.7,46 Z"
                   fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 5:  30° to 60° -->
-            <path d="M0,0 L79.7,46
-                     A92,92 0 0,1 46,79.7 Z"
+            <path d="M0,0 L79.7,46 A92,92 0 0,1 46,79.7 Z"
                   fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 6:  60° to 90° -->
-            <path d="M0,0 L46,79.7
-                     A92,92 0 0,1 0,92 Z"
+            <path d="M0,0 L46,79.7 A92,92 0 0,1 0,92 Z"
                   fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 7:  90° to 120° -->
-            <path d="M0,0 L0,92
-                     A92,92 0 0,1 -46,79.7 Z"
+            <path d="M0,0 L0,92 A92,92 0 0,1 -46,79.7 Z"
                   fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 8:  120° to 150° -->
-            <path d="M0,0 L-46,79.7
-                     A92,92 0 0,1 -79.7,46 Z"
+            <path d="M0,0 L-46,79.7 A92,92 0 0,1 -79.7,46 Z"
                   fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 9:  150° to 180° -->
-            <path d="M0,0 L-79.7,46
-                     A92,92 0 0,1 -92,0 Z"
+            <path d="M0,0 L-79.7,46 A92,92 0 0,1 -92,0 Z"
                   fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 10: 180° to 210° -->
-            <path d="M0,0 L-92,0
-                     A92,92 0 0,1 -79.7,-46 Z"
+            <path d="M0,0 L-92,0 A92,92 0 0,1 -79.7,-46 Z"
                   fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 11: 210° to 240° -->
-            <path d="M0,0 L-79.7,-46
-                     A92,92 0 0,1 -46,-79.7 Z"
+            <path d="M0,0 L-79.7,-46 A92,92 0 0,1 -46,-79.7 Z"
                   fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <!-- Sector 12: 240° to 270° (= −90°) -->
-            <path d="M0,0 L-46,-79.7
-                     A92,92 0 0,1 0,-92 Z"
+            <path d="M0,0 L-46,-79.7 A92,92 0 0,1 0,-92 Z"
                   fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
 
-            <!--
-              Labels placed at radius=66, mid-angle of each sector.
-              Numbers (clockwise from top):
-              S1=3, S2=1, S3=1, S4=2, S5=2, S6=3,
-              S7=2, S8=3, S9=1, S10=4, S11=1, S12=3
+            <!-- Labels: S1=3,S2=1,S3=1,S4=2,S5=2,S6=3,
+                         S7=2,S8=3,S9=1,S10=4,S11=1,S12=3 -->
+            <text x="17"  y="-58" text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">3</text>
+            <text x="47"  y="-43" text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">1</text>
+            <text x="62"  y="-13" text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">1</text>
+            <text x="62"  y="20"  text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">2</text>
+            <text x="47"  y="52"  text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">2</text>
+            <text x="17"  y="68"  text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">3</text>
+            <text x="-17" y="68"  text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">2</text>
+            <text x="-47" y="52"  text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">3</text>
+            <text x="-62" y="20"  text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">1</text>
+            <text x="-62" y="-13" text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">4</text>
+            <text x="-47" y="-43" text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">1</text>
+            <text x="-17" y="-58" text-anchor="middle"
+                  font-family="Arial" font-size="15"
+                  font-weight="bold">3</text>
 
-              Mid-angles (from positive x-axis, SVG coords):
-              S1:  −75°  → (17.1,  −63.7)
-              S2:  −45°  → (46.7,  −46.7)
-              S3:  −15°  → (63.7,  −17.1)
-              S4:   15°  → (63.7,   17.1)
-              S5:   45°  → (46.7,   46.7)
-              S6:   75°  → (17.1,   63.7)
-              S7:  105°  → (−17.1,  63.7)
-              S8:  135°  → (−46.7,  46.7)
-              S9:  165°  → (−63.7,  17.1)
-              S10: 195°  → (−63.7, −17.1)
-              S11: 225°  → (−46.7, −46.7)
-              S12: 255°  → (−17.1, −63.7)
-            -->
-            <text x="17"   y="-58" text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">3</text>
-            <text x="47"   y="-43" text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">1</text>
-            <text x="62"   y="-13" text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">1</text>
-            <text x="62"   y="20"  text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">2</text>
-            <text x="47"   y="52"  text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">2</text>
-            <text x="17"   y="68"  text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">3</text>
-            <text x="-17"  y="68"  text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">2</text>
-            <text x="-47"  y="52"  text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">3</text>
-            <text x="-62"  y="20"  text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">1</text>
-            <text x="-62"  y="-13" text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">4</text>
-            <text x="-47"  y="-43" text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">1</text>
-            <text x="-17"  y="-58" text-anchor="middle"
-                  font-family="Arial" font-size="15" font-weight="bold">3</text>
-
-            <!-- Centre dot -->
-            <circle cx="0" cy="0" r="6"
-                    fill="#1a1a1a"/>
+            <circle cx="0" cy="0" r="6" fill="#1a1a1a"/>
           </g>
         </svg>
       </div>
@@ -669,15 +552,18 @@
         in der Form Zähler/Nenner.
       </p>
 
-      <button class="submit-btn" id="btn-1g" onclick="check1g()">
-        Antwort prüfen
-      </button>
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-1g" onclick="check1g()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-1g"></span>
+      </div>
       <div class="feedback-box" id="feedback-1g"></div>
     </div>
 
   </div><!-- /task-content -->
 
-  <!-- ── Navigation Footer ── -->
   <div class="nav-footer">
     <button class="nav-btn" onclick="navigateTo('index.html')">
       ← Übersicht
@@ -693,7 +579,9 @@
 <script src="exam.js"></script>
 <script>
 /* ══════════════════════════════════════════
-   Aufgabe 1 – Answer checking & scoring
+   Aufgabe 1 – checking & scoring
+   No inputs are ever locked.
+   Points only on first attempt.
    ══════════════════════════════════════════ */
 
 let state = ExamState.load();
@@ -703,29 +591,44 @@ function saveAndRefresh() {
   updateScoreDisplay();
 }
 
-function isLocked(subId) {
-  return state.scores[subId] && state.scores[subId].attempts > 0;
+/* Show a small notice next to the button explaining
+   the points situation on repeat attempts            */
+function updateNotice(subId) {
+  const el = document.getElementById(`notice-${subId}`);
+  if (!el) return;
+  const s = state.scores[subId];
+  if (!s || s.attempts === 0) { el.textContent = ''; return; }
+  if (s.earned > 0) {
+    el.className = 'scored-notice earned';
+    el.textContent = `✓ ${s.earned}/${s.max} Punkt(e) bereits vergeben`;
+  } else {
+    el.className = 'scored-notice not-earned';
+    el.textContent = `0/${s.max} Punkt(e) – weiteres Üben möglich`;
+  }
 }
 
 /* ─────────────────────────
-   1a  Vergleichszeichen  (2 BE)
+   1a  (2 BE)
    ───────────────────────── */
 function check1a() {
-  if (isLocked('1a')) return;
-
   const v1 = document.getElementById('ans-1a-1').value.trim();
   const v2 = document.getElementById('ans-1a-2').value.trim();
 
   const ok1 = (v1 === '>');
   const ok2 = (v2 === '>');
 
+  // Clear old styles then re-apply
+  ['ans-1a-1','ans-1a-2'].forEach(id =>
+    document.getElementById(id).classList.remove('correct','incorrect'));
   document.getElementById('ans-1a-1')
     .classList.add(ok1 ? 'correct' : 'incorrect');
   document.getElementById('ans-1a-2')
     .classList.add(ok2 ? 'correct' : 'incorrect');
 
   const earned = (ok1 ? 1 : 0) + (ok2 ? 1 : 0);
+  const bothOk = ok1 && ok2;
 
+  // Record score only on first attempt
   if (!state.scores['1a']) {
     state.scores['1a'] = { earned: 0, max: 2, attempts: 0 };
   }
@@ -734,170 +637,147 @@ function check1a() {
   }
   state.scores['1a'].attempts += 1;
 
-  lockInput('1a');
-
   const fb = document.getElementById('feedback-1a');
   fb.classList.add('show');
-
-  if (ok1 && ok2) {
+  if (bothOk) {
     fb.className = 'feedback-box show correct';
     fb.innerHTML = `<span class="feedback-icon">✅</span>
-      <strong>Richtig!</strong> Beide Zeichen sind korrekt.
-      (2/2 Punkte)`;
+      <strong>Richtig!</strong> Beide Zeichen korrekt. (2/2 Punkte)`;
   } else if (earned === 1) {
     fb.className = 'feedback-box show incorrect';
     fb.innerHTML = `<span class="feedback-icon">⚠️</span>
-      <strong>Teilweise richtig.</strong> (1/2 Punkte)
-      <div class="hint-text">💡 Hinweis: Vergleiche die Zahlen auf dem
-      Zahlenstrahl. Negative Zahlen werden größer, je näher sie an der 0
-      sind – also liegt −5 rechts von −6 auf dem Zahlenstrahl.</div>`;
+      <strong>Teilweise richtig.</strong> (${earned}/2 Punkte)
+      <div class="hint-text">💡 Negative Zahlen werden größer,
+      je näher sie an der 0 sind – −5 liegt rechts von −6
+      auf dem Zahlenstrahl.</div>`;
   } else {
     fb.className = 'feedback-box show incorrect';
     fb.innerHTML = `<span class="feedback-icon">❌</span>
       <strong>Leider falsch.</strong> (0/2 Punkte)
-      <div class="hint-text">💡 Hinweis: 3,6 ist eine positive Zahl,
-      −4,9 ist negativ – positive Zahlen sind stets größer als negative.
-      Bei negativen Zahlen: je kleiner der Betrag, desto größer die Zahl.
-      </div>`;
+      <div class="hint-text">💡 Positive Zahlen sind immer größer
+      als negative. Bei negativen Zahlen: je kleiner der Betrag,
+      desto größer die Zahl.</div>`;
   }
 
+  updateNotice('1a');
   saveAndRefresh();
 }
 
 /* ─────────────────────────
-   1b  50 % als Bruch  (1 BE)
+   1b  (1 BE)
    ───────────────────────── */
 function check1b() {
-  if (isLocked('1b')) return;
-
   const raw = document.getElementById('ans-1b').value.trim();
-
-  // Must be the reduced form 1/2 specifically
   const isReduced = (() => {
-    const m = raw.replace(/\s/g, '').match(/^(\d+)\/(\d+)$/);
+    const m = raw.replace(/\s/g,'').match(/^(\d+)\/(\d+)$/);
     if (m) return parseInt(m[1]) === 1 && parseInt(m[2]) === 2;
-    // Accept 0.5 as decimal
-    const d = parseFloat(raw.replace(',', '.'));
+    const d = parseFloat(raw.replace(',','.'));
     return Math.abs(d - 0.5) < 0.001;
   })();
 
+  // Clear then re-apply style
+  const inp = document.getElementById('ans-1b');
+  inp.classList.remove('correct','incorrect');
+  inp.classList.add(isReduced ? 'correct' : 'incorrect');
+
   state = recordScore('1b', 1, isReduced, state);
-  markInput('1b', isReduced);
-  lockInput('1b');
 
   showFeedback('1b', isReduced,
     isReduced ? '' :
-    '50 % bedeutet 50 von 100. Schreibe das als Bruch: 50/100. ' +
-    'Kürze dann durch den größten gemeinsamen Teiler (50): ' +
-    '50 ÷ 50 = 1 und 100 ÷ 50 = 2.');
+    '50 % = 50/100. Kürze durch den größten gemeinsamen Teiler (50): ' +
+    '50 ÷ 50 = 1, 100 ÷ 50 = 2.');
 
+  updateNotice('1b');
   saveAndRefresh();
 }
 
 /* ─────────────────────────
-   1c  LKW-Aufgabe  (1 BE)
+   1c  (1 BE)
    ───────────────────────── */
 function check1c() {
-  if (isLocked('1c')) return;
-
-  const numRaw  = document.getElementById('ans-1c-num').value;
-  const unit    = document.getElementById('ans-1c-unit').value;
+  const numRaw = document.getElementById('ans-1c-num').value;
+  const unit   = document.getElementById('ans-1c-unit').value;
 
   const numOk  = numericCheck(numRaw, 25, 0.01);
   const unitOk = (unit === 'stunden');
   const ok     = numOk && unitOk;
 
-  // Visual feedback on both fields
-  document.getElementById('ans-1c-num')
-    .classList.add(numOk ? 'correct' : 'incorrect');
-  document.getElementById('ans-1c-unit')
-    .classList.add(unitOk ? 'correct' : 'incorrect');
+  // Clear then re-apply
+  const numEl  = document.getElementById('ans-1c-num');
+  const unitEl = document.getElementById('ans-1c-unit');
+  numEl.classList.remove('correct','incorrect');
+  unitEl.classList.remove('correct','incorrect');
+  numEl.classList.add(numOk ? 'correct' : 'incorrect');
+  unitEl.classList.add(unitOk ? 'correct' : 'incorrect');
 
-  // Lock both
-  document.getElementById('ans-1c-num').disabled = true;
-  document.getElementById('ans-1c-num').classList.add('locked');
-  document.getElementById('ans-1c-unit').disabled = true;
-  document.getElementById('ans-1c-unit').classList.add('locked');
-  document.getElementById('btn-1c').disabled = true;
-
-  if (!state.scores['1c']) {
-    state.scores['1c'] = { earned: 0, max: 1, attempts: 0 };
-  }
-  if (state.scores['1c'].attempts === 0) {
-    state.scores['1c'].earned = ok ? 1 : 0;
-  }
-  state.scores['1c'].attempts += 1;
+  state = recordScore('1c', 1, ok, state);
 
   const fb = document.getElementById('feedback-1c');
   fb.classList.add('show');
-
   if (ok) {
     fb.className = 'feedback-box show correct';
     fb.innerHTML = `<span class="feedback-icon">✅</span>
       <strong>Richtig!</strong> (1/1 Punkt)`;
   } else {
-    fb.className = 'feedback-box show incorrect';
     let hint = '';
     if (!numOk && !unitOk) {
-      hint = 'Das ist eine antiproportionale Zuordnung: ' +
-             '5 LKW × 20 h = 4 LKW × x → x = (5 × 20) ÷ 4. ' +
-             'Vergiss auch nicht die richtige Einheit!';
+      hint = 'Antiproportionale Zuordnung: 5 × 20 = 4 × x → ' +
+             'x = 100 ÷ 4. Vergiss auch die Einheit nicht.';
     } else if (!numOk) {
       hint = 'Die Zahl stimmt noch nicht. ' +
-             'Denke daran: 5 LKW × 20 h = 4 LKW × x → ' +
-             'x = (5 × 20) ÷ 4.';
+             '5 LKW × 20 h = 4 LKW × x → x = (5 × 20) ÷ 4.';
     } else {
-      hint = 'Die Zahl ist richtig, aber prüfe die Einheit – ' +
-             'das Ergebnis soll in Stunden angegeben werden.';
+      hint = 'Die Zahl stimmt – aber prüfe die Einheit. ' +
+             'Das Ergebnis soll in Stunden angegeben werden.';
     }
+    fb.className = 'feedback-box show incorrect';
     fb.innerHTML = `<span class="feedback-icon">❌</span>
-      <strong>Leider falsch.</strong> (0/1 Punkte)
-      <div class="hint-text">💡 Hinweis: ${hint}</div>`;
+      <strong>Leider falsch.</strong>
+      <div class="hint-text">💡 ${hint}</div>`;
   }
 
+  updateNotice('1c');
   saveAndRefresh();
 }
 
 /* ─────────────────────────
-   1d  Gleichung  (1 BE)
+   1d  (1 BE)
    ───────────────────────── */
 function check1d() {
-  if (isLocked('1d')) return;
-
   const raw = document.getElementById('ans-1d').value;
   const ok  = numericCheck(raw, 70, 0.01);
 
+  const inp = document.getElementById('ans-1d');
+  inp.classList.remove('correct','incorrect');
+  inp.classList.add(ok ? 'correct' : 'incorrect');
+
   state = recordScore('1d', 1, ok, state);
-  markInput('1d', ok);
-  lockInput('1d');
 
   showFeedback('1d', ok,
     ok ? '' :
     'x − 17 = 53 → addiere 17 auf beiden Seiten: x = 53 + 17.');
 
+  updateNotice('1d');
   saveAndRefresh();
 }
 
 /* ─────────────────────────
-   1e  Umfang Trapez MC  (1 BE)
+   1e  MC  (1 BE)
    ───────────────────────── */
 let selected1e = null;
 
 function selectMC1e(el) {
-  if (isLocked('1e')) return;
-
+  // Always allow re-selection
   document.querySelectorAll('.mc-option-1e').forEach(o => {
-    o.classList.remove('selected');
+    o.classList.remove('selected','correct','incorrect');
     o.querySelector('.mc-checkbox-1e').textContent = '';
   });
-
   el.classList.add('selected');
   el.querySelector('.mc-checkbox-1e').textContent = '✓';
   selected1e = el.dataset.val;
 }
 
 function check1e() {
-  if (isLocked('1e')) return;
   if (!selected1e) {
     alert('Bitte wähle eine Antwort aus.');
     return;
@@ -905,25 +785,27 @@ function check1e() {
 
   const ok = (selected1e === 'C');
 
+  // Clear all, then mark
+  document.querySelectorAll('.mc-option-1e').forEach(o => {
+    o.classList.remove('correct','incorrect');
+  });
   document.querySelectorAll('.mc-option-1e').forEach(o => {
     if (o.dataset.val === 'C') {
       o.classList.add('correct');
     } else if (o.dataset.val === selected1e && !ok) {
       o.classList.add('incorrect');
     }
-    o.style.pointerEvents = 'none';
   });
 
   state = recordScore('1e', 1, ok, state);
-  document.getElementById('btn-1e').disabled = true;
 
   showFeedback('1e', ok,
     ok ? '' :
-    'Der Umfang ist die Summe aller Seiten eines Vierecks. ' +
-    'Alle vier Seiten werden addiert: U = a + b + c + b. ' +
-    'Multiplikation berechnet einen Flächeninhalt, ' +
-    'Subtraktion ergibt für einen Umfang keinen Sinn.');
+    'Der Umfang ist die Summe aller Seiten: U = a + b + c + b. ' +
+    'Multiplikation wäre für Flächeninhalt, Subtraktion ergibt ' +
+    'keinen sinnvollen Umfang.');
 
+  updateNotice('1e');
   saveAndRefresh();
 }
 
@@ -931,8 +813,6 @@ function check1e() {
    1f  Körper benennen  (3 BE)
    ───────────────────────── */
 function check1f() {
-  if (isLocked('1f')) return;
-
   const answers = [
     document.getElementById('ans-1f-1').value,
     document.getElementById('ans-1f-2').value,
@@ -940,28 +820,28 @@ function check1f() {
   ];
 
   const correct = [
-    ['quader', 'rechteckige säule', 'rechtquader',
-     'rechteckquader', 'würfel'],
-    ['pyramide', 'quadratische pyramide',
-     'vierseitige pyramide', 'quadratpyramide'],
-    ['prisma', 'dreiseitiges prisma', 'dreieckiges prisma',
-     'dreiecksprisma', 'triangulares prisma',
-     'dreiseitige prisma', 'dreieckprisma'],
+    ['quader','rechteckige säule','rechtquader',
+     'rechteckquader'],
+    ['pyramide','quadratische pyramide',
+     'vierseitige pyramide','quadratpyramide'],
+    ['prisma','dreiseitiges prisma','dreieckiges prisma',
+     'dreiecksprisma','triangulares prisma',
+     'dreiseitige prisma','dreieckprisma'],
   ];
 
   const results = answers.map((ans, i) =>
     stringCheck(ans, correct[i])
   );
-
   const earned = results.filter(Boolean).length;
 
-  ['ans-1f-1', 'ans-1f-2', 'ans-1f-3'].forEach((id, i) => {
+  // Clear then re-apply per input
+  ['ans-1f-1','ans-1f-2','ans-1f-3'].forEach((id, i) => {
     const el = document.getElementById(id);
+    el.classList.remove('correct','incorrect');
     el.classList.add(results[i] ? 'correct' : 'incorrect');
-    el.disabled = true;
-    el.classList.add('locked');
   });
 
+  // Record: partial credit 1 BE per body, only on first attempt
   if (!state.scores['1f']) {
     state.scores['1f'] = { earned: 0, max: 3, attempts: 0 };
   }
@@ -970,84 +850,65 @@ function check1f() {
   }
   state.scores['1f'].attempts += 1;
 
-  document.getElementById('btn-1f').disabled = true;
-
   const fb = document.getElementById('feedback-1f');
   fb.classList.add('show');
-
   if (earned === 3) {
     fb.className = 'feedback-box show correct';
     fb.innerHTML = `<span class="feedback-icon">✅</span>
-      <strong>Alle drei Körper richtig erkannt!</strong>
-      (3/3 Punkte)`;
+      <strong>Alle drei Körper richtig!</strong> (3/3 Punkte)`;
   } else {
-    fb.className = 'feedback-box show incorrect';
-    // Only reveal names of wrong answers
-    const names  = ['Quader', 'Pyramide', 'Dreiseitiges Prisma'];
-    const hints  = results
+    const names = ['Quader','Pyramide','Dreiseitiges Prisma'];
+    const hints = results
       .map((ok, i) => ok
         ? null
-        : `• Körper ${i + 1} heißt: <strong>${names[i]}</strong>`)
-      .filter(Boolean)
-      .join('<br>');
+        : `• Körper ${i+1}: <strong>${names[i]}</strong>`)
+      .filter(Boolean).join('<br>');
+    fb.className = 'feedback-box show incorrect';
     fb.innerHTML = `<span class="feedback-icon">⚠️</span>
       <strong>${earned}/3 Punkte.</strong>
       <div class="hint-text">💡 Korrektur:<br>${hints}</div>`;
   }
 
+  updateNotice('1f');
   saveAndRefresh();
 }
 
 /* ─────────────────────────
    1g  Glücksrad  (1 BE)
-   Numbers: 3,1,1,2,2,3,2,3,1,4,1,3
-   Count of 2s: sectors 4,5,7 → 3 twos
-   Wait – let me recount:
    S1=3,S2=1,S3=1,S4=2,S5=2,S6=3,
    S7=2,S8=3,S9=1,S10=4,S11=1,S12=3
-   2s appear at S4, S5, S7 → 3 times
-   P(2) = 3/12 = 1/4
+   Twos: S4,S5,S7 → 3 twos → P = 3/12 = 1/4
    ───────────────────────── */
 function check1g() {
-  if (isLocked('1g')) return;
-
   const raw = document.getElementById('ans-1g').value.trim();
+  const ok  = fractionCheck(raw, 1, 4) ||
+              fractionCheck(raw, 3, 12) ||
+              raw.replace(/\s/g,'') === '3/12';
 
-  // P(2) = 3/12 = 1/4
-  // Accept both reduced (1/4) and unreduced (3/12)
-  const ok = fractionCheck(raw, 1, 4) ||
-             fractionCheck(raw, 3, 12) ||
-             raw.replace(/\s/g, '') === '3/12';
+  const inp = document.getElementById('ans-1g');
+  inp.classList.remove('correct','incorrect');
+  inp.classList.add(ok ? 'correct' : 'incorrect');
 
   state = recordScore('1g', 1, ok, state);
-  markInput('1g', ok);
-  lockInput('1g');
 
   showFeedback('1g', ok,
     ok ? '' :
-    'Zähle zunächst alle Felder im Rad: es sind 12. ' +
-    'Zähle dann, wie viele davon eine „2" zeigen. ' +
-    'Die Wahrscheinlichkeit ist dann: (Anzahl der 2er-Felder) / 12. ' +
-    'Kürze den Bruch so weit wie möglich.');
+    'Zähle alle Felder im Rad (Nenner) und dann die Felder ' +
+    'mit einer „2" (Zähler). Bilde daraus einen Bruch ' +
+    'und kürze ihn so weit wie möglich.');
 
+  updateNotice('1g');
   saveAndRefresh();
 }
 
-/* ── Restore locked state on page reload ── */
-(function restoreState() {
+/* ── Restore visual notices on page reload ── */
+(function restoreNotices() {
+  state = ExamState.load();
   ['1a','1b','1c','1d','1e','1f','1g'].forEach(id => {
-    if (state.scores[id] && state.scores[id].attempts > 0) {
-      document.querySelectorAll(`[data-sub="${id}"]`).forEach(el => {
-        el.disabled = true;
-        el.classList.add('locked');
-      });
-      const btn = document.getElementById(`btn-${id}`);
-      if (btn) btn.disabled = true;
-    }
+    updateNotice(id);
   });
+  updateScoreDisplay();
 })();
-
-updateScoreDisplay();
 </script>
 </body>
 </html>
