@@ -9,7 +9,6 @@
   <style>
     /* ── Task-1-specific styles ── */
 
-    /* 1a comparison rows */
     .comparison-grid {
       display: flex;
       flex-direction: column;
@@ -32,24 +31,62 @@
       font-family: Arial, sans-serif;
       -webkit-appearance: none;
     }
-    .comparison-box.correct  { border-color:#27ae60; background:#f0fff4; }
-    .comparison-box.incorrect{ border-color:#c0392b; background:#fff5f5; }
-    .comparison-box.locked   { background:#f5f5f5; color:#666; pointer-events:none; }
+    .comparison-box.correct   { border-color: #27ae60; background: #f0fff4; }
+    .comparison-box.incorrect { border-color: #c0392b; background: #fff5f5; }
+    .comparison-box.locked    { background: #f5f5f5; color: #666;
+                                 pointer-events: none; }
 
-    /* 1b fraction input hint */
-    .fraction-hint {
-      font-size: 14px;
+    .input-hint {
+      font-size: 13px;
       color: #666;
       margin-top: 4px;
       font-style: italic;
     }
 
-    /* 1e shape + MC layout */
-    .shape-mc-wrap {
+    /* 1c unit row */
+    .answer-unit-row {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0;
     }
+    .unit-input {
+      border: 2px solid #999;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 18px;
+      font-family: Arial, sans-serif;
+      width: 160px;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+    }
+    .unit-input.correct   { border-color: #27ae60; background: #f0fff4; }
+    .unit-input.incorrect { border-color: #c0392b; background: #fff5f5; }
+    .unit-input.locked    { background: #f5f5f5; color: #666;
+                            pointer-events: none; }
+    .unit-label {
+      font-size: 16px;
+      color: #333;
+    }
+    /* unit selector */
+    .unit-select {
+      border: 2px solid #999;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      background: white;
+      -webkit-appearance: none;
+      min-width: 130px;
+      cursor: pointer;
+    }
+    .unit-select.correct   { border-color: #27ae60; background: #f0fff4; }
+    .unit-select.incorrect { border-color: #c0392b; background: #fff5f5; }
+    .unit-select.locked    { background: #f5f5f5; color: #666;
+                             pointer-events: none; }
+
+    /* 1e MC */
     .mc-options-inline {
       display: flex;
       flex-direction: column;
@@ -68,9 +105,9 @@
       user-select: none;
       transition: border-color 0.2s, background 0.2s;
     }
-    .mc-option-1e.selected  { border-color:#2980b9; background:#eaf4fb; }
-    .mc-option-1e.correct   { border-color:#27ae60; background:#f0fff4; }
-    .mc-option-1e.incorrect { border-color:#c0392b; background:#fff5f5; }
+    .mc-option-1e.selected  { border-color: #2980b9; background: #eaf4fb; }
+    .mc-option-1e.correct   { border-color: #27ae60; background: #f0fff4; }
+    .mc-option-1e.incorrect { border-color: #c0392b; background: #fff5f5; }
     .mc-checkbox-1e {
       width: 26px;
       height: 26px;
@@ -103,15 +140,16 @@
       padding: 8px 10px;
       font-size: 15px;
       font-family: Arial, sans-serif;
-      width: 145px;
+      width: 150px;
       text-align: center;
       -webkit-appearance: none;
     }
-    .body-input.correct   { border-color:#27ae60; background:#f0fff4; }
-    .body-input.incorrect { border-color:#c0392b; background:#fff5f5; }
-    .body-input.locked    { background:#f5f5f5; color:#666; pointer-events:none; }
+    .body-input.correct   { border-color: #27ae60; background: #f0fff4; }
+    .body-input.incorrect { border-color: #c0392b; background: #fff5f5; }
+    .body-input.locked    { background: #f5f5f5; color: #666;
+                            pointer-events: none; }
 
-    /* 1g wheel layout */
+    /* 1g wheel */
     .wheel-wrap {
       display: flex;
       flex-direction: column;
@@ -119,19 +157,6 @@
       gap: 10px;
       margin: 10px 0;
     }
-
-    /* inline math fraction */
-    .frac {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      vertical-align: middle;
-      margin: 0 2px;
-      font-size: 15px;
-      line-height: 1.2;
-    }
-    .frac .num { border-bottom: 1.5px solid currentColor; padding: 0 3px; }
-    .frac .den { padding: 0 3px; }
   </style>
 </head>
 <body>
@@ -156,9 +181,6 @@
     <span class="points-badge">10 Punkte</span>
   </div>
 
-  <!-- ══════════════════════════════════════
-       TASK CONTENT
-       ══════════════════════════════════════ -->
   <div class="task-content">
 
     <!-- ────────────────────────────────────
@@ -167,7 +189,8 @@
     <div class="sub-exercise" id="block-1a">
       <div class="sub-label">a)</div>
       <p class="exercise-text">
-        Setze das richtige Zeichen ein (&lt;&nbsp;;&nbsp;=&nbsp;;&nbsp;&gt;).
+        Setze das richtige Zeichen ein
+        (&lt;&nbsp;;&nbsp;=&nbsp;;&nbsp;&gt;).
       </p>
 
       <div class="comparison-grid">
@@ -201,7 +224,7 @@
         Antwort prüfen
       </button>
       <div class="feedback-box" id="feedback-1a"></div>
-    </div><!-- /1a -->
+    </div>
 
 
     <!-- ────────────────────────────────────
@@ -217,15 +240,17 @@
              id="ans-1b"
              data-sub="1b"
              type="text"
-             placeholder="z.B. 1/2"
+             placeholder="Zähler/Nenner"
              autocomplete="off">
-      <p class="fraction-hint">Schreibe den Bruch als Zähler/Nenner, z.&thinsp;B. 1/2</p>
+      <p class="input-hint">
+        Schreibe den Bruch in der Form Zähler/Nenner.
+      </p>
 
       <button class="submit-btn" id="btn-1b" onclick="check1b()">
         Antwort prüfen
       </button>
       <div class="feedback-box" id="feedback-1b"></div>
-    </div><!-- /1b -->
+    </div>
 
 
     <!-- ────────────────────────────────────
@@ -237,24 +262,33 @@
         Ein Sandberg kann von 5&nbsp;LKW in 20&nbsp;Stunden abgefahren werden.
         Wie viele Stunden benötigen 4&nbsp;LKW dafür?
       </p>
+      <p class="input-hint">
+        Gib die Zahl und die Einheit an (z.&thinsp;B. „30 Minuten").
+      </p>
 
-      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <input class="answer-input"
-               id="ans-1c"
+      <div class="answer-unit-row">
+        <input class="unit-input"
+               id="ans-1c-num"
                data-sub="1c"
                type="number"
                inputmode="decimal"
-               placeholder="Stunden"
-               style="max-width:160px;"
+               placeholder="Zahl"
                autocomplete="off">
-        <span style="font-size:16px;">Stunden</span>
+        <select class="unit-select"
+                id="ans-1c-unit"
+                data-sub="1c">
+          <option value="">– Einheit –</option>
+          <option value="stunden">Stunden</option>
+          <option value="minuten">Minuten</option>
+          <option value="sekunden">Sekunden</option>
+        </select>
       </div>
 
       <button class="submit-btn" id="btn-1c" onclick="check1c()">
         Antwort prüfen
       </button>
       <div class="feedback-box" id="feedback-1c"></div>
-    </div><!-- /1c -->
+    </div>
 
 
     <!-- ────────────────────────────────────
@@ -263,11 +297,12 @@
     <div class="sub-exercise" id="block-1d">
       <div class="sub-label">d)</div>
       <p class="exercise-text">
-        Ermittle die Lösung der Gleichung&nbsp;&nbsp;<strong>x − 17 = 53</strong>.
+        Ermittle die Lösung der Gleichung&nbsp;&nbsp;
+        <strong>x − 17 = 53</strong>.
       </p>
 
       <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <span style="font-size:18px;">x =</span>
+        <span style="font-size:18px;">x&nbsp;=</span>
         <input class="answer-input"
                id="ans-1d"
                data-sub="1d"
@@ -282,7 +317,7 @@
         Antwort prüfen
       </button>
       <div class="feedback-box" id="feedback-1d"></div>
-    </div><!-- /1d -->
+    </div>
 
 
     <!-- ────────────────────────────────────
@@ -295,26 +330,23 @@
         Kreuze an.
       </p>
 
-      <!-- SVG: labeled trapezoid -->
       <div class="diagram-container">
         <svg width="260" height="110" viewBox="0 0 260 110"
-             aria-label="Trapez mit Seiten a (unten), b (links), b (rechts), c (oben)">
-          <!-- trapezoid shape -->
+             aria-label="Trapez mit Seiten a unten, b links, b rechts, c oben">
           <polygon points="20,90 240,90 200,20 60,20"
                    fill="#f0f0f0" stroke="#1a1a1a" stroke-width="2"/>
-          <!-- side labels -->
-          <!-- bottom: a -->
           <text x="130" y="108" text-anchor="middle"
-                font-family="Arial" font-size="16" font-style="italic">a</text>
-          <!-- left: b -->
-          <text x="22" y="60" text-anchor="middle"
-                font-family="Arial" font-size="16" font-style="italic">b</text>
-          <!-- right: b -->
-          <text x="238" y="60" text-anchor="middle"
-                font-family="Arial" font-size="16" font-style="italic">b</text>
-          <!-- top: c -->
-          <text x="130" y="15" text-anchor="middle"
-                font-family="Arial" font-size="16" font-style="italic">c</text>
+                font-family="Arial" font-size="16"
+                font-style="italic">a</text>
+          <text x="22"  y="60"  text-anchor="middle"
+                font-family="Arial" font-size="16"
+                font-style="italic">b</text>
+          <text x="238" y="60"  text-anchor="middle"
+                font-family="Arial" font-size="16"
+                font-style="italic">b</text>
+          <text x="130" y="15"  text-anchor="middle"
+                font-family="Arial" font-size="16"
+                font-style="italic">c</text>
         </svg>
       </div>
 
@@ -337,7 +369,7 @@
         Antwort prüfen
       </button>
       <div class="feedback-box" id="feedback-1e"></div>
-    </div><!-- /1e -->
+    </div>
 
 
     <!-- ────────────────────────────────────
@@ -351,36 +383,39 @@
 
       <div class="bodies-row">
 
-        <!-- Body 1: Quader -->
+        <!-- Body 1: Quader (rectangular cuboid)
+             A proper box drawn with three visible faces -->
         <div class="body-item">
-          <svg width="110" height="90" viewBox="0 0 110 90"
-               aria-label="Quader">
-            <!-- back faces (lighter) -->
-            <polygon points="30,10 90,10 90,55 30,55"
-                     fill="#e8e8e8" stroke="#999" stroke-width="1"
-                     stroke-dasharray="4,3"/>
-            <!-- right back vertical -->
-            <line x1="90" y1="10" x2="100" y2="22"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- top back horizontal -->
-            <line x1="30" y1="10" x2="40" y2="22"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- back-right vertical -->
-            <line x1="40" y1="22" x2="100" y2="22"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
+          <svg width="120" height="100" viewBox="0 0 120 100"
+               aria-label="Geometrischer Körper 1">
+            <!--
+              Front face:  (10,35)-(70,35)-(70,85)-(10,85)
+              Top face:    (10,35)-(70,35)-(90,15)-(30,15)
+              Right face:  (70,35)-(90,15)-(90,65)-(70,85)
+              Hidden edges dashed
+            -->
+            <!-- hidden back-left vertical -->
+            <line x1="30" y1="15" x2="30" y2="65"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+            <!-- hidden back-bottom horizontal -->
+            <line x1="30" y1="65" x2="90" y2="65"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+            <!-- hidden back-left to front-left bottom -->
+            <line x1="30" y1="65" x2="10" y2="85"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
 
-            <!-- front face -->
-            <polygon points="20,22 80,22 80,68 20,68"
-                     fill="#f8f8f8" stroke="#1a1a1a" stroke-width="2"/>
             <!-- top face -->
-            <polygon points="20,22 30,10 90,10 80,22"
-                     fill="#efefef" stroke="#1a1a1a" stroke-width="2"/>
+            <polygon points="10,35 70,35 90,15 30,15"
+                     fill="#e8e8e8" stroke="#1a1a1a" stroke-width="2"/>
+            <!-- front face -->
+            <polygon points="10,35 70,35 70,85 10,85"
+                     fill="#f8f8f8" stroke="#1a1a1a" stroke-width="2"/>
             <!-- right face -->
-            <polygon points="80,22 90,10 100,22 100,68 80,68"
-                     fill="#e0e0e0" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- bottom-right connector -->
-            <line x1="80" y1="68" x2="100" y2="68"
-                  stroke="#1a1a1a" stroke-width="2"/>
+            <polygon points="70,35 90,15 90,65 70,85"
+                     fill="#d8d8d8" stroke="#1a1a1a" stroke-width="2"/>
           </svg>
           <input class="body-input"
                  id="ans-1f-1"
@@ -390,28 +425,43 @@
                  autocomplete="off">
         </div>
 
-        <!-- Body 2: Pyramide -->
+        <!-- Body 2: Quadratische Pyramide
+             Square base visible at bottom, apex at top,
+             four triangular faces, dashed hidden base edges -->
         <div class="body-item">
-          <svg width="110" height="90" viewBox="0 0 110 90"
-               aria-label="Pyramide">
-            <!-- base edges (dashed back) -->
-            <line x1="25" y1="72" x2="85" y2="72"
+          <svg width="120" height="100" viewBox="0 0 120 100"
+               aria-label="Geometrischer Körper 2">
+            <!--
+              Square base corners (perspective):
+              front-left=(15,80), front-right=(85,80),
+              back-right=(75,65), back-left=(25,65)
+              Apex=(50,10)
+            -->
+            <!-- hidden base edges (back) -->
+            <line x1="25" y1="65" x2="75" y2="65"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+            <line x1="25" y1="65" x2="15" y2="80"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+            <!-- hidden lateral edge (back-left) -->
+            <line x1="50" y1="10" x2="25" y2="65"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+
+            <!-- visible base edges (front) -->
+            <line x1="15" y1="80" x2="85" y2="80"
                   stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="85" y1="72" x2="70" y2="60"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="25" y1="72" x2="40" y2="60"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="40" y1="60" x2="70" y2="60"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- apex to base corners -->
-            <line x1="55" y1="10" x2="25" y2="72"
+            <line x1="85" y1="80" x2="75" y2="65"
                   stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="55" y1="10" x2="85" y2="72"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="55" y1="10" x2="40" y2="60"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="55" y1="10" x2="70" y2="60"
-                  stroke="#1a1a1a" stroke-width="2"/>
+
+            <!-- lateral faces -->
+            <!-- front face -->
+            <polygon points="50,10 15,80 85,80"
+                     fill="#f0f0f0" stroke="#1a1a1a" stroke-width="2"/>
+            <!-- right face -->
+            <polygon points="50,10 85,80 75,65"
+                     fill="#d8d8d8" stroke="#1a1a1a" stroke-width="2"/>
           </svg>
           <input class="body-input"
                  id="ans-1f-2"
@@ -421,31 +471,51 @@
                  autocomplete="off">
         </div>
 
-        <!-- Body 3: Dreiseitiges Prisma -->
+        <!-- Body 3: Dreiseitiges Prisma (triangular prism)
+             Two triangular faces (front/back),
+             three rectangular faces,
+             dashed hidden edges -->
         <div class="body-item">
-          <svg width="110" height="90" viewBox="0 0 110 90"
-               aria-label="Dreiseitiges Prisma">
-            <!-- back triangle (dashed) -->
-            <line x1="55" y1="12" x2="90" y2="65"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="20" y1="65" x2="55" y2="12"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <line x1="20" y1="65" x2="90" y2="65"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
-            <!-- connecting edges (dashed back-left) -->
-            <line x1="20" y1="65" x2="10" y2="78"
-                  stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>
+          <svg width="120" height="100" viewBox="0 0 120 100"
+               aria-label="Geometrischer Körper 3">
+            <!--
+              Front triangle:  A=(15,85) B=(75,85) C=(45,25)
+              Back triangle (offset +20,−15):
+                               A'=(35,70) B'=(95,70) C'=(65,10)
+            -->
+            <!-- hidden back edges -->
+            <line x1="35" y1="70" x2="95" y2="70"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+            <line x1="35" y1="70" x2="65" y2="10"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+            <line x1="95" y1="70" x2="65" y2="10"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+            <!-- hidden connecting edge A–A' -->
+            <line x1="15" y1="85" x2="35" y2="70"
+                  stroke="#999" stroke-width="1.2"
+                  stroke-dasharray="4,3"/>
+
+            <!-- visible connecting edges -->
+            <!-- B–B' (bottom right) -->
+            <line x1="75" y1="85" x2="95" y2="70"
+                  stroke="#1a1a1a" stroke-width="2"/>
+            <!-- C–C' (top) -->
+            <line x1="45" y1="25" x2="65" y2="10"
+                  stroke="#1a1a1a" stroke-width="2"/>
+
             <!-- front triangle -->
-            <polygon points="45,25 100,78 10,78"
+            <polygon points="15,85 75,85 45,25"
                      fill="#f8f8f8" stroke="#1a1a1a" stroke-width="2"/>
-            <!-- connecting edges (front) -->
-            <line x1="45" y1="25" x2="55" y2="12"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <line x1="100" y1="78" x2="90" y2="65"
-                  stroke="#1a1a1a" stroke-width="2"/>
-            <!-- top face -->
-            <polygon points="45,25 55,12 90,65 100,78"
-                     fill="#e8e8e8" stroke="#1a1a1a" stroke-width="2"/>
+            <!-- right rectangular face -->
+            <polygon points="75,85 95,70 65,10 45,25"
+                     fill="#e0e0e0" stroke="#1a1a1a" stroke-width="2"/>
+            <!-- bottom rectangular face (partial) -->
+            <polygon points="15,85 75,85 95,70 35,70"
+                     fill="#ececec" stroke="#1a1a1a" stroke-width="2"
+                     opacity="0.6"/>
           </svg>
           <input class="body-input"
                  id="ans-1f-3"
@@ -461,7 +531,7 @@
         Antwort prüfen
       </button>
       <div class="feedback-box" id="feedback-1f"></div>
-    </div><!-- /1f -->
+    </div>
 
 
     <!-- ────────────────────────────────────
@@ -471,105 +541,139 @@
       <div class="sub-label">g)</div>
       <p class="exercise-text">
         Ein Glücksrad ist in gleich große Felder eingeteilt.
-        Man dreht es und es bleibt zufällig auf einer <strong>„2"</strong> stehen.<br>
-        Gib dafür die Wahrscheinlichkeit an.
+        Man dreht es und es bleibt zufällig auf einer
+        <strong>„2"</strong> stehen.<br>
+        Gib dafür die Wahrscheinlichkeit als gekürzten Bruch an.
       </p>
 
-      <!-- SVG Glücksrad: 12 equal sectors, numbers 3,1,1,2,2,3,2,3,1,4,1,3 -->
+      <!-- SVG Glücksrad: 12 equal sectors -->
       <div class="wheel-wrap">
-        <svg width="200" height="200" viewBox="0 0 200 200"
-             aria-label="Glücksrad mit 12 gleich großen Feldern">
-          <g transform="translate(100,100)">
-            <!-- 12 sectors, each 30° -->
-            <!-- Numbers reading clockwise from top:
-                 3,1,1,2,2,3,2,3,1,4,1,3  (from original diagram) -->
-            <path d="M0,0 L0,-90 A90,90 0 0,1 45,-77.9 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L45,-77.9 A90,90 0 0,1 77.9,-45 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L77.9,-45 A90,90 0 0,1 90,0 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L90,0 A90,90 0 0,1 77.9,45 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L77.9,45 A90,90 0 0,1 45,77.9 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L45,77.9 A90,90 0 0,1 0,90 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L0,90 A90,90 0 0,1 -45,77.9 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-45,77.9 A90,90 0 0,1 -77.9,45 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-77.9,45 A90,90 0 0,1 -90,0 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-90,0 A90,90 0 0,1 -77.9,-45 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-77.9,-45 A90,90 0 0,1 -45,-77.9 Z"
-                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
-            <path d="M0,0 L-45,-77.9 A90,90 0 0,1 0,-90 Z"
-                  fill="#e0e0e0" stroke="#1a1a1a" stroke-width="1.5"/>
+        <svg width="210" height="210" viewBox="0 0 210 210"
+             aria-label="Glücksrad mit 12 gleich großen Feldern,
+             Zahlen: 3,1,1,2,2,3,2,3,1,4,1,3">
+          <g transform="translate(105,105)">
 
-            <!-- Sector labels at radius ~65, mid-angle of each sector -->
-            <!-- Sector 1:  0°–30°  mid=15°   number=3 -->
-            <text x="17"  y="-61" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">3</text>
-            <!-- Sector 2: 30°–60°  mid=45°   number=1 -->
-            <text x="46"  y="-46" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">1</text>
-            <!-- Sector 3: 60°–90°  mid=75°   number=1 -->
-            <text x="63"  y="-17" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">1</text>
-            <!-- Sector 4: 90°–120° mid=105°  number=2 -->
-            <text x="63"  y="20"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">2</text>
-            <!-- Sector 5: 120°–150° mid=135° number=2 -->
-            <text x="46"  y="50"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">2</text>
-            <!-- Sector 6: 150°–180° mid=165° number=3 -->
-            <text x="17"  y="65"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">3</text>
-            <!-- Sector 7: 180°–210° mid=195° number=2 -->
-            <text x="-17" y="65"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">2</text>
-            <!-- Sector 8: 210°–240° mid=225° number=3 -->
-            <text x="-46" y="50"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">3</text>
-            <!-- Sector 9: 240°–270° mid=255° number=1 -->
-            <text x="-63" y="20"  text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">1</text>
-            <!-- Sector 10: 270°–300° mid=285° number=4 -->
-            <text x="-63" y="-17" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">4</text>
-            <!-- Sector 11: 300°–330° mid=315° number=1 -->
-            <text x="-46" y="-46" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">1</text>
-            <!-- Sector 12: 330°–360° mid=345° number=3 -->
-            <text x="-17" y="-61" text-anchor="middle"
-                  font-family="Arial" font-size="14" font-weight="bold">3</text>
+            <!-- 12 sectors at 30° each, alternating fill -->
+            <!-- Angles measured clockwise from top (−90° offset) -->
+
+            <!-- Sector 1:  −90° to −60°  (top, slightly right) -->
+            <path d="M0,0 L0,-92
+                     A92,92 0 0,1 46,-79.7 Z"
+                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 2:  −60° to −30° -->
+            <path d="M0,0 L46,-79.7
+                     A92,92 0 0,1 79.7,-46 Z"
+                  fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 3:  −30° to 0° -->
+            <path d="M0,0 L79.7,-46
+                     A92,92 0 0,1 92,0 Z"
+                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 4:  0° to 30° -->
+            <path d="M0,0 L92,0
+                     A92,92 0 0,1 79.7,46 Z"
+                  fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 5:  30° to 60° -->
+            <path d="M0,0 L79.7,46
+                     A92,92 0 0,1 46,79.7 Z"
+                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 6:  60° to 90° -->
+            <path d="M0,0 L46,79.7
+                     A92,92 0 0,1 0,92 Z"
+                  fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 7:  90° to 120° -->
+            <path d="M0,0 L0,92
+                     A92,92 0 0,1 -46,79.7 Z"
+                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 8:  120° to 150° -->
+            <path d="M0,0 L-46,79.7
+                     A92,92 0 0,1 -79.7,46 Z"
+                  fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 9:  150° to 180° -->
+            <path d="M0,0 L-79.7,46
+                     A92,92 0 0,1 -92,0 Z"
+                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 10: 180° to 210° -->
+            <path d="M0,0 L-92,0
+                     A92,92 0 0,1 -79.7,-46 Z"
+                  fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 11: 210° to 240° -->
+            <path d="M0,0 L-79.7,-46
+                     A92,92 0 0,1 -46,-79.7 Z"
+                  fill="#f5f5f5" stroke="#1a1a1a" stroke-width="1.5"/>
+            <!-- Sector 12: 240° to 270° (= −90°) -->
+            <path d="M0,0 L-46,-79.7
+                     A92,92 0 0,1 0,-92 Z"
+                  fill="#dcdcdc" stroke="#1a1a1a" stroke-width="1.5"/>
+
+            <!--
+              Labels placed at radius=66, mid-angle of each sector.
+              Numbers (clockwise from top):
+              S1=3, S2=1, S3=1, S4=2, S5=2, S6=3,
+              S7=2, S8=3, S9=1, S10=4, S11=1, S12=3
+
+              Mid-angles (from positive x-axis, SVG coords):
+              S1:  −75°  → (17.1,  −63.7)
+              S2:  −45°  → (46.7,  −46.7)
+              S3:  −15°  → (63.7,  −17.1)
+              S4:   15°  → (63.7,   17.1)
+              S5:   45°  → (46.7,   46.7)
+              S6:   75°  → (17.1,   63.7)
+              S7:  105°  → (−17.1,  63.7)
+              S8:  135°  → (−46.7,  46.7)
+              S9:  165°  → (−63.7,  17.1)
+              S10: 195°  → (−63.7, −17.1)
+              S11: 225°  → (−46.7, −46.7)
+              S12: 255°  → (−17.1, −63.7)
+            -->
+            <text x="17"   y="-58" text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">3</text>
+            <text x="47"   y="-43" text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">1</text>
+            <text x="62"   y="-13" text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">1</text>
+            <text x="62"   y="20"  text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">2</text>
+            <text x="47"   y="52"  text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">2</text>
+            <text x="17"   y="68"  text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">3</text>
+            <text x="-17"  y="68"  text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">2</text>
+            <text x="-47"  y="52"  text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">3</text>
+            <text x="-62"  y="20"  text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">1</text>
+            <text x="-62"  y="-13" text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">4</text>
+            <text x="-47"  y="-43" text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">1</text>
+            <text x="-17"  y="-58" text-anchor="middle"
+                  font-family="Arial" font-size="15" font-weight="bold">3</text>
 
             <!-- Centre dot -->
-            <circle cx="0" cy="0" r="5"
+            <circle cx="0" cy="0" r="6"
                     fill="#1a1a1a"/>
           </g>
         </svg>
       </div>
 
-      <p class="exercise-text mt-8">
-        Schreibe die Wahrscheinlichkeit als gekürzten Bruch.
-      </p>
       <input class="answer-input"
              id="ans-1g"
              data-sub="1g"
              type="text"
-             placeholder="z.B. 1/4"
+             placeholder="Zähler/Nenner"
              style="max-width:160px;"
              autocomplete="off">
-      <p class="fraction-hint">Zähler/Nenner, z.&thinsp;B. 3/12</p>
+      <p class="input-hint">
+        Schreibe die Wahrscheinlichkeit als gekürzten Bruch
+        in der Form Zähler/Nenner.
+      </p>
 
       <button class="submit-btn" id="btn-1g" onclick="check1g()">
         Antwort prüfen
       </button>
       <div class="feedback-box" id="feedback-1g"></div>
-    </div><!-- /1g -->
+    </div>
 
   </div><!-- /task-content -->
 
@@ -594,7 +698,6 @@
 
 let state = ExamState.load();
 
-/* ── helpers ── */
 function saveAndRefresh() {
   ExamState.save(state);
   updateScoreDisplay();
@@ -615,15 +718,12 @@ function check1a() {
 
   const ok1 = (v1 === '>');
   const ok2 = (v2 === '>');
-  const bothOk = ok1 && ok2;
 
-  // Visual feedback on each box
-  const box1 = document.getElementById('ans-1a-1');
-  const box2 = document.getElementById('ans-1a-2');
-  box1.classList.add(ok1 ? 'correct' : 'incorrect');
-  box2.classList.add(ok2 ? 'correct' : 'incorrect');
+  document.getElementById('ans-1a-1')
+    .classList.add(ok1 ? 'correct' : 'incorrect');
+  document.getElementById('ans-1a-2')
+    .classList.add(ok2 ? 'correct' : 'incorrect');
 
-  // Award points: 1 BE per correct comparison
   const earned = (ok1 ? 1 : 0) + (ok2 ? 1 : 0);
 
   if (!state.scores['1a']) {
@@ -638,24 +738,27 @@ function check1a() {
 
   const fb = document.getElementById('feedback-1a');
   fb.classList.add('show');
-  if (bothOk) {
+
+  if (ok1 && ok2) {
     fb.className = 'feedback-box show correct';
     fb.innerHTML = `<span class="feedback-icon">✅</span>
-      <strong>Richtig!</strong> Beide Zeichen sind korrekt. (2/2 Punkte)`;
+      <strong>Richtig!</strong> Beide Zeichen sind korrekt.
+      (2/2 Punkte)`;
   } else if (earned === 1) {
     fb.className = 'feedback-box show incorrect';
     fb.innerHTML = `<span class="feedback-icon">⚠️</span>
       <strong>Teilweise richtig.</strong> (1/2 Punkte)
-      <div class="hint-text">💡 Hinweis: Vergleiche die Zahlen auf dem Zahlenstrahl.
-      Negative Zahlen werden größer, je näher sie an der 0 sind.
-      Also: −5 &gt; −6, weil −5 weiter rechts auf dem Zahlenstrahl liegt.</div>`;
+      <div class="hint-text">💡 Hinweis: Vergleiche die Zahlen auf dem
+      Zahlenstrahl. Negative Zahlen werden größer, je näher sie an der 0
+      sind – also liegt −5 rechts von −6 auf dem Zahlenstrahl.</div>`;
   } else {
     fb.className = 'feedback-box show incorrect';
     fb.innerHTML = `<span class="feedback-icon">❌</span>
       <strong>Leider falsch.</strong> (0/2 Punkte)
-      <div class="hint-text">💡 Hinweis: 3,6 ist positiv, −4,9 ist negativ –
-      positive Zahlen sind immer größer als negative.
-      Bei negativen Zahlen gilt: Je kleiner der Betrag, desto größer die Zahl.</div>`;
+      <div class="hint-text">💡 Hinweis: 3,6 ist eine positive Zahl,
+      −4,9 ist negativ – positive Zahlen sind stets größer als negative.
+      Bei negativen Zahlen: je kleiner der Betrag, desto größer die Zahl.
+      </div>`;
   }
 
   saveAndRefresh();
@@ -668,14 +771,14 @@ function check1b() {
   if (isLocked('1b')) return;
 
   const raw = document.getElementById('ans-1b').value.trim();
-  // Accept: 1/2, 2/4 (not reduced), but must be 1/2 reduced
-  const ok = fractionCheck(raw, 1, 2);
 
-  // Also specifically reject non-reduced forms
+  // Must be the reduced form 1/2 specifically
   const isReduced = (() => {
-    const m = raw.replace(/\s/g,'').match(/^(\d+)\/(\d+)$/);
+    const m = raw.replace(/\s/g, '').match(/^(\d+)\/(\d+)$/);
     if (m) return parseInt(m[1]) === 1 && parseInt(m[2]) === 2;
-    return ok; // decimal form counts
+    // Accept 0.5 as decimal
+    const d = parseFloat(raw.replace(',', '.'));
+    return Math.abs(d - 0.5) < 0.001;
   })();
 
   state = recordScore('1b', 1, isReduced, state);
@@ -684,7 +787,9 @@ function check1b() {
 
   showFeedback('1b', isReduced,
     isReduced ? '' :
-    '50 % = 50/100. Kürze den Bruch: 50 ÷ 50 = 1, 100 ÷ 50 = 2. Ergebnis: 1/2.');
+    '50 % bedeutet 50 von 100. Schreibe das als Bruch: 50/100. ' +
+    'Kürze dann durch den größten gemeinsamen Teiler (50): ' +
+    '50 ÷ 50 = 1 und 100 ÷ 50 = 2.');
 
   saveAndRefresh();
 }
@@ -695,17 +800,60 @@ function check1b() {
 function check1c() {
   if (isLocked('1c')) return;
 
-  const raw = document.getElementById('ans-1c').value;
-  const ok  = numericCheck(raw, 25, 0.01);
+  const numRaw  = document.getElementById('ans-1c-num').value;
+  const unit    = document.getElementById('ans-1c-unit').value;
 
-  state = recordScore('1c', 1, ok, state);
-  markInput('1c', ok);
-  lockInput('1c');
+  const numOk  = numericCheck(numRaw, 25, 0.01);
+  const unitOk = (unit === 'stunden');
+  const ok     = numOk && unitOk;
 
-  showFeedback('1c', ok,
-    ok ? '' :
-    'Das ist eine antiproportionale Zuordnung: ' +
-    '5 LKW × 20 h = 4 LKW × ? h → ? = (5 × 20) ÷ 4 = 25 Stunden.');
+  // Visual feedback on both fields
+  document.getElementById('ans-1c-num')
+    .classList.add(numOk ? 'correct' : 'incorrect');
+  document.getElementById('ans-1c-unit')
+    .classList.add(unitOk ? 'correct' : 'incorrect');
+
+  // Lock both
+  document.getElementById('ans-1c-num').disabled = true;
+  document.getElementById('ans-1c-num').classList.add('locked');
+  document.getElementById('ans-1c-unit').disabled = true;
+  document.getElementById('ans-1c-unit').classList.add('locked');
+  document.getElementById('btn-1c').disabled = true;
+
+  if (!state.scores['1c']) {
+    state.scores['1c'] = { earned: 0, max: 1, attempts: 0 };
+  }
+  if (state.scores['1c'].attempts === 0) {
+    state.scores['1c'].earned = ok ? 1 : 0;
+  }
+  state.scores['1c'].attempts += 1;
+
+  const fb = document.getElementById('feedback-1c');
+  fb.classList.add('show');
+
+  if (ok) {
+    fb.className = 'feedback-box show correct';
+    fb.innerHTML = `<span class="feedback-icon">✅</span>
+      <strong>Richtig!</strong> (1/1 Punkt)`;
+  } else {
+    fb.className = 'feedback-box show incorrect';
+    let hint = '';
+    if (!numOk && !unitOk) {
+      hint = 'Das ist eine antiproportionale Zuordnung: ' +
+             '5 LKW × 20 h = 4 LKW × x → x = (5 × 20) ÷ 4. ' +
+             'Vergiss auch nicht die richtige Einheit!';
+    } else if (!numOk) {
+      hint = 'Die Zahl stimmt noch nicht. ' +
+             'Denke daran: 5 LKW × 20 h = 4 LKW × x → ' +
+             'x = (5 × 20) ÷ 4.';
+    } else {
+      hint = 'Die Zahl ist richtig, aber prüfe die Einheit – ' +
+             'das Ergebnis soll in Stunden angegeben werden.';
+    }
+    fb.innerHTML = `<span class="feedback-icon">❌</span>
+      <strong>Leider falsch.</strong> (0/1 Punkte)
+      <div class="hint-text">💡 Hinweis: ${hint}</div>`;
+  }
 
   saveAndRefresh();
 }
@@ -725,7 +873,7 @@ function check1d() {
 
   showFeedback('1d', ok,
     ok ? '' :
-    'x − 17 = 53 → addiere 17 auf beiden Seiten: x = 53 + 17 = 70.');
+    'x − 17 = 53 → addiere 17 auf beiden Seiten: x = 53 + 17.');
 
   saveAndRefresh();
 }
@@ -738,13 +886,11 @@ let selected1e = null;
 function selectMC1e(el) {
   if (isLocked('1e')) return;
 
-  // Deselect all
   document.querySelectorAll('.mc-option-1e').forEach(o => {
     o.classList.remove('selected');
     o.querySelector('.mc-checkbox-1e').textContent = '';
   });
 
-  // Select clicked
   el.classList.add('selected');
   el.querySelector('.mc-checkbox-1e').textContent = '✓';
   selected1e = el.dataset.val;
@@ -757,9 +903,8 @@ function check1e() {
     return;
   }
 
-  const ok = (selected1e === 'C'); // a + b + c + b
+  const ok = (selected1e === 'C');
 
-  // Mark options
   document.querySelectorAll('.mc-option-1e').forEach(o => {
     if (o.dataset.val === 'C') {
       o.classList.add('correct');
@@ -770,14 +915,14 @@ function check1e() {
   });
 
   state = recordScore('1e', 1, ok, state);
-  lockInput('1e');
   document.getElementById('btn-1e').disabled = true;
 
   showFeedback('1e', ok,
     ok ? '' :
-    'Der Umfang eines Vierecks ist die Summe aller Seiten: ' +
-    'U = a + b + c + b. Multiplizieren wäre für den Flächeninhalt, ' +
-    'Subtraktion ergibt keinen Sinn für einen Umfang.');
+    'Der Umfang ist die Summe aller Seiten eines Vierecks. ' +
+    'Alle vier Seiten werden addiert: U = a + b + c + b. ' +
+    'Multiplikation berechnet einen Flächeninhalt, ' +
+    'Subtraktion ergibt für einen Umfang keinen Sinn.');
 
   saveAndRefresh();
 }
@@ -795,10 +940,13 @@ function check1f() {
   ];
 
   const correct = [
-    ['quader', 'rechteckige säule', 'rechtquader', 'cuboid'],
-    ['pyramide', 'quadratische pyramide', 'vierseitige pyramide'],
+    ['quader', 'rechteckige säule', 'rechtquader',
+     'rechteckquader', 'würfel'],
+    ['pyramide', 'quadratische pyramide',
+     'vierseitige pyramide', 'quadratpyramide'],
     ['prisma', 'dreiseitiges prisma', 'dreieckiges prisma',
-     'dreiecksprisma', 'triangulares prisma', 'dreiseitige prisma'],
+     'dreiecksprisma', 'triangulares prisma',
+     'dreiseitige prisma', 'dreieckprisma'],
   ];
 
   const results = answers.map((ans, i) =>
@@ -807,15 +955,13 @@ function check1f() {
 
   const earned = results.filter(Boolean).length;
 
-  // Per-input visual feedback
-  ['ans-1f-1','ans-1f-2','ans-1f-3'].forEach((id, i) => {
+  ['ans-1f-1', 'ans-1f-2', 'ans-1f-3'].forEach((id, i) => {
     const el = document.getElementById(id);
     el.classList.add(results[i] ? 'correct' : 'incorrect');
     el.disabled = true;
     el.classList.add('locked');
   });
 
-  // Record score (partial credit: 1 BE per correct body)
   if (!state.scores['1f']) {
     state.scores['1f'] = { earned: 0, max: 3, attempts: 0 };
   }
@@ -832,16 +978,21 @@ function check1f() {
   if (earned === 3) {
     fb.className = 'feedback-box show correct';
     fb.innerHTML = `<span class="feedback-icon">✅</span>
-      <strong>Alle drei Körper richtig!</strong> (3/3 Punkte)`;
+      <strong>Alle drei Körper richtig erkannt!</strong>
+      (3/3 Punkte)`;
   } else {
     fb.className = 'feedback-box show incorrect';
-    const names = ['Quader', 'Pyramide', 'Dreiseitiges Prisma'];
-    const hints = results.map((ok, i) =>
-      ok ? '' : `• Körper ${i+1}: <strong>${names[i]}</strong>`
-    ).filter(Boolean).join('<br>');
+    // Only reveal names of wrong answers
+    const names  = ['Quader', 'Pyramide', 'Dreiseitiges Prisma'];
+    const hints  = results
+      .map((ok, i) => ok
+        ? null
+        : `• Körper ${i + 1} heißt: <strong>${names[i]}</strong>`)
+      .filter(Boolean)
+      .join('<br>');
     fb.innerHTML = `<span class="feedback-icon">⚠️</span>
       <strong>${earned}/3 Punkte.</strong>
-      <div class="hint-text">💡 Korrekte Antworten:<br>${hints}</div>`;
+      <div class="hint-text">💡 Korrektur:<br>${hints}</div>`;
   }
 
   saveAndRefresh();
@@ -849,41 +1000,43 @@ function check1f() {
 
 /* ─────────────────────────
    1g  Glücksrad  (1 BE)
+   Numbers: 3,1,1,2,2,3,2,3,1,4,1,3
+   Count of 2s: sectors 4,5,7 → 3 twos
+   Wait – let me recount:
+   S1=3,S2=1,S3=1,S4=2,S5=2,S6=3,
+   S7=2,S8=3,S9=1,S10=4,S11=1,S12=3
+   2s appear at S4, S5, S7 → 3 times
+   P(2) = 3/12 = 1/4
    ───────────────────────── */
 function check1g() {
   if (isLocked('1g')) return;
 
   const raw = document.getElementById('ans-1g').value.trim();
 
-  // Count the 2s on the wheel: sectors 4,5,7 → 4 twos
-  // Wheel numbers: 3,1,1,2,2,3,2,3,1,4,1,3 → count of 2s = 4
-  // P(2) = 4/12 = 1/3
-  const ok = fractionCheck(raw, 1, 3) ||
-             fractionCheck(raw, 4, 12);
+  // P(2) = 3/12 = 1/4
+  // Accept both reduced (1/4) and unreduced (3/12)
+  const ok = fractionCheck(raw, 1, 4) ||
+             fractionCheck(raw, 3, 12) ||
+             raw.replace(/\s/g, '') === '3/12';
 
-  // Also accept "4/12"
-  const cleanRaw = raw.replace(/\s/g,'');
-  const is4_12 = cleanRaw === '4/12';
-  const final  = ok || is4_12;
-
-  state = recordScore('1g', 1, final, state);
-  markInput('1g', final);
+  state = recordScore('1g', 1, ok, state);
+  markInput('1g', ok);
   lockInput('1g');
 
-  showFeedback('1g', final,
-    final ? '' :
-    'Zähle die Felder mit „2": es sind 4 von insgesamt 12 Feldern. ' +
-    'P(2) = 4/12 = 1/3.');
+  showFeedback('1g', ok,
+    ok ? '' :
+    'Zähle zunächst alle Felder im Rad: es sind 12. ' +
+    'Zähle dann, wie viele davon eine „2" zeigen. ' +
+    'Die Wahrscheinlichkeit ist dann: (Anzahl der 2er-Felder) / 12. ' +
+    'Kürze den Bruch so weit wie möglich.');
 
   saveAndRefresh();
 }
 
-/* ── On load: restore locked state if already answered ── */
+/* ── Restore locked state on page reload ── */
 (function restoreState() {
-  const subs = ['1a','1b','1c','1d','1e','1f','1g'];
-  subs.forEach(id => {
+  ['1a','1b','1c','1d','1e','1f','1g'].forEach(id => {
     if (state.scores[id] && state.scores[id].attempts > 0) {
-      // Re-lock inputs visually
       document.querySelectorAll(`[data-sub="${id}"]`).forEach(el => {
         el.disabled = true;
         el.classList.add('locked');
