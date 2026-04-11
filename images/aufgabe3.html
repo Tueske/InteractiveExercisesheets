@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Aufgabe 3 – Zeitplanung</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+    /* ── Task cards showing Andy's to-do items ── */
+    .todo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .todo-card {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .todo-card .todo-time {
+      font-size: 22px;
+      font-weight: bold;
+      color: #c0392b;
+    }
+    .todo-card .todo-label {
+      font-size: 15px;
+      color: #333;
+    }
+
+    /* ── Answer rows ── */
+    .answer-unit-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0;
+    }
+    .unit-input {
+      border: 2px solid #999;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 18px;
+      font-family: Arial, sans-serif;
+      width: 120px;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+    }
+    .unit-input.correct   { border-color: #27ae60; background: #f0fff4; }
+    .unit-input.incorrect { border-color: #c0392b; background: #fff5f5; }
+
+    .unit-label {
+      font-size: 16px;
+      color: #333;
+    }
+
+    /* time input (hh:mm) */
+    .time-input {
+      border: 2px solid #999;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 20px;
+      font-family: Arial, sans-serif;
+      width: 110px;
+      text-align: center;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+      letter-spacing: 2px;
+    }
+    .time-input.correct   { border-color: #27ae60; background: #f0fff4; }
+    .time-input.incorrect { border-color: #c0392b; background: #fff5f5; }
+
+    /* duration answer (h + min fields) */
+    .duration-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 8px 0;
+    }
+    .duration-input {
+      border: 2px solid #999;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 18px;
+      font-family: Arial, sans-serif;
+      width: 80px;
+      text-align: center;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+    }
+    .duration-input.correct   { border-color: #27ae60; background: #f0fff4; }
+    .duration-input.incorrect { border-color: #c0392b; background: #fff5f5; }
+
+    .input-hint {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* scored-notice */
+    .scored-notice {
+      display: inline-block;
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+      margin-left: 8px;
+    }
+    .scored-notice.earned     { color: #27ae60; font-weight: bold; }
+    .scored-notice.not-earned { color: #c0392b; }
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Header ── -->
+  <div class="header-bar">
+    <span class="header-title">VA 2014 Mathematik</span>
+  </div>
+
+  <!-- ── Progress ── -->
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: 42%"></div>
+    </div>
+    <span class="progress-text">Aufgabe 3 von 7</span>
+  </div>
+
+  <!-- ── Task Header ── -->
+  <div class="task-header">
+    <h1>Aufgabe 3 – Zeitplanung</h1>
+    <span class="points-badge">6 Punkte</span>
+  </div>
+
+  <div class="task-content">
+
+    <p class="exercise-text">
+      Andy sitzt am Schreibtisch und überlegt,
+      was er noch alles zu tun hat.
+    </p>
+
+    <!-- ── To-do overview cards ── -->
+    <div class="todo-grid">
+      <div class="todo-card">
+        <span class="todo-time">20 min</span>
+        <span class="todo-label">Englisch-Hausaufgaben</span>
+      </div>
+      <div class="todo-card">
+        <span class="todo-time">25 min</span>
+        <span class="todo-label">Im Haushalt helfen</span>
+      </div>
+      <div class="todo-card">
+        <span class="todo-time">¼ Stunde</span>
+        <span class="todo-label">Hund ausführen</span>
+      </div>
+      <div class="todo-card">
+        <span class="todo-time">¾ Stunde</span>
+        <span class="todo-label">Mathe-Hausaufgaben</span>
+      </div>
+    </div>
+
+
+    <!-- ────────────────────────────────────
+         3a  Gesamtzeit Hausaufgaben  (2 BE)
+         Englisch: 20 min
+         Mathe:    ¾ h = 45 min
+         Gesamt:   65 min
+         ──────────────────────────────────── -->
+    <div class="sub-exercise" id="block-3a">
+      <div class="sub-label">a)</div>
+      <p class="exercise-text">
+        Berechne, wie viele Minuten Andy insgesamt für die Erledigung
+        der <strong>beiden Hausaufgaben</strong> benötigt.
+      </p>
+      <p class="input-hint">
+        Gib die Gesamtzeit in Minuten an.
+      </p>
+
+      <div class="answer-unit-row">
+        <input class="unit-input"
+               id="ans-3a"
+               data-sub="3a"
+               type="number"
+               inputmode="numeric"
+               placeholder="min"
+               autocomplete="off">
+        <span class="unit-label">Minuten</span>
+      </div>
+
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-3a" onclick="check3a()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-3a"></span>
+      </div>
+      <div class="feedback-box" id="feedback-3a"></div>
+    </div>
+
+
+    <!-- ────────────────────────────────────
+         3b  Startzeit  (3 BE)
+         All four tasks total:
+           Englisch:  20 min
+           Mathe:     45 min  (¾ h)
+           Hund:      15 min  (¼ h)
+           Haushalt:  25 min
+           Total:    105 min
+         Finished at 15:10 → started at 13:25
+         ──────────────────────────────────── -->
+    <div class="sub-exercise" id="block-3b">
+      <div class="sub-label">b)</div>
+      <p class="exercise-text">
+        Es ist <strong>15:10 Uhr</strong>.
+        Andy ist mit allen vier Tätigkeiten fertig.<br>
+        Wann hat er begonnen, seine vier Tätigkeiten zu erledigen?<br>
+        Berechne den genauen Zeitpunkt.
+      </p>
+      <p class="input-hint">
+        Gib die Uhrzeit im Format HH:MM an, z.&thinsp;B. 08:30.
+      </p>
+
+      <div class="answer-unit-row">
+        <input class="time-input"
+               id="ans-3b"
+               data-sub="3b"
+               type="text"
+               inputmode="numeric"
+               maxlength="5"
+               placeholder="HH:MM"
+               autocomplete="off">
+        <span class="unit-label">Uhr</span>
+      </div>
+
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-3b" onclick="check3b()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-3b"></span>
+      </div>
+      <div class="feedback-box" id="feedback-3b"></div>
+    </div>
+
+
+    <!-- ────────────────────────────────────
+         3c  Verbleibende Zeit  (1 BE)
+         Current time: 15:15
+         Meeting:      16:30
+         Remaining:    1 h 15 min
+         ──────────────────────────────────── -->
+    <div class="sub-exercise" id="block-3c">
+      <div class="sub-label">c)</div>
+      <p class="exercise-text">
+        Andy hört die Zeitansage im Radio.
+        Es ist <strong>15:15 Uhr</strong>.<br>
+        Um <strong>16:30 Uhr</strong> möchte sich Andy
+        mit Tom treffen.<br>
+        Gib an, wie viel Zeit er bis dahin noch hat.
+      </p>
+
+      <div class="duration-row">
+        <input class="duration-input"
+               id="ans-3c-h"
+               data-sub="3c"
+               type="number"
+               inputmode="numeric"
+               min="0"
+               placeholder="h"
+               autocomplete="off">
+        <span class="unit-label">Stunde(n)</span>
+        <input class="duration-input"
+               id="ans-3c-min"
+               data-sub="3c"
+               type="number"
+               inputmode="numeric"
+               min="0"
+               max="59"
+               placeholder="min"
+               autocomplete="off">
+        <span class="unit-label">Minute(n)</span>
+      </div>
+
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-3c" onclick="check3c()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-3c"></span>
+      </div>
+      <div class="feedback-box" id="feedback-3c"></div>
+    </div>
+
+  </div><!-- /task-content -->
+
+  <!-- ── Navigation Footer ── -->
+  <div class="nav-footer">
+    <button class="nav-btn" onclick="navigateTo('aufgabe2.html')">
+      ← Zurück
+    </button>
+    <span class="score-display" id="score-footer">Punkte: 0 / 51</span>
+    <button class="nav-btn next" onclick="navigateTo('aufgabe4.html')">
+      Weiter →
+    </button>
+  </div>
+
+</div><!-- /page -->
+
+<script src="exam.js"></script>
+<script>
+/* ══════════════════════════════════════════
+   Aufgabe 3 – checking & scoring
+
+   3a: Englisch (20 min) + Mathe (¾ h = 45 min) = 65 min   → 2 BE
+   3b: 20+45+15+25 = 105 min vor 15:10 = 13:25 Uhr          → 3 BE
+   3c: 16:30 − 15:15 = 1 h 15 min                           → 1 BE
+   ══════════════════════════════════════════ */
+
+let state = ExamState.load();
+
+function saveAndRefresh() {
+  ExamState.save(state);
+  updateScoreDisplay();
+}
+
+function updateNotice(subId) {
+  const el = document.getElementById(`notice-${subId}`);
+  if (!el) return;
+  const s = state.scores[subId];
+  if (!s || s.attempts === 0) { el.textContent = ''; return; }
+  if (s.earned > 0) {
+    el.className = 'scored-notice earned';
+    el.textContent =
+      `✓ ${s.earned}/${s.max} Punkt(e) bereits vergeben`;
+  } else {
+    el.className = 'scored-notice not-earned';
+    el.textContent =
+      `0/${s.max} Punkt(e) – weiteres Üben möglich`;
+  }
+}
+
+/* ─────────────────────────
+   3a  Gesamtzeit HA  (2 BE)
+   Correct: 65 min
+   Partial credit:
+     2 BE if exactly 65
+     1 BE if student converts one fraction correctly
+       but makes a small arithmetic error
+       → accept 60 or 70 as partial
+       (too generous; keep strict: only 65 = 2 BE,
+        wrong = 0 BE, but give detailed hint)
+   Per Erwartungshorizont: 2 BE for this sub-task.
+   We award 2 or 0 (no partial defined in marking scheme).
+   ───────────────────────── */
+function check3a() {
+  const raw = document.getElementById('ans-3a').value;
+  const ok  = numericCheck(raw, 65, 0.5);
+
+  const inp = document.getElementById('ans-3a');
+  inp.classList.remove('correct', 'incorrect');
+  inp.classList.add(ok ? 'correct' : 'incorrect');
+
+  state = recordScore('3a', 2, ok, state);
+
+  showFeedback('3a', ok,
+    ok ? '' :
+    'Die beiden Hausaufgaben sind: Englisch (20 min) und ' +
+    'Mathe (¾ Stunde). Rechne ¾ Stunde in Minuten um: ' +
+    '¾ × 60 = 45 min. Dann addieren: 20 + 45 = 65 Minuten.');
+
+  updateNotice('3a');
+  saveAndRefresh();
+}
+
+/* ─────────────────────────
+   3b  Startzeit  (3 BE)
+   Total time: 20 + 45 + 15 + 25 = 105 min
+   End time: 15:10
+   Start: 15:10 − 105 min = 15:10 − 1h45min = 13:25
+
+   Scoring (3 BE):
+     1 BE – correct total time (105 min)
+     1 BE – correct subtraction method
+     1 BE – correct final time 13:25
+   Since we only have one input, we award:
+     3 BE for 13:25
+     1 BE for a reasonable wrong time
+       (shows 105 min total but arithmetic slip)
+   We approximate:
+     13:25 → 3 BE
+     Any time ±5 min (13:20–13:30) → 1 BE
+       (shows correct method, minor error)
+     Otherwise → 0 BE
+   ───────────────────────── */
+function parseTimeToMinutes(str) {
+  /* accepts HH:MM or HHMM or H:MM */
+  const cleaned = str.trim().replace(/[.,\s]/g, '');
+  const m1 = cleaned.match(/^(\d{1,2}):(\d{2})$/);
+  if (m1) return parseInt(m1[1]) * 60 + parseInt(m1[2]);
+  const m2 = cleaned.match(/^(\d{1,2})(\d{2})$/);
+  if (m2) return parseInt(m2[1]) * 60 + parseInt(m2[2]);
+  return null;
+}
+
+function check3b() {
+  const raw      = document.getElementById('ans-3b').value;
+  const minutes  = parseTimeToMinutes(raw);
+  const inp      = document.getElementById('ans-3b');
+
+  inp.classList.remove('correct', 'incorrect');
+
+  /* Correct answer: 13:25 = 805 min from midnight */
+  const CORRECT_MIN = 13 * 60 + 25; // 805
+
+  let earned = 0;
+  let isCorrect = false;
+
+  if (minutes !== null) {
+    const diff = Math.abs(minutes - CORRECT_MIN);
+    if (diff === 0) {
+      earned    = 3;
+      isCorrect = true;
+      inp.classList.add('correct');
+    } else if (diff <= 5) {
+      /* Correct method, small arithmetic error → 1 BE */
+      earned = 1;
+      inp.classList.add('incorrect');
+    } else {
+      inp.classList.add('incorrect');
+    }
+  } else {
+    inp.classList.add('incorrect');
+  }
+
+  /* Record: only on first attempt */
+  if (!state.scores['3b']) {
+    state.scores['3b'] = { earned: 0, max: 3, attempts: 0 };
+  }
+  if (state.scores['3b'].attempts === 0) {
+    state.scores['3b'].earned = earned;
+  }
+  state.scores['3b'].attempts += 1;
+
+  const fb = document.getElementById('feedback-3b');
+  fb.classList.add('show');
+
+  if (isCorrect) {
+    fb.className = 'feedback-box show correct';
+    fb.innerHTML = `<span class="feedback-icon">✅</span>
+      <strong>Richtig!</strong> (3/3 Punkte)`;
+  } else if (earned === 1) {
+    fb.className = 'feedback-box show incorrect';
+    fb.innerHTML = `<span class="feedback-icon">⚠️</span>
+      <strong>Fast richtig – kleiner Rechenfehler.</strong>
+      (1/3 Punkte)
+      <div class="hint-text">💡 Prüfe deine Rechnung noch einmal:
+      Addiere alle vier Zeiten (in Minuten) und ziehe sie
+      von 15:10 ab.</div>`;
+  } else {
+    fb.className = 'feedback-box show incorrect';
+    fb.innerHTML = `<span class="feedback-icon">❌</span>
+      <strong>Leider falsch.</strong> (0/3 Punkte)
+      <div class="hint-text">💡 Hinweis: Rechne zunächst alle
+      vier Tätigkeiten in Minuten um und addiere sie:
+      Englisch (20 min) + Mathe (¾ h = 45 min) +
+      Hund (¼ h = 15 min) + Haushalt (25 min).
+      Ziehe die Summe dann von 15:10 Uhr ab.</div>`;
+  }
+
+  updateNotice('3b');
+  saveAndRefresh();
+}
+
+/* ─────────────────────────
+   3c  Verbleibende Zeit  (1 BE)
+   16:30 − 15:15 = 1 h 15 min = 75 min total
+   Accept:
+     h=1, min=15   ✓
+     h=0, min=75   ✓  (expressed purely in minutes)
+   ───────────────────────── */
+function check3c() {
+  const hRaw   = document.getElementById('ans-3c-h').value;
+  const minRaw = document.getElementById('ans-3c-min').value;
+
+  const h   = parseInt(hRaw)   || 0;
+  const min = parseInt(minRaw) || 0;
+  const totalMinutes = h * 60 + min;
+
+  /* Correct: 75 min total */
+  const ok = (totalMinutes === 75);
+
+  const hEl   = document.getElementById('ans-3c-h');
+  const minEl = document.getElementById('ans-3c-min');
+
+  hEl.classList.remove('correct', 'incorrect');
+  minEl.classList.remove('correct', 'incorrect');
+
+  if (ok) {
+    hEl.classList.add('correct');
+    minEl.classList.add('correct');
+  } else {
+    /* Give individual field feedback */
+    const hOk   = (h === 1 && min === 15) || (h === 0 && min === 75)
+                  ? true
+                  : (totalMinutes === 75);
+    hEl.classList.add(ok ? 'correct' : 'incorrect');
+    minEl.classList.add(ok ? 'correct' : 'incorrect');
+  }
+
+  state = recordScore('3c', 1, ok, state);
+
+  showFeedback('3c', ok,
+    ok ? '' :
+    '16:30 Uhr − 15:15 Uhr: Von 15:15 bis 16:15 sind es ' +
+    '1 Stunde, von 16:15 bis 16:30 sind es noch 15 Minuten. ' +
+    'Insgesamt also 1 Stunde und 15 Minuten.');
+
+  updateNotice('3c');
+  markTaskCompleted('task3');
+  saveAndRefresh();
+}
+
+/* ── Auto-format time input (insert colon) ── */
+document.getElementById('ans-3b')
+  .addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '');
+    if (v.length >= 3) {
+      v = v.slice(0, 2) + ':' + v.slice(2, 4);
+    }
+    this.value = v;
+  });
+
+/* ── Restore notices on reload ── */
+(function restoreNotices() {
+  state = ExamState.load();
+  ['3a', '3b', '3c'].forEach(id => updateNotice(id));
+  updateScoreDisplay();
+})();
+</script>
+</body>
+</html>
