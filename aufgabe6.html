@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Aufgabe 6 – Fernseher</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+    /* ── TV illustration ── */
+    .tv-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0;
+    }
+
+    /* ── Answer rows ── */
+    .answer-unit-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0;
+    }
+    .unit-input {
+      border: 2px solid #999;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 18px;
+      font-family: Arial, sans-serif;
+      width: 160px;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+    }
+    .unit-input.correct   { border-color: #27ae60; background: #f0fff4; }
+    .unit-input.incorrect { border-color: #c0392b; background: #fff5f5; }
+    .unit-label {
+      font-size: 16px;
+      color: #333;
+    }
+
+    /* yes/no decision for 6b second part */
+    .decision-group {
+      display: flex;
+      gap: 12px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+    .decision-btn {
+      padding: 12px 28px;
+      border: 2px solid #999;
+      border-radius: 8px;
+      background: white;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      min-height: 48px;
+      -webkit-appearance: none;
+    }
+    .decision-btn.selected  { border-color: #2980b9; background: #eaf4fb; }
+    .decision-btn.correct   { border-color: #27ae60; background: #f0fff4; }
+    .decision-btn.incorrect { border-color: #c0392b; background: #fff5f5; }
+
+    /* reasoning textarea */
+    .reasoning-input {
+      border: 2px solid #999;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-family: Arial, sans-serif;
+      width: 100%;
+      resize: vertical;
+      min-height: 64px;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+      margin-top: 8px;
+    }
+    .reasoning-input.correct   { border-color: #27ae60; background: #f0fff4; }
+    .reasoning-input.incorrect { border-color: #c0392b; background: #fff5f5; }
+
+    /* two-part answer block */
+    .two-part-answer {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin: 8px 0;
+    }
+    .part-block {
+      padding: 14px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .part-block p {
+      margin-bottom: 8px;
+    }
+
+    /* formula reminder */
+    .formula-box {
+      background: #f0f4ff;
+      border: 1px solid #b0bfff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 15px;
+      margin: 10px 0 14px;
+      color: #1a1a6e;
+      line-height: 1.8;
+    }
+
+    .input-hint {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    .star-label {
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+      margin-left: 4px;
+    }
+
+    /* scored-notice */
+    .scored-notice {
+      display: inline-block;
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+      margin-left: 8px;
+    }
+    .scored-notice.earned     { color: #27ae60; font-weight: bold; }
+    .scored-notice.not-earned { color: #c0392b; }
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Header ── -->
+  <div class="header-bar">
+    <span class="header-title">VA 2014 Mathematik</span>
+  </div>
+
+  <!-- ── Progress ── -->
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: 84%"></div>
+    </div>
+    <span class="progress-text">Aufgabe 6 von 7</span>
+  </div>
+
+  <!-- ── Task Header ── -->
+  <div class="task-header">
+    <h1>Aufgabe 6 – Fernseher</h1>
+    <span class="points-badge">7 Punkte</span>
+  </div>
+
+  <div class="task-content">
+
+    <p class="exercise-text">
+      Familie Müller kauft für <strong>500&nbsp;€</strong> einen
+      neuen Fernseher. Sie finanziert ihn mit einem Kredit.
+      Der Zinssatz dafür beträgt <strong>4,5&nbsp;%</strong>.
+    </p>
+
+    <!-- ── TV SVG with labelled dimensions ── -->
+    <div class="tv-wrap">
+      <svg width="280" height="200" viewBox="0 0 280 200"
+           aria-label="Fernseher mit Breite 95 cm,
+           Höhe 60 cm und Diagonale">
+
+        <!-- TV stand -->
+        <rect x="115" y="168" width="50" height="8"
+              fill="#888" rx="2"/>
+        <rect x="105" y="176" width="70" height="6"
+              fill="#666" rx="2"/>
+
+        <!-- TV outer body -->
+        <rect x="20" y="20" width="240" height="148"
+              fill="#2a2a2a" rx="8"/>
+
+        <!-- Screen -->
+        <rect x="30" y="28" width="220" height="132"
+              fill="#1a1a1a" rx="4"/>
+
+        <!-- Screen face (slight blue tint) -->
+        <rect x="32" y="30" width="216" height="128"
+              fill="#0a0a1a" rx="3"/>
+
+        <!-- Dimension lines and labels -->
+
+        <!-- Width arrow (bottom, outside TV) -->
+        <line x1="30"  y1="188" x2="250" y2="188"
+              stroke="#c0392b" stroke-width="1.5"/>
+        <!-- left arrowhead -->
+        <polygon points="30,188 38,184 38,192"
+                 fill="#c0392b"/>
+        <!-- right arrowhead -->
+        <polygon points="250,188 242,184 242,192"
+                 fill="#c0392b"/>
+        <text x="140" y="199" text-anchor="middle"
+              font-family="Arial" font-size="13"
+              fill="#c0392b" font-weight="bold">95 cm</text>
+
+        <!-- Height arrow (right side, outside TV) -->
+        <line x1="264" y1="28" x2="264" y2="160"
+              stroke="#c0392b" stroke-width="1.5"/>
+        <!-- top arrowhead -->
+        <polygon points="264,28 260,36 268,36"
+                 fill="#c0392b"/>
+        <!-- bottom arrowhead -->
+        <polygon points="264,160 260,152 268,152"
+                 fill="#c0392b"/>
+        <text x="276" y="98" text-anchor="middle"
+              font-family="Arial" font-size="13"
+              fill="#c0392b" font-weight="bold"
+              transform="rotate(90,276,98)">60 cm</text>
+
+        <!-- Diagonal line across screen -->
+        <line x1="32" y1="30" x2="248" y2="158"
+              stroke="#e74c3c" stroke-width="2"
+              stroke-dasharray="6,4"/>
+
+        <!-- Diagonal label -->
+        <text x="148" y="88" text-anchor="middle"
+              font-family="Arial" font-size="12"
+              fill="#e74c3c" font-weight="bold"
+              transform="rotate(30,148,88)">Diagonale</text>
+
+      </svg>
+    </div>
+    <p class="text-small text-center"
+       style="margin-top:-8px; margin-bottom:16px;">
+      (Skizze nicht maßstabsgerecht)
+    </p>
+
+
+    <!-- ────────────────────────────────────
+         6a  Zinsen  (3 BE)
+         500 € × 4,5 % = 500 × 0,045 = 22,50 €
+         Frau Müller hat recht.
+         Scoring:
+           1 BE – correct calculation set up
+           1 BE – correct result 22,50 €
+           1 BE – correct conclusion (hat recht)
+         We award:
+           2 BE for correct amount 22,50 €
+           1 BE for correct yes/no decision
+         ──────────────────────────────────── -->
+    <div class="sub-exercise" id="block-6a">
+      <div class="sub-label">a)</div>
+      <p class="exercise-text">
+        Frau Müller sagt:
+        <em>„Die Zinsen betragen für das erste Jahr 22,50&nbsp;€."</em><br>
+        Hat sie recht? Überprüfe ihre Aussage mit einer Rechnung.
+      </p>
+
+      <div class="two-part-answer">
+
+        <div class="part-block">
+          <p class="exercise-text">
+            Berechne die Jahreszinsen:
+          </p>
+          <div class="answer-unit-row">
+            <input class="unit-input"
+                   id="ans-6a-zinsen"
+                   data-sub="6a"
+                   type="text"
+                   inputmode="decimal"
+                   placeholder="0,00"
+                   autocomplete="off">
+            <span class="unit-label">€</span>
+          </div>
+          <p class="input-hint">
+            Gib den Betrag mit Komma an, z.&thinsp;B. 15,00.
+          </p>
+        </div>
+
+        <div class="part-block">
+          <p class="exercise-text">
+            Hat Frau Müller recht?
+          </p>
+          <div class="decision-group">
+            <button class="decision-btn"
+                    id="dec-6a-ja"
+                    data-val="ja"
+                    onclick="selectDecision6a(this)">
+              Ja
+            </button>
+            <button class="decision-btn"
+                    id="dec-6a-nein"
+                    data-val="nein"
+                    onclick="selectDecision6a(this)">
+              Nein
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-6a" onclick="check6a()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-6a"></span>
+      </div>
+      <div class="feedback-box" id="feedback-6a"></div>
+    </div>
+
+
+    <!-- ────────────────────────────────────
+         6b*  Diagonale und Sitzabstand  (4 BE)
+         Part 1 – Diagonale:
+           d = √(95² + 60²)
+             = √(9025 + 3600)
+             = √12625
+             ≈ 112,37 cm
+             ≈ 1,12 m  ✓
+         Part 2 – Sitzabstand:
+           Mindestabstand = 3 × 1,12 = 3,36 m
+           Vorhandener Abstand = 3,00 m
+           3,00 < 3,36 → reicht NICHT aus
+
+         Scoring:
+           1 BE – correct Pythagoras setup / calculation
+           1 BE – correct diagonal ≈ 1,12 m
+           1 BE – correct minimum distance (3 × diagonal)
+           1 BE – correct decision with justification
+         We award:
+           1 BE – diagonal in cm correct (within ±1 cm)
+           1 BE – diagonal in m correct (within ±0.01 m)
+           1 BE – correct minimum distance (within ±0.05 m)
+           1 BE – correct decision (Nein) + reasoning
+         ──────────────────────────────────── -->
+    <div class="sub-exercise" id="block-6b">
+      <div class="sub-label">
+        b) <span class="star-label">(*)</span>
+      </div>
+      <p class="exercise-text">
+        Der Verkäufer hat gesagt, dass der Sitzabstand zum
+        Fernseher mindestens <strong>drei Mal so groß</strong>
+        wie die Bildschirmdiagonale des Gerätes sein soll.
+      </p>
+
+      <!-- Formula reminder -->
+      <div class="formula-box">
+        Satz des Pythagoras:&nbsp;
+        <strong>c² = a² + b²</strong>&nbsp;&nbsp;→&nbsp;&nbsp;
+        <strong>c = √(a² + b²)</strong>
+      </div>
+
+      <div class="two-part-answer">
+
+        <!-- Part 1: Calculate diagonal -->
+        <div class="part-block">
+          <p class="exercise-text">
+            <strong>Teil 1:</strong> Weise durch eine Rechnung nach,
+            dass die Bildschirmdiagonale etwa <strong>1,12&nbsp;m</strong>
+            lang ist.
+          </p>
+
+          <p class="exercise-text mt-8">
+            Diagonale in cm:
+          </p>
+          <div class="answer-unit-row">
+            <input class="unit-input"
+                   id="ans-6b-cm"
+                   data-sub="6b"
+                   type="text"
+                   inputmode="decimal"
+                   placeholder=""
+                   autocomplete="off">
+            <span class="unit-label">cm</span>
+          </div>
+
+          <p class="exercise-text mt-8">
+            Diagonale in m:
+          </p>
+          <div class="answer-unit-row">
+            <input class="unit-input"
+                   id="ans-6b-m"
+                   data-sub="6b"
+                   type="text"
+                   inputmode="decimal"
+                   placeholder=""
+                   autocomplete="off">
+            <span class="unit-label">m</span>
+          </div>
+          <p class="input-hint">
+            Gib den Wert auf zwei Stellen nach dem Komma an.
+          </p>
+        </div>
+
+        <!-- Part 2: Minimum distance and decision -->
+        <div class="part-block">
+          <p class="exercise-text">
+            <strong>Teil 2:</strong> Reicht ein Abstand von
+            <strong>3&nbsp;Metern</strong> zwischen dem neuen
+            Fernseher und Familie Müllers Sofa aus?
+          </p>
+
+          <p class="exercise-text mt-8">
+            Mindestabstand (3 × Diagonale in m):
+          </p>
+          <div class="answer-unit-row">
+            <input class="unit-input"
+                   id="ans-6b-dist"
+                   data-sub="6b"
+                   type="text"
+                   inputmode="decimal"
+                   placeholder=""
+                   autocomplete="off">
+            <span class="unit-label">m</span>
+          </div>
+
+          <p class="exercise-text mt-8">
+            Entscheidung:
+          </p>
+          <div class="decision-group">
+            <button class="decision-btn"
+                    id="dec-6b-ja"
+                    data-val="ja"
+                    onclick="selectDecision6b(this)">
+              Ja, reicht aus
+            </button>
+            <button class="decision-btn"
+                    id="dec-6b-nein"
+                    data-val="nein"
+                    onclick="selectDecision6b(this)">
+              Nein, reicht nicht
+            </button>
+          </div>
+
+          <p class="exercise-text mt-8">
+            Begründung:
+          </p>
+          <textarea class="reasoning-input"
+                    id="ans-6b-reason"
+                    data-sub="6b"
+                    placeholder="Begründe deine Entscheidung …">
+          </textarea>
+        </div>
+
+      </div>
+
+      <div style="display:flex; align-items:center;
+                  flex-wrap:wrap; gap:8px; margin-top:12px;">
+        <button class="submit-btn" id="btn-6b" onclick="check6b()">
+          Antwort prüfen
+        </button>
+        <span class="scored-notice" id="notice-6b"></span>
+      </div>
+      <div class="feedback-box" id="feedback-6b"></div>
+    </div>
+
+  </div><!-- /task-content -->
+
+  <!-- ── Navigation Footer ── -->
+  <div class="nav-footer">
+    <button class="nav-btn" onclick="navigateTo('aufgabe5.html')">
+      ← Zurück
+    </button>
+    <span class="score-display" id="score-footer">Punkte: 0 / 51</span>
+    <button class="nav-btn next" onclick="navigateTo('aufgabe7.html')">
+      Weiter →
+    </button>
+  </div>
+
+</div><!-- /page -->
+
+<script src="exam.js"></script>
+<script>
+/* ══════════════════════════════════════════
+   Aufgabe 6 – checking & scoring
+
+   6a:  500 × 4,5% = 22,50 € → ja, hat recht     3 BE
+   6b*: d = √(95²+60²) ≈ 112 cm = 1,12 m
+        min. dist = 3 × 1,12 = 3,36 m
+        3,00 < 3,36 → nein, reicht nicht aus      4 BE
+   ══════════════════════════════════════════ */
+
+let state = ExamState.load();
+
+function saveAndRefresh() {
+  ExamState.save(state);
+  updateScoreDisplay();
+}
+
+function updateNotice(subId) {
+  const el = document.getElementById(`notice-${subId}`);
+  if (!el) return;
+  const s = state.scores[subId];
+  if (!s || s.attempts === 0) { el.textContent = ''; return; }
+  if (s.earned > 0) {
+    el.className = 'scored-notice earned';
+    el.textContent =
+      `✓ ${s.earned}/${s.max} Punkt(e) bereits vergeben`;
+  } else {
+    el.className = 'scored-notice not-earned';
+    el.textContent =
+      `0/${s.max} Punkt(e) – weiteres Üben möglich`;
+  }
+}
+
+function parseNum(str) {
+  if (!str) return NaN;
+  return parseFloat(
+    String(str).trim().replace(',', '.').replace(/[^0-9.]/g, '')
+  );
+}
+
+/* ─────────────────────────
+   6a  Zinsen  (3 BE)
+   Correct amount: 22,50 €
+   Correct decision: ja
+   Scoring:
+     2 BE – correct amount 22,50 €
+     1 BE – correct decision "ja"
+   ───────────────────────── */
+let decision6a = null;
+
+function selectDecision6a(el) {
+  decision6a = el.dataset.val;
+  document.querySelectorAll('#block-6a .decision-btn')
+    .forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function check6a() {
+  const zinsenVal = parseNum(
+    document.getElementById('ans-6a-zinsen').value);
+
+  const zinsenOk   = Math.abs(zinsenVal - 22.50) < 0.005;
+  const decisionOk = (decision6a === 'ja');
+
+  /* Visual feedback on amount */
+  const zinsenEl = document.getElementById('ans-6a-zinsen');
+  zinsenEl.classList.remove('correct', 'incorrect');
+  zinsenEl.classList.add(zinsenOk ? 'correct' : 'incorrect');
+
+  /* Visual feedback on decision buttons */
+  document.querySelectorAll('#block-6a .decision-btn')
+    .forEach(b => b.classList.remove(
+      'selected', 'correct', 'incorrect'));
+  document.getElementById('dec-6a-ja')
+    .classList.add('correct');
+  if (decision6a === 'nein') {
+    document.getElementById('dec-6a-nein')
+      .classList.add('incorrect');
+  }
+
+  const earned = (zinsenOk ? 2 : 0) + (decisionOk ? 1 : 0);
+
+  if (!state.scores['6a']) {
+    state.scores['6a'] = { earned: 0, max: 3, attempts: 0 };
+  }
+  if (state.scores['6a'].attempts === 0) {
+    state.scores['6a'].earned = earned;
+  }
+  state.scores['6a'].attempts += 1;
+
+  const fb = document.getElementById('feedback-6a');
+  fb.classList.add('show');
+
+  if (zinsenOk && decisionOk) {
+    fb.className = 'feedback-box show correct';
+    fb.innerHTML = `<span class="feedback-icon">✅</span>
+      <strong>Richtig!</strong> (3/3 Punkte)`;
+  } else {
+    fb.className = 'feedback-box show incorrect';
+    let hint = '';
+    if (!zinsenOk) {
+      hint = 'Berechne die Zinsen mit der Formel: ' +
+             'Zinsen = Kapital × Zinssatz ÷ 100. ' +
+             'Also: 500 € × 4,5 ÷ 100 = ?';
+    } else if (!decisionOk) {
+      hint = 'Deine Rechnung stimmt! Vergleiche das Ergebnis ' +
+             'mit Frau Müllers Aussage (22,50 €).';
+    }
+    fb.innerHTML = `<span class="feedback-icon">⚠️</span>
+      <strong>${earned}/3 Punkte.</strong>
+      <div class="hint-text">💡 ${hint}</div>`;
+  }
+
+  updateNotice('6a');
+  saveAndRefresh();
+}
+
+/* ─────────────────────────
+   6b*  Diagonale + Abstand  (4 BE)
+
+   Correct values:
+     diagonal cm  : √(95²+60²) = √12625 ≈ 112.36 cm
+     diagonal m   : ≈ 1.1236 m  (accept 1.12)
+     min distance : 3 × 1.1236 ≈ 3.37 m (accept 3.36–3.37)
+     decision     : nein
+
+   Scoring:
+     1 BE – diagonal in cm correct (±2 cm)
+     1 BE – diagonal in m  correct (±0.02 m)
+     1 BE – min distance   correct (±0.05 m)
+     1 BE – correct decision "nein" + reasoning mentioning
+            numbers or comparison
+   ───────────────────────── */
+const DIAG_CM   = Math.sqrt(95*95 + 60*60); // ≈ 112.36
+const DIAG_M    = DIAG_CM / 100;            // ≈ 1.1236
+const MIN_DIST  = 3 * DIAG_M;              // ≈ 3.3708
+
+let decision6b = null;
+
+function selectDecision6b(el) {
+  decision6b = el.dataset.val;
+  document.querySelectorAll('#block-6b .decision-btn')
+    .forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function reasoningOk6b(text) {
+  /* Accept if text contains numbers and/or key comparison words */
+  const s = text.toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe')
+    .replace(/ü/g,'ue').replace(/ß/g,'ss');
+  const hasNumbers = /[0-9]/.test(s);
+  const hasCompare = ['kleiner','weniger','reicht nicht','nicht aus',
+    'zu wenig','unter','3,3','3.3','3 m'].some(kw => s.includes(kw));
+  return text.trim().length > 8 && (hasNumbers || hasCompare);
+}
+
+function check6b() {
+  if (decision6b === null) {
+    alert('Bitte triff eine Entscheidung (Ja/Nein).');
+    return;
+  }
+
+  const cmVal   = parseNum(document.getElementById('ans-6b-cm').value);
+  const mVal    = parseNum(document.getElementById('ans-6b-m').value);
+  const distVal = parseNum(
+    document.getElementById('ans-6b-dist').value);
+  const reason  = document.getElementById('ans-6b-reason').value;
+
+  const cmOk     = !isNaN(cmVal)   &&
+                   Math.abs(cmVal   - DIAG_CM)  < 2.0;
+  const mOk      = !isNaN(mVal)    &&
+                   Math.abs(mVal    - DIAG_M)   < 0.02;
+  const distOk   = !isNaN(distVal) &&
+                   Math.abs(distVal - MIN_DIST)  < 0.05;
+  const decOk    = (decision6b === 'nein');
+  const reasonOk = reasoningOk6b(reason);
+
+  /* Visual: calculation fields */
+  ['ans-6b-cm','ans-6b-m','ans-6b-dist'].forEach(id => {
+    document.getElementById(id)
+      .classList.remove('correct','incorrect');
+  });
+  document.getElementById('ans-6b-cm')
+    .classList.add(cmOk   ? 'correct' : 'incorrect');
+  document.getElementById('ans-6b-m')
+    .classList.add(mOk    ? 'correct' : 'incorrect');
+  document.getElementById('ans-6b-dist')
+    .classList.add(distOk ? 'correct' : 'incorrect');
+
+  /* Visual: decision buttons */
+  document.querySelectorAll('#block-6b .decision-btn')
+    .forEach(b => b.classList.remove(
+      'selected','correct','incorrect'));
+  document.getElementById('dec-6b-nein')
+    .classList.add('correct');
+  if (decision6b === 'ja') {
+    document.getElementById('dec-6b-ja')
+      .classList.add('incorrect');
+  }
+
+  /* Visual: reasoning */
+  const reasonEl = document.getElementById('ans-6b-reason');
+  reasonEl.classList.remove('correct','incorrect');
+  reasonEl.classList.add(
+    (decOk && reasonOk) ? 'correct' : 'incorrect');
+
+  /* Scoring: 1 BE each for cm, m, dist, decision+reason */
+  let earned = 0;
+  if (cmOk)              earned += 1;
+  if (mOk)               earned += 1;
+  if (distOk)            earned += 1;
+  if (decOk && reasonOk) earned += 1;
+
+  if (!state.scores['6b']) {
+    state.scores['6b'] = { earned: 0, max: 4, attempts: 0 };
+  }
+  if (state.scores['6b'].attempts === 0) {
+    state.scores['6b'].earned = earned;
+  }
+  state.scores['6b'].attempts += 1;
+
+  const fb = document.getElementById('feedback-6b');
+  fb.classList.add('show');
+
+  if (earned === 4) {
+    fb.className = 'feedback-box show correct';
+    fb.innerHTML = `<span class="feedback-icon">✅</span>
+      <strong>Alles richtig!</strong> (4/4 Punkte)`;
+  } else {
+    /* Build targeted hint */
+    const hints = [];
+    if (!cmOk) {
+      hints.push('Diagonale in cm: Wende den Satz des Pythagoras an: ' +
+        'c = √(95² + 60²) = √(9025 + 3600) = √12625.');
+    }
+    if (cmOk && !mOk) {
+      hints.push('Umrechnung in Meter: Teile den cm-Wert durch 100.');
+    }
+    if (!distOk) {
+      hints.push('Mindestabstand = 3 × Diagonale in Metern.');
+    }
+    if (!decOk) {
+      hints.push('Vergleiche den Mindestabstand (ca. 3,36 m) ' +
+        'mit dem vorhandenen Abstand (3,00 m). ' +
+        '3,00 m < 3,36 m → der Abstand reicht nicht aus.');
+    } else if (decOk && !reasonOk) {
+      hints.push('Deine Entscheidung ist richtig! ' +
+        'Begründe sie mit Zahlen: z.&thinsp;B. ' +
+        '„3,00 m &lt; 3,36 m".');
+    }
+
+    fb.className = 'feedback-box show incorrect';
+    fb.innerHTML = `<span class="feedback-icon">⚠️</span>
+      <strong>${earned}/4 Punkte.</strong>
+      <div class="hint-text">💡
+        ${hints.map(h => `<p style="margin:4px 0">${h}</p>`)
+               .join('')}
+      </div>`;
+  }
+
+  updateNotice('6b');
+  markTaskCompleted('task6');
+  saveAndRefresh();
+}
+
+/* ── Restore notices on reload ── */
+(function restoreNotices() {
+  state = ExamState.load();
+  ['6a','6b'].forEach(id => updateNotice(id));
+  updateScoreDisplay();
+})();
+</script>
+</body>
+</html>
