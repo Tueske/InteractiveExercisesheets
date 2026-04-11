@@ -223,75 +223,8 @@
         Berechne, wie viel Limonade in ein solches Glas
         hineinpasst. Gib dein Ergebnis in Litern an.
       </p>
-      <p class="input-hint">
-        Es gilt: 1&nbsp;l = 1&nbsp;dm³ = 1000&nbsp;cm³
-      </p>
-
-      <!-- Cylinder SVG with labelled dimensions -->
-      <div class="cylinder-wrap">
-        <svg width="180" height="200" viewBox="0 0 180 200"
-             aria-label="Zylinderförmiges Glas mit
-             Durchmesser 6 cm und Höhe 10 cm">
-
-          <!-- cylinder body -->
-          <!-- top ellipse -->
-          <ellipse cx="90" cy="40" rx="60" ry="18"
-                   fill="#e8f4ff" stroke="#1a1a1a" stroke-width="2"/>
-          <!-- left side -->
-          <line x1="30" y1="40" x2="30" y2="155"
-                stroke="#1a1a1a" stroke-width="2"/>
-          <!-- right side -->
-          <line x1="150" y1="40" x2="150" y2="155"
-                stroke="#1a1a1a" stroke-width="2"/>
-          <!-- bottom ellipse -->
-          <ellipse cx="90" cy="155" rx="60" ry="18"
-                   fill="#d0e8ff" stroke="#1a1a1a" stroke-width="2"/>
-          <!-- fill colour inside -->
-          <rect x="30" y="40" width="120" height="115"
-                fill="#d0e8ff" opacity="0.35"/>
-
-          <!-- diameter arrow (top, horizontal) -->
-          <!-- left arrow -->
-          <line x1="30" y1="18" x2="90" y2="18"
-                stroke="#c0392b" stroke-width="1.5"/>
-          <polygon points="30,18 38,14 38,22"
-                   fill="#c0392b"/>
-          <!-- right arrow -->
-          <line x1="90" y1="18" x2="150" y2="18"
-                stroke="#c0392b" stroke-width="1.5"/>
-          <polygon points="150,18 142,14 142,22"
-                   fill="#c0392b"/>
-          <!-- label -->
-          <text x="90" y="13" text-anchor="middle"
-                font-family="Arial" font-size="13"
-                fill="#c0392b" font-weight="bold">d = 6 cm</text>
-
-          <!-- height arrow (right side, vertical) -->
-          <!-- top arrow -->
-          <line x1="165" y1="40" x2="165" y2="97"
-                stroke="#c0392b" stroke-width="1.5"/>
-          <polygon points="165,40 161,48 169,48"
-                   fill="#c0392b"/>
-          <!-- bottom arrow -->
-          <line x1="165" y1="155" x2="165" y2="97"
-                stroke="#c0392b" stroke-width="1.5"/>
-          <polygon points="165,155 161,147 169,147"
-                   fill="#c0392b"/>
-          <!-- label -->
-          <text x="175" y="101" text-anchor="middle"
-                font-family="Arial" font-size="13"
-                fill="#c0392b" font-weight="bold"
-                transform="rotate(90,175,101)">h = 10 cm</text>
-
-        </svg>
-      </div>
-
-      <!-- Formula reminder -->
-      <div class="formula-box">
-        Volumen Zylinder:&nbsp;
-        <strong>V = π · r² · h</strong>
-      </div>
-
+      
+      
       <!-- Two answer fields: cm³ and litres -->
       <div class="two-part-answer">
 
