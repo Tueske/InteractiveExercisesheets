@@ -50,6 +50,7 @@ function numericCheck(userAnswer, correct, tolerance = 0.05) {
 }
 
 function stringCheck(userAnswer, correctList) {
+  if (!userAnswer.trim()) return false;
   const clean = str =>
     str.trim().toLowerCase()
       .replace(/ä/g,'ae').replace(/ö/g,'oe')
