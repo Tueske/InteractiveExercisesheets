@@ -156,7 +156,7 @@
   <!-- ── Task Header ── -->
   <div class="task-header">
     <h1>Aufgabe 6 – Fernseher</h1>
-    <span class="points-badge">7 Punkte</span>
+    <span class="points-badge">8 Punkte</span>
   </div>
 
   <div class="task-content">
@@ -308,7 +308,7 @@
 
 
     <!-- ────────────────────────────────────
-         6b*  Diagonale und Sitzabstand  (4 BE)
+         6b*  Diagonale und Sitzabstand  (5 BE)
          Part 1 – Diagonale:
            d = √(95² + 60²)
              = √(9025 + 3600)
@@ -321,11 +321,12 @@
            3,00 < 3,36 → reicht NICHT aus
 
          Scoring:
-           1 BE – correct Pythagoras setup / calculation
+           1 BE – correct Pythagoras calculation path
            1 BE – correct diagonal ≈ 1,12 m
            1 BE – correct minimum distance (3 × diagonal)
            1 BE – correct decision with justification
          We award:
+           1 BE – calculation path (mentions Pythagoras or steps)
            1 BE – diagonal in cm correct (within ±1 cm)
            1 BE – diagonal in m correct (within ±0.01 m)
            1 BE – correct minimum distance (within ±0.05 m)
@@ -346,10 +347,17 @@
         <!-- Part 1: Calculate diagonal -->
         <div class="part-block">
           <p class="exercise-text">
-            <strong>Teil 1:</strong> Weise durch eine Rechnung nach,
-            dass die Bildschirmdiagonale etwa <strong>1,12&nbsp;m</strong>
-            lang ist.
+            <strong>Teil 1:</strong> Berechne die Bildschirmdiagonale.
           </p>
+
+          <p class="exercise-text mt-8">
+            Rechenweg:
+          </p>
+          <textarea class="reasoning-input"
+                    id="ans-6b-calc"
+                    data-sub="6b"
+                    placeholder="Beschreibe deinen Rechenweg …">
+          </textarea>
 
           <p class="exercise-text mt-8">
             Diagonale in cm:
@@ -579,7 +587,7 @@ function check6a() {
 }
 
 /* ─────────────────────────
-   6b*  Diagonale + Abstand  (4 BE)
+   6b*  Diagonale + Abstand  (5 BE)
 
    Correct values:
      diagonal cm  : √(95²+60²) = √12625 ≈ 112.36 cm
@@ -588,6 +596,7 @@ function check6a() {
      decision     : nein
 
    Scoring:
+     1 BE – calculation path correct (mentions Pythagoras or steps)
      1 BE – diagonal in cm correct (±2 cm)
      1 BE – diagonal in m  correct (±0.02 m)
      1 BE – min distance   correct (±0.05 m)
@@ -606,7 +615,6 @@ function selectDecision6b(el) {
     .forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
 }
-
 function reasoningOk6b(text) {
   /* Accept if text contains numbers and/or key comparison words */
   const s = text.toLowerCase()
@@ -616,6 +624,18 @@ function reasoningOk6b(text) {
   const hasCompare = ['kleiner','weniger','reicht nicht','nicht aus',
     'zu wenig','unter','3,3','3.3','3 m'].some(kw => s.includes(kw));
   return text.trim().length > 8 && (hasNumbers || hasCompare);
+}
+
+function calcOk6b(text) {
+  /* Check if calculation shows Pythagoras steps */
+  const s = text.toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe')
+    .replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .replace(/\s/g, '');
+  const hasPythagoras = ['pythagoras','satzdespythagoras','c²=a²+b²','c2=a2+b2'].some(kw => s.includes(kw));
+  const hasSquares = ['95²','95^2','60²','60^2','9025','3600','12625'].some(kw => s.includes(kw));
+  const hasSqrt = ['√','sqrt','wurzel'].some(kw => s.includes(kw));
+  return text.trim().length > 10 && (hasPythagoras || (hasSquares && hasSqrt));
 }
 
 function check6b() {
@@ -640,10 +660,12 @@ function check6b() {
   const reasonOk = reasoningOk6b(reason);
 
   /* Visual: calculation fields */
-  ['ans-6b-cm','ans-6b-m','ans-6b-dist'].forEach(id => {
+  ['ans-6b-calc','ans-6b-cm','ans-6b-m','ans-6b-dist'].forEach(id => {
     document.getElementById(id)
       .classList.remove('correct','incorrect');
   });
+  document.getElementById('ans-6b-calc')
+    .classList.add(calcOk ? 'correct' : 'incorrect');
   document.getElementById('ans-6b-cm')
     .classList.add(cmOk   ? 'correct' : 'incorrect');
   document.getElementById('ans-6b-m')
@@ -668,15 +690,16 @@ function check6b() {
   reasonEl.classList.add(
     (decOk && reasonOk) ? 'correct' : 'incorrect');
 
-  /* Scoring: 1 BE each for cm, m, dist, decision+reason */
+  /* Scoring: 1 BE each for calc, cm, m, dist, decision+reason */
   let earned = 0;
+  if (calcOk)            earned += 1;
   if (cmOk)              earned += 1;
   if (mOk)               earned += 1;
   if (distOk)            earned += 1;
   if (decOk && reasonOk) earned += 1;
 
   if (!state.scores['6b']) {
-    state.scores['6b'] = { earned: 0, max: 4, attempts: 0 };
+    state.scores['6b'] = { earned: 0, max: 5, attempts: 0 };
   }
   if (state.scores['6b'].attempts === 0) {
     state.scores['6b'].earned = earned;
@@ -686,16 +709,20 @@ function check6b() {
   const fb = document.getElementById('feedback-6b');
   fb.classList.add('show');
 
-  if (earned === 4) {
+  if (earned === 5) {
     fb.className = 'feedback-box show correct';
     fb.innerHTML = `<span class="feedback-icon">✅</span>
-      <strong>Alles richtig!</strong> (4/4 Punkte)`;
+      <strong>Alles richtig!</strong> (5/5 Punkte)`;
   } else {
     /* Build targeted hint */
     const hints = [];
+    if (!calcOk) {
+      hints.push('Rechenweg: Verwende den Satz des Pythagoras: ' +
+        'c² = a² + b², wobei a=95 cm, b=60 cm. ' +
+        'Berechne a², b², addiere sie, ziehe die Wurzel.');
+    }
     if (!cmOk) {
-      hints.push('Diagonale in cm: Wende den Satz des Pythagoras an: ' +
-        'c = √(95² + 60²) = √(9025 + 3600) = √12625.');
+      hints.push('Diagonale in cm: √(95² + 60²) = √12625 ≈ 112 cm.');
     }
     if (cmOk && !mOk) {
       hints.push('Umrechnung in Meter: Teile den cm-Wert durch 100.');
@@ -715,7 +742,7 @@ function check6b() {
 
     fb.className = 'feedback-box show incorrect';
     fb.innerHTML = `<span class="feedback-icon">⚠️</span>
-      <strong>${earned}/4 Punkte.</strong>
+      <strong>${earned}/5 Punkte.</strong>
       <div class="hint-text">💡
         ${hints.map(h => `<p style="margin:4px 0">${h}</p>`)
                .join('')}

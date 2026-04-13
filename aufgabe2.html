@@ -572,11 +572,13 @@ const TF_CORRECT = { 1: 'f', 2: 'w', 3: 'w' };
 const REASONING_KW = {
   1: ['april', 'höchste', 'höchst', 'meisten', 'grösste',
       'größte', 'nicht februar', '5', 'fünf', 'am meisten'],
-  2: ['september', 'keine säule', 'kein schüler', 'niemand',
+  2: ['september ist leer', 'keine säule', 'kein schüler', 'niemand',
       'null', '0', 'leer', 'keine bar'],
-  3: ['8', 'acht', 'winter', '7', 'sieben', 'frühjahr',
-      'mehr', 'grösser', 'größer', 'dezember', 'januar',
-      'februar', 'märz', 'april', 'mai']
+  3: ['3+2+3>1+5+1', '1+5+1<3+2+3', '8>7','7<8', 'winter:8,frühjahr:7',
+      'dezember+januar+februar>maerz+april+mai', 'maerz+april+mai<dezember+januar+februar',
+      'winter>frühjahr', 'frühjahr<winter', '8 größer 7', '7 kleiner 8',
+      'winter:8 frühjahr:7',  'winter hat mehr',
+      'frühjahr hat weniger', 'dez+jan+feb>mä+apr+mai', 'mä+apr+mai<dez+jan+feb']
 };
 
 function reasoningOk(row, text) {

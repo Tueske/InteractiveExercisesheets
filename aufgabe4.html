@@ -615,20 +615,62 @@ function check4b() {
      2 BE – correct answer x = 4
    ───────────────────────── */
 function checkEquation4c(eqStr) {
-  /* Accept any equation that contains all of:
-     - coefficient 1,65 or 1.65
-     - constant 3 or 3,00 or 3.00 (cost of 2 Bratwürste im Brötchen)
-     - total 9,60 or 9.60
-     - a variable (x or X)                                          */
-  const s = eqStr.toLowerCase().replace(/\s/g, '');
-  const has165  = s.includes('1,65') || s.includes('1.65');
-  const has3    = s.includes('3,00') || s.includes('3.00') ||
-                  s.includes('+3=')  || s.includes('+3,') ||
-                  s.includes('+3.')  || /\+3[^0-9]/.test(s) ||
-                  s.includes('3+')   || s.startsWith('3');
-  const has960  = s.includes('9,60') || s.includes('9.60');
-  const hasX    = s.includes('x');
-  return has165 && has3 && has960 && hasX;
+  /* List of all acceptable equation forms, normalized */
+  const acceptedEquations = [
+    // Simple form with comma
+    '1,65x+3=9,60',
+    '1,65x+3,00=9,60',
+    '1,65x+3=9,60€',
+    '1,65x+3,00=9,60€',
+    // Simple form with dot
+    '1.65x+3=9.60',
+    '1.65x+3.00=9.60',
+    '1.65x+3=9.60€',
+    '1.65x+3.00=9.60€',
+    // Expanded form with comma
+    '2*(1,30+0,20)+1,65x=9,60',
+    '2*(1,30+0,20)+1,65x=9,60€',
+    '2*(1,30 + 0,20) + 1,65x = 9,60',
+    '2*(1,30 + 0,20) + 1,65x = 9,60€',
+    // Expanded form with dot
+    '2*(1.30+0.20)+1.65x=9.60',
+    '2*(1.30+0.20)+1.65x=9.60€',
+    '2*(1.30 + 0.20) + 1.65x = 9.60',
+    '2*(1.30 + 0.20) + 1.65x = 9.60€',
+    // With 1,50
+    '1,65x+2*1,50=9,60',
+    '1,65x+2*1,50=9,60€',
+    '1.65x+2*1.50=9.60',
+    '1.65x+2*1.50=9.60€',
+    // Other variations
+    '3+1,65x=9,60',
+    '3+1,65x=9,60€',
+    '3+1.65x=9.60',
+    '3+1.65x=9.60€',
+    '2*1,50+1,65x=9,60',
+    '2*1,50+1,65x=9,60€',
+    '2*1.50+1.65x=9.60',
+    '2*1.50+1.65x=9.60€',
+    // With explicit multiplication
+    '1,65*x+3=9,60',
+    '1.65*x+3=9.60',
+    // With spaces (but normalized)
+    // Since we remove spaces, these are covered above
+    // Uppercase X
+    '1,65X+3=9,60',
+    '1.65X+3=9.60',
+    // Add more if needed
+  ];
+
+  const normalize = str =>
+    str.toLowerCase()
+       .replace(/\s/g, '')
+       .replace(/€/g, '')
+       .replace(/x/g, 'x'); // ensure lowercase x
+
+  const normalizedInput = normalize(eqStr);
+
+  return acceptedEquations.some(eq => normalize(eq) === normalizedInput);
 }
 
 function check4c() {
