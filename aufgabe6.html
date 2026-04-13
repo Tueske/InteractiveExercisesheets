@@ -654,10 +654,12 @@ function reasoningOk6b(text) {
   const s = text.toLowerCase()
     .replace(/ä/g,'ae').replace(/ö/g,'oe')
     .replace(/ü/g,'ue').replace(/ß/g,'ss');
+  const noSpace = s.replace(/\s/g, '');
   const hasNumbers = /[0-9]/.test(s);
   const hasCompare = ['kleiner','weniger','reicht nicht','nicht aus',
-    'zu wenig','unter','3,3','3.3','3 m'].some(kw => s.includes(kw));
-  return text.trim().length > 8 && (hasNumbers || hasCompare);
+    'zu wenig','unter','3,3','3.3','3 m','3m'].some(kw => s.includes(kw) || noSpace.includes(kw));
+  const hasThree = /\b3(?:[.,]0{0,2})?\b/.test(s) || /3(?:[.,]0{0,2})?m\b/.test(noSpace);
+  return text.trim().length > 8 && (hasNumbers || hasCompare || hasThree);
 }
 
 function calcOk6b(text) {
