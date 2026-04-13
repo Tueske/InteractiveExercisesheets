@@ -358,10 +358,14 @@
                     data-sub="6b"
                     placeholder="Beschreibe deinen Rechenweg …">
           </textarea>
-          <div style="margin-top: 8px;">
+          <div style="margin-top: 8px; display:flex; gap:8px; flex-wrap:wrap;">
             <button type="button" onclick="insertSqrt('ans-6b-calc')"
                     style="padding: 6px 12px; font-size: 14px; border: 1px solid #999; background: #f9f9f9; cursor: pointer;">
               √ einfügen
+            </button>
+            <button type="button" onclick="insertSquare('ans-6b-calc')"
+                    style="padding: 6px 12px; font-size: 14px; border: 1px solid #999; background: #f9f9f9; cursor: pointer;">
+              ^2 einfügen
             </button>
           </div>
 
@@ -625,6 +629,18 @@ function insertSqrt(textareaId) {
   textarea.focus();
 }
 
+function insertSquare(textareaId) {
+  const textarea = document.getElementById(textareaId);
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const before = text.substring(0, start);
+  const after = text.substring(end, text.length);
+  textarea.value = before + '^2' + after;
+  textarea.selectionStart = textarea.selectionEnd = start + 2;
+  textarea.focus();
+}
+
 let decision6b = null;
 
 function selectDecision6b(el) {
@@ -662,12 +678,14 @@ function check6b() {
     return;
   }
 
-  const cmVal   = parseNum(document.getElementById('ans-6b-cm').value);
-  const mVal    = parseNum(document.getElementById('ans-6b-m').value);
-  const distVal = parseNum(
+  const calcText = document.getElementById('ans-6b-calc').value;
+  const cmVal    = parseNum(document.getElementById('ans-6b-cm').value);
+  const mVal     = parseNum(document.getElementById('ans-6b-m').value);
+  const distVal  = parseNum(
     document.getElementById('ans-6b-dist').value);
-  const reason  = document.getElementById('ans-6b-reason').value;
+  const reason   = document.getElementById('ans-6b-reason').value;
 
+  const calcOk   = calcOk6b(calcText);
   const cmOk     = !isNaN(cmVal)   &&
                    Math.abs(cmVal   - DIAG_CM)  < 2.0;
   const mOk      = !isNaN(mVal)    &&
