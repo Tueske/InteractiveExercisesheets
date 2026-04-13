@@ -650,16 +650,21 @@ function selectDecision6b(el) {
   el.classList.add('selected');
 }
 function reasoningOk6b(text) {
-  /* Accept if text contains numbers and/or key comparison words */
   const s = text.toLowerCase()
     .replace(/ä/g,'ae').replace(/ö/g,'oe')
-    .replace(/ü/g,'ue').replace(/ß/g,'ss');
+    .replace(/ü/g,'ue')
+    .replace(/ß/g,'ss');
   const noSpace = s.replace(/\s/g, '');
-  const hasNumbers = /[0-9]/.test(s);
-  const hasCompare = ['kleiner','weniger','reicht nicht','nicht aus',
-    'zu wenig','unter','3,3','3.3','3 m','3m'].some(kw => s.includes(kw) || noSpace.includes(kw));
-  const hasThree = /\b3(?:[.,]0{0,2})?\b/.test(s) || /3(?:[.,]0{0,2})?m\b/.test(noSpace);
-  return text.trim().length > 8 && (hasNumbers || hasCompare || hasThree);
+
+  const v1 = ['3','3.0','3.00','3,0','3,00','3m','3 m'];
+  const v2 = ['<','kleiner','kleinerals','weniger','wenigerals','unter','istkleinerals','istkleiner','istwenigerals','istweniger'];
+  const v3 = ['3,36','3.36','3,36m','3.36m','3,36 m','3.36 m'];
+
+  const hasV1 = v1.some(kw => noSpace.includes(kw.replace(/\s/g, '')));
+  const hasV2 = v2.some(kw => noSpace.includes(kw));
+  const hasV3 = v3.some(kw => noSpace.includes(kw.replace(/\s/g, '')));
+
+  return text.trim().length > 8 && hasV1 && hasV2 && hasV3;
 }
 
 function calcOk6b(text) {
