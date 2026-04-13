@@ -358,6 +358,12 @@
                     data-sub="6b"
                     placeholder="Beschreibe deinen Rechenweg …">
           </textarea>
+          <div style="margin-top: 8px;">
+            <button type="button" onclick="insertSqrt('ans-6b-calc')"
+                    style="padding: 6px 12px; font-size: 14px; border: 1px solid #999; background: #f9f9f9; cursor: pointer;">
+              √ einfügen
+            </button>
+          </div>
 
           <p class="exercise-text mt-8">
             Diagonale in cm:
@@ -606,6 +612,18 @@ function check6a() {
 const DIAG_CM   = Math.sqrt(95*95 + 60*60); // ≈ 112.36
 const DIAG_M    = DIAG_CM / 100;            // ≈ 1.1236
 const MIN_DIST  = 3 * DIAG_M;              // ≈ 3.3708
+
+function insertSqrt(textareaId) {
+  const textarea = document.getElementById(textareaId);
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const before = text.substring(0, start);
+  const after = text.substring(end, text.length);
+  textarea.value = before + '√' + after;
+  textarea.selectionStart = textarea.selectionEnd = start + 1;
+  textarea.focus();
+}
 
 let decision6b = null;
 
