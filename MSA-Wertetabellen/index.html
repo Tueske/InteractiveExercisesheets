@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BBR Training: Wertetabellen & Funktionen</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .math-container {
+      font-size: 1.15rem;
+    }
+
+    /* Druck-Optimierung */
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-border {
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .print-break {
+        page-break-inside: avoid;
+      }
+
+      .question-box {
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+        padding: 1rem !important;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        border: none !important;
+        border-bottom: 1px dotted #000 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        appearance: none;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl print-border overflow-hidden pb-8">
+    <!-- Header -->
+    <div class="bg-violet-600 text-white p-6 text-center print-border no-print">
+      <h1 class="text-3xl font-bold mb-2">BBR Training: Wertetabellen</h1>
+      <p class="text-violet-100 text-lg">Eigenschaften ablesen, Lücken füllen, Wachstum erkennen & Gleichungen
+        aufstellen</p>
+    </div>
+
+    <!-- Print Header -->
+    <div class="hidden print:block p-6 border-b-2 border-gray-800 mb-4">
+      <div class="flex justify-between items-end">
+        <h1 class="text-2xl font-bold">Aufgabenblatt: Wertetabellen</h1>
+        <div class="text-right">
+          <p>Name: _______________________</p>
+          <p class="mt-2">Datum: _______________________</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center no-print">
+      <p class="text-sm text-gray-600"><strong>Wichtig:</strong> Analysiere die Tabellen genau. Achte auf die Abstände
+        der Werte (Differenz oder Faktor?).</p>
+      <div class="flex gap-3">
+        <button onclick="window.print()"
+          class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow transition font-medium flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+              clip-rule="evenodd" />
+          </svg>
+          Drucken
+        </button>
+        <button onclick="generateWorksheet()"
+          class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg shadow transition font-medium">
+          Neues Blatt generieren
+        </button>
+      </div>
+    </div>
+
+    <!-- App Content -->
+    <div class="p-6">
+      <div id="worksheet-container" class="space-y-8">
+        <!-- Generierte Aufgaben landen hier -->
+      </div>
+
+      <!-- Global Actions -->
+      <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col items-center gap-4 no-print">
+        <button id="btn-check-all" onclick="checkAllAnswers()"
+          class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:scale-105 text-lg">
+          Verbleibende Antworten auswerten
+        </button>
+        <div id="final-score" class="text-2xl font-bold hidden mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- HILFSFUNKTIONEN ---
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function formatNum(num) {
+      return Number.isInteger(num) ? num.toString() : num.toFixed(1).replace('.', ',');
+    }
+
+    function evaluateUserExpression(expr, xVal) {
+      try {
+        let s = expr.toLowerCase();
+        s = s.replace(/,/g, '.');
+        s = s.replace(/\s+/g, '');
+        s = s.replace(/^[a-z]\([a-z]\)=/, ''); // Ersetzt z.B. f(x)= oder v(t)=
+        s = s.replace(/^[a-z]=/, ''); // Ersetzt z.B. y= oder K=
+        s = s.replace(/\^/g, '**');
+
+        // Implizite Multiplikation (z.B. 2x -> 2*x)
+        s = s.replace(/(\d)([a-z(])/g, '$1*$2');
+        s = s.replace(/([a-z])(\()/g, '$1*$2');
+
+        // Alle Buchstaben durch den Wert ersetzen (in Klammern)
+        s = s.replace(/[a-z]/g, `(${xVal})`);
+
+        return Function('"use strict";return (' + s + ')')();
+      } catch (e) {
+        return NaN;
+      }
+    }
+
+    // --- HTML TABLE GENERATOR ---
+    function createTableHtml(xLabel, yLabel, xVals, yVals) {
+      let html = '<div class="overflow-x-auto mt-4 mb-5"><table class="w-full max-w-lg border-collapse border-2 border-gray-400 text-center print-break bg-white text-lg">';
+
+      // X-Row
+      html += `<tr><td class="border-2 border-gray-300 p-3 font-bold bg-violet-100 text-violet-900 w-1/4">${xLabel}</td>`;
+      xVals.forEach(x => {
+        html += `<td class="border-2 border-gray-300 p-3">${x}</td>`;
+      });
+      html += '</tr>';
+
+      // Y-Row
+      html += `<tr><td class="border-2 border-gray-300 p-3 font-bold bg-violet-100 text-violet-900 w-1/4">${yLabel}</td>`;
+      yVals.forEach(y => {
+        let displayY = (y === '?') ? '<span class="text-red-600 font-bold">?</span>' : y;
+        html += `<td class="border-2 border-gray-300 p-3">${displayY}</td>`;
+      });
+      html += '</tr></table></div>';
+
+      return html;
+    }
+
+    // --- AUFGABEN-GENERATOREN ---
+
+    // 1. Startwert ablesen
+    function genStartwert() {
+      let m = getRandomItem([2, 3, -2, -3]);
+      let b = getRandomItem([-5, -2, 4, 8, 12]);
+      let varX = getRandomItem(['x', 't', 'p']);
+      let varY = getRandomItem(['y', 'f(' + varX + ')', 'K']);
+
+      let xVals = [-1, 0, 1, 2];
+      let yVals = xVals.map(x => formatNum(m * x + b));
+
+      return {
+        topic: 'Startwert (y-Achsenabschnitt)',
+        text: `Lies den **Startwert** (Anfangswert) der linearen Funktion aus der Wertetabelle ab. <br><span class="text-sm text-gray-500">(Tipp: Der Startwert ist der Wert der Funktion, wenn die Eingangsvariable $0$ ist.)</span>`,
+        customHtml: createTableHtml(varX, varY, xVals, yVals),
+        evalVars: [{ idSuffix: 'val', expected: b }]
+      };
+    }
+
+    // 2. Steigung berechnen
+    function genSteigung() {
+      let m = getRandomItem([0.5, -0.5, 1.5, 2, -2, 4]);
+      let b = getRandomInt(-5, 10);
+      let varX = 'x';
+      let varY = 'y';
+
+      // Sprünge in der Tabelle, damit man m = Delta y / Delta x rechnen muss
+      let step = getRandomItem([2, 3]);
+      let xVals = [0, step, step * 2, step * 3];
+      let yVals = xVals.map(x => formatNum(m * x + b));
+
+      return {
+        topic: 'Steigung (m)',
+        text: `Berechne die **Steigung $m$** der linearen Funktion aus der Wertetabelle. <br><span class="text-sm text-gray-500">(Achtung: Die oberen Werte gehen nicht in 1er-Schritten weiter! Nutze $m = \\frac{\\text{Unterschied unten}}{\\text{Unterschied oben}}$)</span>`,
+        customHtml: createTableHtml(varX, varY, xVals, yVals),
+        evalVars: [{ idSuffix: 'val', expected: m }]
+      };
+    }
+
+    // 3. Fehlenden Wert berechnen (Lücke)
+    function genLuecke() {
+      let m = getRandomItem([3, 4, 5, -2, -4]);
+      let b = getRandomInt(10, 50);
+
+      let xVals = [1, 2, 3, 4, 5];
+      let yValsRaw = xVals.map(x => m * x + b);
+
+      let missingIndex = getRandomInt(1, 3); // Lücke nicht am Rand
+      let ans = yValsRaw[missingIndex];
+
+      let yValsStr = [...yValsRaw];
+      yValsStr[missingIndex] = '?';
+
+      return {
+        topic: 'Lücke in der Tabelle',
+        text: `Es handelt sich um eine **lineare Funktion**. Welcher Wert gehört in die markierte Lücke **?** der Wertetabelle?`,
+        customHtml: createTableHtml('x', 'f(x)', xVals, yValsStr),
+        evalVars: [{ idSuffix: 'val', expected: ans }]
+      };
+    }
+
+    // 4. Wachstumsart erkennen (Linear vs. Exponentiell)
+    function genWachstumsart() {
+      let isExponential = Math.random() > 0.5;
+      let xVals = [0, 1, 2, 3];
+      let yVals;
+
+      if (isExponential) {
+        let a = getRandomItem([2, 3]);
+        let c = getRandomItem([1, 2, 5]);
+        yVals = xVals.map(x => c * Math.pow(a, x));
+      } else {
+        let m = getRandomItem([3, 5, 8]);
+        let b = getRandomItem([2, 10]);
+        yVals = xVals.map(x => m * x + b);
+      }
+
+      let html = createTableHtml('Zeit (Tage)', 'Bakterien', xVals, yVals);
+      html += `
+                <div class="mt-4 flex items-center gap-4">
+                    <span class="font-bold text-gray-700 text-lg">Art des Wachstums:</span>
+                    <select id="input-IDX-select" class="p-2 border-2 border-gray-300 rounded-md outline-none focus:border-violet-600 print-input text-lg bg-white">
+                        <option value="">-- Bitte wählen --</option>
+                        <option value="linear">Lineares Wachstum</option>
+                        <option value="exponentiell">Exponentielles Wachstum</option>
+                    </select>
+                </div>
+            `;
+
+      return {
+        topic: 'Wachstumsart erkennen',
+        text: `Untersuche die Tabelle: Liegt hier **lineares** oder **exponentielles** Wachstum vor? <br><span class="text-sm text-gray-500">(Wird immer das Gleiche *addiert* oder immer mit dem Gleichen *multipliziert*?)</span>`,
+        customHtml: html,
+        isSelect: true,
+        expectedSelect: isExponential ? 'exponentiell' : 'linear'
+      };
+    }
+
+    // 5. Wachstumsfaktor (Exponentiell)
+    function genWachstumsfaktor() {
+      let a = getRandomItem([2, 3, 4, 1.5, 0.5]); // 0.5 ist Zerfall
+      let c = getRandomItem([2, 4, 10, 100]);
+
+      // Vermeide hässliche Dezimalbrüche wenn c=2 und a=1.5
+      if (a === 1.5) c = 16;
+      if (a === 0.5) c = 80;
+
+      let xVals = [0, 1, 2, 3];
+      let yVals = xVals.map(x => formatNum(c * Math.pow(a, x)));
+
+      return {
+        topic: 'Wachstumsfaktor (a)',
+        text: `Die Tabelle gehört zu einer Exponentialfunktion ($f(x) = c \\cdot a^x$). Bestimme den **Wachstumsfaktor $a$**.`,
+        customHtml: createTableHtml('x', 'f(x)', xVals, yVals),
+        evalVars: [{ idSuffix: 'val', expected: a }]
+      };
+    }
+
+    // 6. Nullstelle aus Tabelle ablesen
+    function genNullstelle() {
+      let m = getRandomItem([2, -2, 3, -3, 5]);
+      let x_n = getRandomItem([-2, -1, 1, 2, 3]);
+      let b = -m * x_n;
+
+      let startX = x_n - getRandomInt(1, 2);
+      let xVals = [startX, startX + 1, startX + 2, startX + 3, startX + 4];
+      let yVals = xVals.map(x => m * x + b);
+
+      return {
+        topic: 'Nullstelle ablesen',
+        text: `Lies die **Nullstelle** (den x-Wert, bei dem die Funktion den Wert 0 annimmt) aus der Tabelle ab.`,
+        customHtml: createTableHtml('x', 'y', xVals, yVals),
+        evalVars: [{ idSuffix: 'val', expected: x_n }]
+      };
+    }
+
+    // 7. Sachaufgabe (Extrapolation)
+    function genSachaufgabe() {
+      let m = getRandomItem([15, 20, 25, 50]); // Sparrate pro Monat
+      let b = getRandomItem([100, 200, 500]); // Startkapital
+
+      let xVals = [0, 1, 2, 3];
+      let yVals = xVals.map(x => m * x + b);
+
+      let targetX = getRandomItem([6, 10, 12]);
+      let ans = m * targetX + b;
+
+      return {
+        topic: 'Sachkontext (Vorhersage)',
+        text: `Die Tabelle zeigt das Ersparte auf einem Konto. Wie viel Euro sind nach **${targetX} Monaten** auf dem Konto, wenn man genau so weiter spart?`,
+        customHtml: createTableHtml('Monate', 'Kapital (€)', xVals, yVals),
+        evalVars: [{ idSuffix: 'val', expected: ans }]
+      };
+    }
+
+    // 8. Funktionsgleichung komplett eingeben
+    function genGleichungFull() {
+      let m = getRandomItem([2, 3, 4, -2, -3]);
+      let b = getRandomItem([5, 10, -5, -10]);
+
+      let varX = getRandomItem(['t', 'x']);
+      let varY = getRandomItem(['f(' + varX + ')', 'y']);
+
+      let xVals = [0, 1, 2, 3];
+      let yVals = xVals.map(x => m * x + b);
+
+      let expectedStr = `f(${varX}) = ${m}${varX} ${b < 0 ? '-' : '+'} ${Math.abs(b)}`;
+
+      let html = createTableHtml(varX, varY, xVals, yVals);
+      html += `
+                <div class="flex items-center gap-2 text-xl w-full flex-wrap mt-2">
+                    <span class="font-serif italic whitespace-nowrap">f(${varX}) = </span>
+                    <input type="text" id="input-IDX-full" class="flex-1 min-w-[200px] p-2 border-2 border-gray-300 rounded-md outline-none focus:border-violet-600 print-input" placeholder="z. B. 2${varX} + 5">
+                </div>
+            `;
+
+      return {
+        topic: 'Funktionsgleichung aufstellen',
+        text: `Ermittle die Parameter der linearen Funktion aus der Tabelle und gib die **komplette Funktionsgleichung** ein.`,
+        customHtml: html,
+        fullEquationCheck: {
+          expectedF: (x) => m * x + b,
+          testPoints: [-2, 0, 5]
+        },
+        expectedStr: expectedStr
+      };
+    }
+
+
+    // --- APP LOGIK ---
+
+    let currentQuestions = [];
+
+    function generateWorksheet() {
+      document.getElementById('final-score').classList.add('hidden');
+      document.getElementById('btn-check-all').classList.remove('hidden');
+
+      currentQuestions = [];
+
+      // Die 8 Aufgabentypen generieren
+      currentQuestions.push(genStartwert());
+      currentQuestions.push(genSteigung());
+      currentQuestions.push(genNullstelle());
+      currentQuestions.push(genLuecke());
+
+      currentQuestions.push(genWachstumsart());
+      currentQuestions.push(genWachstumsfaktor());
+      currentQuestions.push(genSachaufgabe());
+      currentQuestions.push(genGleichungFull());
+
+      // Initialisiere hasChecked status
+      currentQuestions.forEach(q => q.hasChecked = false);
+
+      renderWorksheet();
+    }
+
+    function renderWorksheet() {
+      const container = document.getElementById('worksheet-container');
+      container.innerHTML = '';
+
+      currentQuestions.forEach((q, index) => {
+        // Konvertiere Markdown-Bold zu HTML
+        let textHtml = q.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Konvertiere Inline-LaTeX
+        textHtml = textHtml.replace(/\$(.*?)\$/g, (match, formula) => {
+          try { return katex.renderToString(formula, { throwOnError: false }); }
+          catch (e) { return match; }
+        });
+
+        // Ersetze Platzhalter 'IDX' im HTML durch die echte index-Zahl
+        let customHtml = q.customHtml.replace(/IDX/g, index);
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question-box bg-white p-5 rounded-xl border-2 border-gray-100 shadow-sm transition-colors print-break relative';
+        qDiv.id = `question-div-${index}`;
+
+        // Input-Feld nur generieren, wenn es kein Select und kein Full-Equation Feld ist
+        let inputHtml = '';
+        if (!q.isSelect && !q.fullEquationCheck) {
+          inputHtml = `
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-gray-600">Ergebnis:</span>
+                            <input type="number" step="0.1" id="input-${index}-val" class="border-2 border-gray-300 rounded-lg p-2 w-32 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none text-lg print-input" placeholder="...">
+                        </div>
+                    `;
+        }
+
+        qDiv.innerHTML = `
+                    <div class="flex gap-3 mb-3">
+                        <div class="font-bold text-violet-600 text-xl w-6 shrink-0">${index + 1}.</div>
+                        <div class="w-full">
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">${q.topic}</div>
+                            <div class="text-gray-800 text-lg mb-2">${textHtml}</div>
+                            
+                            ${customHtml}
+                            
+                            <div class="mt-6 flex flex-wrap items-center gap-3">
+                                ${inputHtml}
+                                <button id="btn-single-${index}" onclick="checkSingleAnswer(${index})" class="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 shadow transition-colors font-bold no-print whitespace-nowrap">Prüfen</button>
+                                <div id="feedback-${index}" class="ml-4 font-bold text-lg hidden no-print"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+        container.appendChild(qDiv);
+      });
+    }
+
+    window.checkSingleAnswer = function (index) {
+      const q = currentQuestions[index];
+      const feedbackEl = document.getElementById(`feedback-${index}`);
+      const boxEl = document.getElementById(`question-div-${index}`);
+      const btnEl = document.getElementById(`btn-single-${index}`);
+
+      let isCorrect = false;
+      let missingInput = false;
+
+      if (q.isSelect) {
+        // Dropdown Auswertung
+        const selectEl = document.getElementById(`input-${index}-select`);
+        if (selectEl.value === '') {
+          missingInput = true;
+        } else {
+          isCorrect = (selectEl.value === q.expectedSelect);
+          selectEl.disabled = true;
+          if (!isCorrect) selectEl.classList.add('bg-red-100', 'border-red-400');
+          else selectEl.classList.add('bg-green-100', 'border-green-400');
+        }
+      }
+      else if (q.fullEquationCheck) {
+        // Freie Gleichung Auswertung
+        const inputEl = document.getElementById(`input-${index}-full`);
+        let expr = inputEl.value;
+
+        if (expr.trim() === '') {
+          missingInput = true;
+        } else {
+          isCorrect = true;
+          for (let xVal of q.fullEquationCheck.testPoints) {
+            let expectedY = q.fullEquationCheck.expectedF(xVal);
+            let userY = evaluateUserExpression(expr, xVal);
+            if (isNaN(userY) || Math.abs(userY - expectedY) > 0.05) {
+              isCorrect = false; break;
+            }
+          }
+          inputEl.disabled = true;
+          if (!isCorrect) inputEl.classList.add('bg-red-100', 'border-red-400');
+          else inputEl.classList.add('bg-green-100', 'border-green-400');
+        }
+      }
+      else {
+        // Standard Zahlenfeld Auswertung
+        const inputEl = document.getElementById(`input-${index}-val`);
+        if (inputEl.value.trim() === '') {
+          missingInput = true;
+        } else {
+          let userVal = parseFloat(inputEl.value.replace(',', '.'));
+          isCorrect = Math.abs(userVal - q.evalVars[0].expected) <= 0.05;
+
+          inputEl.disabled = true;
+          if (!isCorrect) inputEl.classList.add('bg-red-100', 'border-red-400');
+          else inputEl.classList.add('bg-green-100', 'border-green-400');
+        }
+      }
+
+      if (missingInput) {
+        alert('Bitte fülle das Feld für Aufgabe ' + (index + 1) + ' aus!');
+        return;
+      }
+
+      q.hasChecked = true;
+      btnEl.classList.add('hidden');
+      feedbackEl.classList.remove('hidden');
+
+      if (isCorrect) {
+        feedbackEl.innerHTML = '✓ Richtig!';
+        feedbackEl.className = 'ml-4 font-bold text-lg text-green-600 no-print';
+        boxEl.classList.add('border-green-300', 'bg-violet-50');
+        boxEl.classList.remove('border-gray-100');
+      } else {
+        if (q.fullEquationCheck) {
+          feedbackEl.innerHTML = `✗ Falsch. Erwartet: <strong>${q.expectedStr}</strong>`;
+        } else if (q.isSelect) {
+          feedbackEl.innerHTML = `✗ Falsch.`;
+        } else {
+          let expectedStr = Number.isInteger(q.evalVars[0].expected) ? q.evalVars[0].expected : q.evalVars[0].expected.toFixed(1).replace('.', ',');
+          feedbackEl.innerHTML = `✗ Falsch. (Richtig: ${expectedStr})`;
+        }
+        feedbackEl.className = 'ml-4 font-bold text-lg text-red-600 no-print';
+        boxEl.classList.add('border-red-300', 'bg-red-50');
+        boxEl.classList.remove('border-gray-100');
+      }
+
+      checkIfAllDone();
+    }
+
+    window.checkAllAnswers = function () {
+      currentQuestions.forEach((q, index) => {
+        if (!q.hasChecked) {
+          if (q.isSelect) {
+            const selectEl = document.getElementById(`input-${index}-select`);
+            if (selectEl.value === '') selectEl.value = 'falsch'; // Force wrong answer
+          } else if (q.fullEquationCheck) {
+            const inputEl = document.getElementById(`input-${index}-full`);
+            if (inputEl.value.trim() === '') inputEl.value = '0';
+          } else {
+            const inputEl = document.getElementById(`input-${index}-val`);
+            if (inputEl.value.trim() === '') inputEl.value = '9999';
+          }
+          checkSingleAnswer(index);
+        }
+      });
+    }
+
+    function checkIfAllDone() {
+      const allChecked = currentQuestions.every(q => q.hasChecked);
+      if (allChecked) {
+        let score = currentQuestions.filter((q, index) => {
+          if (q.isSelect) {
+            const selectEl = document.getElementById(`input-${index}-select`);
+            return selectEl.value === q.expectedSelect;
+          } else if (q.fullEquationCheck) {
+            const inputEl = document.getElementById(`input-${index}-full`);
+            let expr = inputEl.value;
+            for (let xVal of q.fullEquationCheck.testPoints) {
+              let expectedY = q.fullEquationCheck.expectedF(xVal);
+              let userY = evaluateUserExpression(expr, xVal);
+              if (isNaN(userY) || Math.abs(userY - expectedY) > 0.05) return false;
+            }
+            return true;
+          } else {
+            const inputEl = document.getElementById(`input-${index}-val`);
+            let userVal = parseFloat(inputEl.value.replace(',', '.'));
+            return Math.abs(userVal - q.evalVars[0].expected) <= 0.05;
+          }
+        }).length;
+
+        const scoreEl = document.getElementById('final-score');
+        scoreEl.innerHTML = `Du hast ${score} von ${currentQuestions.length} Aufgaben richtig gelöst!`;
+        scoreEl.className = `text-2xl font-bold mt-4 text-center ${score === currentQuestions.length ? 'text-green-600' : 'text-violet-600'}`;
+        scoreEl.classList.remove('hidden');
+
+        document.getElementById('btn-check-all').classList.add('hidden');
+      }
+    }
+
+    // --- Start ---
+    document.addEventListener('DOMContentLoaded', () => {
+      generateWorksheet();
+    });
+  </script>
+</body>
+
+</html>
