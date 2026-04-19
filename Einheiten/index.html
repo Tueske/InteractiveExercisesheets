@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BBR Training: Einheiten umrechnen</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .math-container {
+      font-size: 1.15rem;
+    }
+
+    /* Druck-Optimierung */
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-border {
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .print-break {
+        page-break-inside: avoid;
+      }
+
+      .question-box {
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+        padding: 1rem !important;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        border: none !important;
+        border-bottom: 1px dotted #000 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        appearance: none;
+      }
+
+      svg {
+        page-break-inside: avoid;
+        overflow: visible !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl print-border overflow-hidden pb-8">
+    <!-- Header -->
+    <div class="bg-cyan-600 text-white p-6 text-center print-border no-print">
+      <h1 class="text-3xl font-bold mb-2">BBR Training: Einheiten umrechnen</h1>
+      <p class="text-cyan-100 text-lg">Längen, Flächen, Volumen, Gewichte & Zeitspannen</p>
+    </div>
+
+    <!-- Print Header -->
+    <div class="hidden print:block p-6 border-b-2 border-gray-800 mb-4">
+      <div class="flex justify-between items-end">
+        <h1 class="text-2xl font-bold">Aufgabenblatt: Einheiten umrechnen</h1>
+        <div class="text-right">
+          <p>Name: _______________________</p>
+          <p class="mt-2">Datum: _______________________</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center no-print">
+      <p class="text-sm text-gray-600"><strong>Tipp:</strong> Achte auf die Umrechnungszahlen (10, 60, 100 oder 1000).
+        Kommazahlen bitte mit Komma (oder Punkt) eingeben.</p>
+      <div class="flex gap-3">
+        <button onclick="window.print()"
+          class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow transition font-medium flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+              clip-rule="evenodd" />
+          </svg>
+          Drucken
+        </button>
+        <button onclick="generateWorksheet()"
+          class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg shadow transition font-medium">
+          Neues Blatt generieren
+        </button>
+      </div>
+    </div>
+
+    <!-- App Content -->
+    <div class="p-6">
+      <div id="worksheet-container" class="space-y-6">
+        <!-- Generierte Aufgaben landen hier -->
+      </div>
+
+      <!-- Global Actions -->
+      <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col items-center gap-4 no-print">
+        <button id="btn-check-all" onclick="checkAllAnswers()"
+          class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:scale-105 text-lg">
+          Verbleibende Antworten auswerten
+        </button>
+        <div id="final-score" class="text-2xl font-bold hidden mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- HILFSFUNKTIONEN ---
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function formatNum(num) {
+      // Formatiert mit deutschem Komma
+      return Number.isInteger(num) ? num.toString() : parseFloat(num.toFixed(4)).toString().replace('.', ',');
+    }
+
+    function texUnit(u) {
+      // Zieht die Hochzahl aus dem \text{} Block heraus, damit KaTeX sie korrekt als mathematischen Exponent rendert
+      if (u.includes('^2')) return '\\text{' + u.replace('^2', '}^2');
+      if (u.includes('^3')) return '\\text{' + u.replace('^3', '}^3');
+      return '\\text{' + u + '}';
+    }
+
+    // --- SVG GRAFIK GENERATOREN ---
+    function getRulerSVG() {
+      return `
+                <svg width="180" height="40" viewBox="0 0 180 40" class="mt-2 mb-2 print-break">
+                    <rect x="10" y="10" width="160" height="20" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+                    <line x1="30" y1="10" x2="30" y2="20" stroke="#ca8a04" stroke-width="2"/>
+                    <line x1="50" y1="10" x2="50" y2="15" stroke="#ca8a04" stroke-width="1"/>
+                    <line x1="70" y1="10" x2="70" y2="20" stroke="#ca8a04" stroke-width="2"/>
+                    <line x1="90" y1="10" x2="90" y2="15" stroke="#ca8a04" stroke-width="1"/>
+                    <line x1="110" y1="10" x2="110" y2="20" stroke="#ca8a04" stroke-width="2"/>
+                    <line x1="130" y1="10" x2="130" y2="15" stroke="#ca8a04" stroke-width="1"/>
+                    <line x1="150" y1="10" x2="150" y2="20" stroke="#ca8a04" stroke-width="2"/>
+                </svg>
+            `;
+    }
+
+    function getWeightSVG() {
+      return `
+                <svg width="60" height="60" viewBox="0 0 60 60" class="mt-2 mb-2 print-break">
+                    <path d="M 20 15 L 40 15 L 45 50 L 15 50 Z" fill="#9ca3af" stroke="#4b5563" stroke-width="2"/>
+                    <circle cx="30" cy="10" r="5" fill="none" stroke="#4b5563" stroke-width="2"/>
+                    <text x="30" y="40" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1f2937" text-anchor="middle">kg</text>
+                </svg>
+            `;
+    }
+
+    function getClockSVG() {
+      return `
+                <svg width="60" height="60" viewBox="0 0 60 60" class="mt-2 mb-2 print-break">
+                    <circle cx="30" cy="30" r="25" fill="#e0f2fe" stroke="#4f46e5" stroke-width="2"/>
+                    <line x1="30" y1="30" x2="30" y2="12" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="30" y1="30" x2="42" y2="30" stroke="#4f46e5" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="30" cy="30" r="2" fill="#1e1b4b"/>
+                </svg>
+            `;
+    }
+
+    function getVolumeSVG() {
+      return `
+                <svg width="60" height="80" viewBox="0 0 60 80" class="mt-2 mb-2 print-break">
+                    <!-- Becher -->
+                    <path d="M 15 10 L 15 70 A 5 5 0 0 0 20 75 L 40 75 A 5 5 0 0 0 45 70 L 45 10" fill="none" stroke="#0891b2" stroke-width="2"/>
+                    <!-- Wasser -->
+                    <path d="M 16 40 L 44 40 L 44 70 A 4 4 0 0 1 40 74 L 20 74 A 4 4 0 0 1 16 70 Z" fill="#a5f3fc"/>
+                    <!-- Skala -->
+                    <line x1="15" y1="25" x2="22" y2="25" stroke="#0891b2" stroke-width="1"/>
+                    <line x1="15" y1="40" x2="22" y2="40" stroke="#0891b2" stroke-width="1"/>
+                    <line x1="15" y1="55" x2="22" y2="55" stroke="#0891b2" stroke-width="1"/>
+                </svg>
+            `;
+    }
+
+    function getAreaSVG() {
+      return `
+                <svg width="80" height="80" viewBox="0 0 80 80" class="mt-2 mb-2 print-break">
+                    <rect x="10" y="10" width="60" height="60" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+                    <line x1="30" y1="10" x2="30" y2="70" stroke="#059669" stroke-width="1" stroke-dasharray="2,2"/>
+                    <line x1="50" y1="10" x2="50" y2="70" stroke="#059669" stroke-width="1" stroke-dasharray="2,2"/>
+                    <line x1="10" y1="30" x2="70" y2="30" stroke="#059669" stroke-width="1" stroke-dasharray="2,2"/>
+                    <line x1="10" y1="50" x2="70" y2="50" stroke="#059669" stroke-width="1" stroke-dasharray="2,2"/>
+                </svg>
+            `;
+    }
+
+    // --- AUFGABEN-GENERATOREN ---
+
+    // 1. Längenmaße (m, cm, km, mm)
+    function genLaenge() {
+      const types = [
+        { from: 'km', to: 'm', factor: 1000 },
+        { from: 'm', to: 'cm', factor: 100 },
+        { from: 'cm', to: 'm', factor: 0.01 },
+        { from: 'mm', to: 'cm', factor: 0.1 }
+      ];
+      let t = getRandomItem(types);
+
+      let startVal;
+      if (t.factor > 1) {
+        // Von groß zu klein (z.B. km -> m)
+        startVal = getRandomItem([1.5, 2.5, 3.2, 4, 5.75, 12, 0.8]);
+      } else {
+        // Von klein zu groß (z.B. cm -> m)
+        startVal = getRandomInt(5, 45) * 10; // 50, 60 ... 450
+      }
+
+      let ans = startVal * t.factor;
+
+      return {
+        topic: 'Längen umrechnen',
+        text: `Wandle die angegebene Länge in die gesuchte Einheit um: <br><br> $${formatNum(startVal)}\\,${texUnit(t.from)} = ?\\,${texUnit(t.to)}$`,
+        customHtml: getRulerSVG(),
+        answer: ans,
+        unit: t.to
+      };
+    }
+
+    // 2. Gewichte (t, kg, g, mg)
+    function genGewicht() {
+      const types = [
+        { from: 't', to: 'kg', factor: 1000 },
+        { from: 'kg', to: 'g', factor: 1000 },
+        { from: 'g', to: 'kg', factor: 0.001 }
+      ];
+      let t = getRandomItem(types);
+
+      let startVal;
+      if (t.factor > 1) {
+        startVal = getRandomItem([0.5, 1.2, 2.5, 3.75, 4, 0.125]);
+      } else {
+        startVal = getRandomInt(1, 85) * 50; // 50, 100, 150... 4250
+      }
+
+      let ans = startVal * t.factor;
+
+      return {
+        topic: 'Gewichte (Massen) umrechnen',
+        text: `Wandle das Gewicht in die gesuchte Einheit um: <br><br> $${formatNum(startVal)}\\,${texUnit(t.from)} = ?\\,${texUnit(t.to)}$`,
+        customHtml: getWeightSVG(),
+        answer: ans,
+        unit: t.to
+      };
+    }
+
+    // 3. Zeit (d, h, min, s)
+    function genZeit() {
+      const types = [
+        { from: 'h', to: 'min', factor: 60 },
+        { from: 'min', to: 's', factor: 60 },
+        { from: 'd', to: 'h', factor: 24 }
+      ];
+      let t = getRandomItem(types);
+
+      let startVal = getRandomItem([1.5, 2, 2.5, 3, 0.5, 0.25]);
+      if (t.from === 'd') startVal = getRandomItem([2, 3, 5, 0.5]); // Halber Tag etc.
+
+      let ans = startVal * t.factor;
+
+      return {
+        topic: 'Zeitspannen umrechnen',
+        text: `Wandle die Zeit in die gesuchte Einheit um: <br><br> $${formatNum(startVal)}\\,${texUnit(t.from)} = ?\\,${texUnit(t.to)}$`,
+        customHtml: getClockSVG(),
+        answer: ans,
+        unit: t.to
+      };
+    }
+
+    // 4. Flächen (km², ha, a, m², cm²)
+    function genFlaeche() {
+      const types = [
+        { from: 'm^2', to: 'dm^2', factor: 100 },
+        { from: 'cm^2', to: 'mm^2', factor: 100 },
+        { from: 'ha', to: 'a', factor: 100 },
+        { from: 'ha', to: 'm^2', factor: 10000 }
+      ];
+      let t = getRandomItem(types);
+
+      let startVal = getRandomItem([2, 3.5, 5, 0.5, 12, 0.2]);
+      let ans = startVal * t.factor;
+
+      return {
+        topic: 'Flächenmaße umrechnen',
+        text: `Wandle den Flächeninhalt um. <span class="text-sm text-gray-500">(Tipp: Die Umrechnungszahl bei Flächen ist meistens 100)</span>: <br><br> $${formatNum(startVal)}\\,${texUnit(t.from)} = ?\\,${texUnit(t.to)}$`,
+        customHtml: getAreaSVG(),
+        answer: ans,
+        unit: t.to.replace('^2', '²')
+      };
+    }
+
+    // 5. Volumen / Hohlmaße (m³, l, ml)
+    function genVolumen() {
+      const types = [
+        { from: 'l', to: 'ml', factor: 1000 },
+        { from: 'm^3', to: 'l', factor: 1000 }, // 1 m³ = 1000 l
+        { from: 'ml', to: 'l', factor: 0.001 }
+      ];
+      let t = getRandomItem(types);
+
+      let startVal;
+      if (t.factor > 1) {
+        startVal = getRandomItem([0.25, 0.75, 1.5, 2.2, 5, 0.33]);
+      } else {
+        startVal = getRandomInt(2, 25) * 100; // 200, 300... 2500
+      }
+
+      let ans = startVal * t.factor;
+
+      return {
+        topic: 'Volumen & Hohlmaße',
+        text: `Wandle das Volumen (den Rauminhalt) um: <br><br> $${formatNum(startVal)}\\,${texUnit(t.from)} = ?\\,${texUnit(t.to)}$`,
+        customHtml: getVolumeSVG(),
+        answer: ans,
+        unit: t.to.replace('^3', '³')
+      };
+    }
+
+    // 6. Gemischte Einheiten (z.B. 2 h 15 min -> min)
+    function genGemischt() {
+      let type = Math.random();
+      if (type < 0.33) {
+        // Zeit
+        let h = getRandomInt(1, 3);
+        let m = getRandomItem([15, 30, 45, 10, 20]);
+        return {
+          topic: 'Gemischte Einheiten (Zeit)',
+          text: `Wandle die gemischte Schreibweise komplett in die kleinere Einheit um: <br><br> $${h}\\,\\text{h } ${m}\\,\\text{min} = ?\\,\\text{min}$`,
+          customHtml: getClockSVG(),
+          answer: h * 60 + m,
+          unit: 'min'
+        };
+      } else if (type < 0.66) {
+        // Länge
+        let m = getRandomInt(2, 8);
+        let cm = getRandomInt(5, 95);
+        return {
+          topic: 'Gemischte Einheiten (Länge)',
+          text: `Wandle die gemischte Schreibweise komplett in die kleinere Einheit um: <br><br> $${m}\\,\\text{m } ${cm}\\,\\text{cm} = ?\\,\\text{cm}$`,
+          customHtml: getRulerSVG(),
+          answer: m * 100 + cm,
+          unit: 'cm'
+        };
+      } else {
+        // Gewicht
+        let kg = getRandomInt(1, 5);
+        let g = getRandomItem([50, 100, 250, 500, 750]);
+        return {
+          topic: 'Gemischte Einheiten (Gewicht)',
+          text: `Wandle die gemischte Schreibweise komplett in die kleinere Einheit um: <br><br> $${kg}\\,\\text{kg } ${g}\\,\\text{g} = ?\\,\\text{g}$`,
+          customHtml: getWeightSVG(),
+          answer: kg * 1000 + g,
+          unit: 'g'
+        };
+      }
+    }
+
+    // 7. Sachaufgabe (Volumen abfüllen)
+    function genSachaufgabeVol() {
+      let liter = getRandomItem([1.5, 2, 3, 5]);
+      let glasMl = getRandomItem([200, 250, 500]);
+      let ans = (liter * 1000) / glasMl;
+
+      return {
+        topic: 'Sachaufgabe (Volumen)',
+        text: `Ein Getränkespender enthält genau **${formatNum(liter)} Liter** Limonade. <br>Wie viele Gläser zu je **${glasMl} ml** können damit vollständig gefüllt werden? <br><span class="text-sm text-gray-500">(Tipp: Rechne zuerst die Liter in Milliliter um!)</span>`,
+        customHtml: getVolumeSVG(),
+        answer: ans,
+        unit: 'Gläser'
+      };
+    }
+
+    // 8. Sachaufgabe (Zeit / Geschwindigkeit)
+    function genSachaufgabeZeit() {
+      // Variante: Wie viele Minuten sind x,x Stunden?
+      let stunden = getRandomItem([0.75, 1.25, 1.5, 2.5, 0.2]);
+      let ans = stunden * 60;
+
+      return {
+        topic: 'Sachaufgabe (Zeit)',
+        text: `Ein Fußball-Training dauert laut Trainingsplan genau **${formatNum(stunden)} Stunden** (als Dezimalzahl geschrieben). <br>Wie viele **Minuten** sind das?`,
+        customHtml: getClockSVG(),
+        answer: ans,
+        unit: 'Minuten'
+      };
+    }
+
+    // --- APP LOGIK ---
+
+    let currentQuestions = [];
+
+    function generateWorksheet() {
+      document.getElementById('final-score').classList.add('hidden');
+      document.getElementById('btn-check-all').classList.remove('hidden');
+
+      currentQuestions = [];
+
+      // Die 8 Aufgabentypen generieren
+      currentQuestions.push(genLaenge());
+      currentQuestions.push(genGewicht());
+      currentQuestions.push(genZeit());
+      currentQuestions.push(genFlaeche());
+      currentQuestions.push(genVolumen());
+      currentQuestions.push(genGemischt());
+      currentQuestions.push(genSachaufgabeVol());
+      currentQuestions.push(genSachaufgabeZeit());
+
+      // Initialisiere hasChecked status
+      currentQuestions.forEach(q => q.hasChecked = false);
+
+      renderWorksheet();
+    }
+
+    function renderWorksheet() {
+      const container = document.getElementById('worksheet-container');
+      container.innerHTML = '';
+
+      currentQuestions.forEach((q, index) => {
+        // Konvertiere Markdown-Bold zu HTML
+        let textHtml = q.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Konvertiere Inline-LaTeX
+        textHtml = textHtml.replace(/\$(.*?)\$/g, (match, formula) => {
+          try { return katex.renderToString(formula, { throwOnError: false }); }
+          catch (e) { return match; }
+        });
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question-box bg-white p-5 rounded-xl border-2 border-gray-100 shadow-sm transition-colors print-break relative flex flex-col md:flex-row gap-6';
+        qDiv.id = `question-div-${index}`;
+
+        qDiv.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex gap-3 mb-3">
+                            <div class="font-bold text-cyan-600 text-xl w-6 shrink-0">${index + 1}.</div>
+                            <div class="w-full">
+                                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">${q.topic}</div>
+                                <div class="text-gray-800 text-lg mb-2">${textHtml}</div>
+                                
+                                <div class="mt-6 flex flex-wrap items-center gap-3">
+                                    <span class="font-bold text-gray-600">Ergebnis:</span>
+                                    <input type="number" step="0.001" id="input-${index}-val" class="border-2 border-gray-300 rounded-lg p-2 w-32 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none text-lg print-input" placeholder="...">
+                                    ${q.unit ? `<span class="text-gray-600 font-medium">${q.unit}</span>` : ''}
+                                    
+                                    <button id="btn-single-${index}" onclick="checkSingleAnswer(${index})" class="ml-2 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 shadow transition-colors font-bold no-print whitespace-nowrap">Prüfen</button>
+                                    
+                                    <div id="feedback-${index}" class="ml-4 font-bold text-lg hidden no-print"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex flex-col items-center justify-center min-w-[120px] opacity-70">
+                        ${q.customHtml ? q.customHtml : ''}
+                    </div>
+                `;
+
+        container.appendChild(qDiv);
+      });
+    }
+
+    window.checkSingleAnswer = function (index) {
+      const q = currentQuestions[index];
+      const feedbackEl = document.getElementById(`feedback-${index}`);
+      const boxEl = document.getElementById(`question-div-${index}`);
+      const btnEl = document.getElementById(`btn-single-${index}`);
+      const inputEl = document.getElementById(`input-${index}-val`);
+
+      if (inputEl.value.trim() === '') {
+        alert('Bitte trage zuerst ein Ergebnis für Aufgabe ' + (index + 1) + ' ein!');
+        return;
+      }
+
+      // Ersetze Komma durch Punkt für deutsche Eingabe
+      let userVal = parseFloat(inputEl.value.replace(',', '.'));
+
+      // Toleranz-Logik für winzige Fließkomma-Ungenauigkeiten in JS
+      let isCorrect = Math.abs(userVal - q.answer) <= 0.01;
+
+      q.hasChecked = true;
+      inputEl.disabled = true;
+      btnEl.classList.add('hidden');
+      feedbackEl.classList.remove('hidden');
+
+      if (isCorrect) {
+        feedbackEl.innerHTML = '✓ Richtig!';
+        feedbackEl.className = 'ml-4 font-bold text-lg text-green-600 no-print';
+        boxEl.classList.add('border-green-300', 'bg-cyan-50');
+        boxEl.classList.remove('border-gray-100');
+      } else {
+        let expectedStr = Number.isInteger(q.answer) ? q.answer : parseFloat(q.answer.toFixed(4)).toString().replace('.', ',');
+        feedbackEl.innerHTML = `✗ Falsch. (Richtig: ${expectedStr})`;
+        feedbackEl.className = 'ml-4 font-bold text-lg text-red-600 no-print';
+        boxEl.classList.add('border-red-300', 'bg-red-50');
+        boxEl.classList.remove('border-gray-100');
+      }
+
+      checkIfAllDone();
+    }
+
+    window.checkAllAnswers = function () {
+      currentQuestions.forEach((q, index) => {
+        if (!q.hasChecked) {
+          const inputEl = document.getElementById(`input-${index}-val`);
+          if (inputEl.value.trim() === '') {
+            inputEl.value = '999999'; // Force Wrong answer if empty
+          }
+          checkSingleAnswer(index);
+        }
+      });
+    }
+
+    function checkIfAllDone() {
+      const allChecked = currentQuestions.every(q => q.hasChecked);
+      if (allChecked) {
+        let score = currentQuestions.filter((q, index) => {
+          const inputEl = document.getElementById(`input-${index}-val`);
+          let userVal = parseFloat(inputEl.value.replace(',', '.'));
+          return Math.abs(userVal - q.answer) <= 0.01;
+        }).length;
+
+        const scoreEl = document.getElementById('final-score');
+        scoreEl.innerHTML = `Du hast ${score} von ${currentQuestions.length} Aufgaben richtig gelöst!`;
+        scoreEl.className = `text-2xl font-bold mt-4 text-center ${score === currentQuestions.length ? 'text-green-600' : 'text-cyan-600'}`;
+        scoreEl.classList.remove('hidden');
+
+        document.getElementById('btn-check-all').classList.add('hidden');
+      }
+    }
+
+    // --- Start ---
+    document.addEventListener('DOMContentLoaded', () => {
+      generateWorksheet();
+    });
+  </script>
+</body>
+
+</html>
