@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BBR Training: Prozent- & Zinsrechnung</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .math-container {
+      font-size: 1.15rem;
+    }
+
+    /* Druck-Optimierung: Versteckt Buttons und formatiert für DIN A4 Papier */
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-border {
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .print-break {
+        page-break-inside: avoid;
+      }
+
+      .question-box {
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+        padding: 1rem !important;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        border: none !important;
+        border-bottom: 1px dotted #000 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+
+      svg {
+        page-break-inside: avoid;
+        overflow: visible !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl print-border overflow-hidden pb-8">
+    <!-- Header -->
+    <div class="bg-emerald-600 text-white p-6 text-center print-border no-print">
+      <h1 class="text-3xl font-bold mb-2">BBR Training: Prozentrechnung</h1>
+      <p class="text-emerald-100 text-lg">Grundbegriffe, Rabatte, Brutto/Netto, Zinsen & Zinseszins</p>
+    </div>
+
+    <!-- Print Header (Nur sichtbar auf dem Ausdruck) -->
+    <div class="hidden print:block p-6 border-b-2 border-gray-800 mb-4">
+      <div class="flex justify-between items-end">
+        <h1 class="text-2xl font-bold">Aufgabenblatt: Prozent- & Zinsrechnung</h1>
+        <div class="text-right">
+          <p>Name: _______________________</p>
+          <p class="mt-2">Datum: _______________________</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center no-print">
+      <p class="text-sm text-gray-600"><strong>Wichtig:</strong> Runde bei Geldbeträgen immer auf zwei Nachkommastellen
+        (Cent).</p>
+      <div class="flex gap-3">
+        <button onclick="window.print()"
+          class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow transition font-medium flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+              clip-rule="evenodd" />
+          </svg>
+          Drucken
+        </button>
+        <button onclick="generateWorksheet()"
+          class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow transition font-medium">
+          Neues Blatt generieren
+        </button>
+      </div>
+    </div>
+
+    <!-- App Content -->
+    <div class="p-6">
+      <div id="worksheet-container" class="space-y-6">
+        <!-- Generierte Aufgaben landen hier -->
+      </div>
+
+      <!-- Global Actions -->
+      <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col items-center gap-4 no-print">
+        <button id="btn-check-all" onclick="checkAllAnswers()"
+          class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:scale-105 text-lg">
+          Verbleibende Antworten auswerten
+        </button>
+        <div id="final-score" class="text-2xl font-bold hidden mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- HILFSFUNKTIONEN ---
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function round2(num) {
+      return Math.round(num * 100) / 100;
+    }
+
+    function formatCurrency(num) {
+      return num.toFixed(2).replace('.', ',');
+    }
+
+    // --- SVG GENERATOREN ---
+    function getPriceTagSVG(discountText) {
+      return `
+                <svg width="120" height="80" viewBox="0 0 120 80" class="mt-2 mb-2 print-break">
+                    <path d="M 10 40 L 40 10 L 110 10 L 110 70 L 40 70 Z" fill="#fca5a5" stroke="#ef4444" stroke-width="2" stroke-linejoin="round"/>
+                    <circle cx="30" cy="40" r="4" fill="#ffffff" stroke="#ef4444" stroke-width="2"/>
+                    <text x="75" y="45" font-family="sans-serif" font-size="16" font-weight="bold" fill="#7f1d1d" text-anchor="middle">-${discountText}%</text>
+                </svg>
+            `;
+    }
+
+    function getPieChartSVG(percent) {
+      return `
+                <svg width="100" height="100" viewBox="0 0 100 100" class="mt-2 mb-2 print-break">
+                    <circle cx="50" cy="50" r="45" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
+                    <!-- Einfacher Hack für ein Kuchendiagramm: Dasharray -->
+                    <circle cx="50" cy="50" r="22.5" fill="transparent" stroke="#10b981" stroke-width="45" stroke-dasharray="${(percent / 100) * 141.37} 141.37" transform="rotate(-90 50 50)"/>
+                    <circle cx="50" cy="50" r="45" fill="transparent" stroke="#047857" stroke-width="2"/>
+                </svg>
+            `;
+    }
+
+    function getPiggyBankSVG() {
+      return `
+                <div class="text-5xl mt-2 mb-2 print-break">🐷💰</div>
+            `;
+    }
+
+    // --- AUFGABEN-GENERATOREN ---
+
+    // 1. Prozentwert berechnen (Erhöhung oder Rabatt absolut)
+    function genProzentwert() {
+      let items = ["Ein Konzert-Ticket", "Ein Pullover", "Ein Skateboard", "Ein Rucksack"];
+      let item = getRandomItem(items);
+      let g = getRandomInt(4, 15) * 10; // 40 bis 150
+      let p = getRandomItem([10, 15, 20, 25]);
+      let isErhoehung = Math.random() > 0.5;
+
+      let ans = round2(g * (p / 100));
+
+      let word = isErhoehung ? "erhöht" : "reduziert";
+      let word2 = isErhoehung ? "die Erhöhung" : "der Rabatt";
+
+      return {
+        topic: 'Grundbegriffe (Anteil berechnen)',
+        text: `${item} kostet regulär $G = ${g}\\,€$. Der Preis wird um $p = ${p}\\%$ ${word}. <br>Wie viel Euro beträgt **allein** ${word2} (der absolute Betrag $x$)?`,
+        customHtml: isErhoehung ? '' : getPriceTagSVG(p),
+        answer: ans,
+        unit: '€'
+      };
+    }
+
+    // 2. Grundwert berechnen (G gesucht)
+    function genGrundwert() {
+      let p = getRandomItem([10, 20, 25, 30, 40, 50]);
+      let g = getRandomInt(10, 50) * 10; // 100 bis 500
+      let w = Math.round(g * (p / 100));
+
+      let subjects = [
+        { name: "der Gummibärchen", prop: "rot" },
+        { name: "der Schüler", prop: "mit dem Fahrrad da" },
+        { name: "der befragten Jugendlichen", prop: "für 'Gaming'" }
+      ];
+      let sub = getRandomItem(subjects);
+
+      return {
+        topic: 'Grundbegriffe (Das Ganze berechnen)',
+        text: `$${p}\\%$ ${sub.name} sind ${sub.prop}. Das sind genau $W = ${w}$ Stück. <br>Wie viele sind es **insgesamt** ($G$)?`,
+        customHtml: getPieChartSVG(p),
+        answer: g,
+        unit: 'Stück'
+      };
+    }
+
+    // 3. Alter Grundwert (Rückwärtsrechnen nach Rabatt)
+    function genAlterGrundwert() {
+      let p = getRandomItem([10, 20, 25, 30]);
+      let g = getRandomItem([200, 300, 400, 500, 600, 800]); // Alter Preis glatt
+      let w_neu = Math.round(g * (1 - p / 100)); // Neuer Preis
+
+      let items = ["Ein Fahrrad", "Eine Spielkonsole", "Ein Smartphone", "Ein Fernseher"];
+      let item = getRandomItem(items);
+
+      return {
+        topic: 'Erweiterte Prozentrechnung (Rückwärtsrechnen)',
+        text: `Nach einem Rabatt von $${p}\\%$ kostet ${item.toLowerCase()} nur noch $P_{neu} = ${w_neu}\\,€$. <br>Wie teuer war es **vor** dem Rabatt (alter Preis $P_{alt}$)? <br><span class="text-sm text-gray-500">(Tipp: Die ${w_neu} € entsprechen nicht 100%, sondern $100\\% - ${p}\\%$!)</span>`,
+        customHtml: getPriceTagSVG(p),
+        answer: g,
+        unit: '€'
+      };
+    }
+
+    // 4. Erweiterter Grundwert (MwSt. Aufschlag)
+    function genMwSt() {
+      let g = getRandomInt(10, 30) * 50; // 500 bis 1500
+      let p = 19;
+      let ans = round2(g * 1.19);
+
+      let items = ["Ein Fernseher", "Ein Laptop", "Ein E-Scooter", "Ein Kühlschrank"];
+      let item = getRandomItem(items);
+
+      return {
+        topic: 'Erweiterter Grundwert (MwSt.)',
+        text: `${item} kostet $K_{netto} = ${g}\\,€$ (netto, ohne Steuern). An der Kasse kommen noch $${p}\\%$ Mehrwertsteuer (MwSt.) hinzu. <br>Wie hoch ist der **Bruttopreis** (Endpreis), den man bezahlen muss?`,
+        answer: ans,
+        unit: '€'
+      };
+    }
+
+    // 5. Prozentsatz der Veränderung (Rabatt/Erhöhung in %)
+    function genVeraenderung() {
+      let isRabatt = Math.random() > 0.5;
+      let g = getRandomItem([40, 50, 60, 80, 100]); // Alter Preis
+      let p = getRandomItem([5, 10, 15, 20, 25]); // Prozentuale Änderung
+
+      let w_neu = isRabatt ? round2(g * (1 - p / 100)) : round2(g * (1 + p / 100));
+      let ans = p;
+
+      if (isRabatt) {
+        return {
+          topic: 'Veränderung in Prozent (Rabatt)',
+          text: `Eine Jacke kostete ursprünglich $P_{alt} = ${g}\\,€$. Im Sale kostet sie nur noch $P_{neu} = ${w_neu}\\,€$. <br>Wie viel Prozent ($p\\%$) Rabatt gibt es?`,
+          answer: ans,
+          unit: '%'
+        };
+      } else {
+        return {
+          topic: 'Veränderung in Prozent (Preiserhöhung)',
+          text: `Eine Monatskarte kostete bisher $P_{alt} = ${g}\\,€$. Nach einer Tarifänderung kostet sie nun $P_{neu} = ${w_neu}\\,€$. <br>Um wie viel Prozent ($p\\%$) wurde sie teurer?`,
+          answer: ans,
+          unit: '%'
+        };
+      }
+    }
+
+    // 6. Jahreszinsen berechnen
+    function genZinsen() {
+      let k = getRandomInt(5, 40) * 100; // 500 bis 4000
+      let p = getRandomItem([1.5, 2, 2.5, 3, 4]);
+      let ans = round2(k * (p / 100));
+
+      return {
+        topic: 'Zinsrechnung (Jahreszinsen)',
+        text: `Du legst ein Kapital von $K = ${k}\\,€$ auf einem Tagesgeldkonto an. Der Zinssatz beträgt $p = ${formatCurrency(p)}\\%$. <br>Wie hoch sind **nur die Zinsen** ($Z$), die du nach einem Jahr erhältst?`,
+        customHtml: getPiggyBankSVG(),
+        answer: ans,
+        unit: '€'
+      };
+    }
+
+    // 7. Mehrstufige Prozentrechnung (Zweistufige Preisänderung)
+    function genZweistufig() {
+      let g = getRandomInt(10, 30) * 100; // 1000 bis 3000
+      let p1 = getRandomItem([10, 15, 20]); // Erhöhung
+      let p2 = getRandomItem([10, 15, 20]); // Rabatt
+
+      // Preis nach Schritt 1
+      let w1 = g * (1 + p1 / 100);
+      // Endpreis nach Schritt 2
+      let ans = round2(w1 * (1 - p2 / 100));
+
+      return {
+        topic: 'Mehrstufige Prozentrechnung',
+        text: `Ein gebrauchtes Auto kostet $G = ${g}\\,€$. Im Frühling wird es um **$${p1}\\%$ teurer**. Im Herbst gibt der Händler dann **$${p2}\\%$ Rabatt** auf den *neuen, teureren* Preis. <br>Wie teuer ist das Auto am Ende ($P_{Ende}$)? <br><span class="text-sm text-gray-500">(Rechne in zwei Schritten. Der Preis nach der Erhöhung ist dein neuer Grundwert für den Rabatt!)</span>`,
+        answer: ans,
+        unit: '€'
+      };
+    }
+
+    // 8. Zinseszins (2 Jahre)
+    function genZinseszins() {
+      let k = getRandomInt(10, 50) * 100; // 1000 bis 5000
+      let p = getRandomItem([2, 3, 4, 5]);
+
+      let ans = round2(k * Math.pow(1 + p / 100, 2));
+
+      return {
+        topic: 'Zinsrechnung (Zinseszins)',
+        text: `Du legst $K_0 = ${k}\\,€$ zu einem Zinssatz von $p = ${p}\\%$ an. Du lässt das Geld und die Zinsen für genau **2 Jahre** auf dem Konto (Zinseszins). <br>Wie viel Geld hast du nach 2 Jahren **insgesamt** auf dem Konto ($K_2$)?`,
+        customHtml: getPiggyBankSVG(),
+        answer: ans,
+        unit: '€'
+      };
+    }
+
+
+    // --- APP LOGIK ---
+
+    let currentQuestions = [];
+
+    function generateWorksheet() {
+      document.getElementById('final-score').classList.add('hidden');
+      document.getElementById('btn-check-all').classList.remove('hidden');
+
+      currentQuestions = [];
+
+      // Die 8 Aufgabentypen generieren
+      currentQuestions.push(genProzentwert());
+      currentQuestions.push(genGrundwert());
+      currentQuestions.push(genAlterGrundwert());
+      currentQuestions.push(genMwSt());
+
+      currentQuestions.push(genVeraenderung());
+      currentQuestions.push(genZinsen());
+      currentQuestions.push(genZweistufig());
+      currentQuestions.push(genZinseszins());
+
+      // Initialisiere hasChecked status
+      currentQuestions.forEach(q => q.hasChecked = false);
+
+      renderWorksheet();
+    }
+
+    function renderWorksheet() {
+      const container = document.getElementById('worksheet-container');
+      container.innerHTML = '';
+
+      currentQuestions.forEach((q, index) => {
+        // Konvertiere Markdown-Bold zu HTML
+        let textHtml = q.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Konvertiere Inline-LaTeX
+        textHtml = textHtml.replace(/\$(.*?)\$/g, (match, formula) => {
+          try { return katex.renderToString(formula, { throwOnError: false }); }
+          catch (e) { return match; }
+        });
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question-box bg-white p-5 rounded-xl border-2 border-gray-100 shadow-sm transition-colors print-break relative';
+        qDiv.id = `question-div-${index}`;
+
+        qDiv.innerHTML = `
+                    <div class="flex gap-3 mb-3">
+                        <div class="font-bold text-emerald-600 text-xl w-6 shrink-0">${index + 1}.</div>
+                        <div class="w-full">
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">${q.topic}</div>
+                            <div class="text-gray-800 text-lg mb-2">${textHtml}</div>
+                            
+                            ${q.latex ? `<div id="math-${index}" class="math-container my-3 ml-2 text-emerald-900"></div>` : ''}
+                            ${q.customHtml ? q.customHtml : ''}
+                            
+                            <div class="mt-6 flex flex-wrap items-center gap-3">
+                                <span class="font-bold text-gray-600">Lösung:</span>
+                                <input type="number" step="0.01" id="input-${index}" class="border-2 border-gray-300 rounded-lg p-2 w-32 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-lg print-input" placeholder="Ergebnis">
+                                ${q.unit ? `<span class="text-gray-600 font-medium">${q.unit}</span>` : ''}
+                                
+                                <button id="btn-single-${index}" onclick="checkSingleAnswer(${index})" class="ml-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow transition-colors font-bold no-print whitespace-nowrap">Prüfen</button>
+                                
+                                <div id="feedback-${index}" class="ml-4 font-bold text-lg hidden no-print"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+        container.appendChild(qDiv);
+
+        if (q.latex) {
+          katex.render(q.latex, document.getElementById(`math-${index}`), {
+            throwOnError: false, displayMode: true
+          });
+        }
+      });
+    }
+
+    window.checkSingleAnswer = function (index) {
+      const q = currentQuestions[index];
+      const inputEl = document.getElementById(`input-${index}`);
+      const feedbackEl = document.getElementById(`feedback-${index}`);
+      const boxEl = document.getElementById(`question-div-${index}`);
+      const btnEl = document.getElementById(`btn-single-${index}`);
+
+      if (inputEl.value.trim() === '') {
+        alert('Bitte trage zuerst ein Ergebnis für Aufgabe ' + (index + 1) + ' ein!');
+        return;
+      }
+
+      // Ersetze Komma durch Punkt für deutsche Eingabe
+      let userVal = parseFloat(inputEl.value.replace(',', '.'));
+
+      // Toleranz-Logik: Erlaubt winzige Rundungsfehler (+/- 0.02)
+      let diff = Math.abs(userVal - q.answer);
+      let isCorrect = diff <= 0.02;
+
+      q.hasChecked = true;
+      inputEl.disabled = true;
+      btnEl.classList.add('hidden');
+      feedbackEl.classList.remove('hidden');
+
+      if (isCorrect) {
+        feedbackEl.innerHTML = '✓ Richtig' + (diff > 0.001 ? ` <span class="text-sm font-normal text-gray-500">(Exakt: ${formatCurrency(q.answer)})</span>` : '');
+        feedbackEl.className = 'ml-4 font-bold text-lg text-green-600 no-print';
+        boxEl.classList.add('border-green-300', 'bg-green-50');
+        boxEl.classList.remove('border-gray-100');
+      } else {
+        feedbackEl.innerHTML = `✗ Falsch (Richtig wäre: ${formatCurrency(q.answer)})`;
+        feedbackEl.className = 'ml-4 font-bold text-lg text-red-600 no-print';
+        boxEl.classList.add('border-red-300', 'bg-red-50');
+        boxEl.classList.remove('border-gray-100');
+      }
+
+      checkIfAllDone();
+    }
+
+    window.checkAllAnswers = function () {
+      // Geht durch alle noch nicht geprüften Aufgaben und wertet sie aus
+      currentQuestions.forEach((q, index) => {
+        if (!q.hasChecked) {
+          const inputEl = document.getElementById(`input-${index}`);
+          if (inputEl.value.trim() === '') {
+            inputEl.value = '0'; // Falls nichts eingetragen wurde, ist es automatisch falsch
+          }
+          checkSingleAnswer(index);
+        }
+      });
+    }
+
+    function checkIfAllDone() {
+      const allChecked = currentQuestions.every(q => q.hasChecked);
+      if (allChecked) {
+        let score = currentQuestions.filter((q, idx) => {
+          let userVal = parseFloat(document.getElementById(`input-${idx}`).value.replace(',', '.'));
+          return Math.abs(userVal - q.answer) <= 0.02;
+        }).length;
+
+        const scoreEl = document.getElementById('final-score');
+        scoreEl.innerHTML = `Du hast ${score} von ${currentQuestions.length} Aufgaben richtig gelöst!`;
+        scoreEl.className = `text-2xl font-bold mt-4 text-center ${score === currentQuestions.length ? 'text-green-600' : 'text-emerald-600'}`;
+        scoreEl.classList.remove('hidden');
+
+        document.getElementById('btn-check-all').classList.add('hidden');
+      }
+    }
+
+    // --- Start ---
+    document.addEventListener('DOMContentLoaded', () => {
+      generateWorksheet();
+    });
+  </script>
+</body>
+
+</html>
