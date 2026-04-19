@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BBR Training: Funktionsgraphen</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .math-container {
+      font-size: 1.15rem;
+    }
+
+    /* Druck-Optimierung */
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-border {
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .print-break {
+        page-break-inside: avoid;
+      }
+
+      .question-box {
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+        padding: 1rem !important;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        border: none !important;
+        border-bottom: 1px dotted #000 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+
+      svg {
+        page-break-inside: avoid;
+        overflow: visible !important;
+      }
+    }
+
+    /* Kleine Input-Boxen für Koordinaten */
+    .coord-input {
+      width: 3.5rem;
+      text-align: center;
+      padding: 0.25rem;
+      border: 2px solid #d1d5db;
+      border-radius: 0.375rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .coord-input:focus {
+      border-color: #d97706;
+      box-shadow: 0 0 0 2px #fde68a;
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl print-border overflow-hidden pb-8">
+    <!-- Header -->
+    <div class="bg-amber-600 text-white p-6 text-center print-border no-print">
+      <h1 class="text-3xl font-bold mb-2">BBR Training: Funktionsgraphen</h1>
+      <p class="text-amber-100 text-lg">Nullstellen, Scheitelpunkte, Schnittpunkte & Funktionsgleichungen ablesen</p>
+    </div>
+
+    <!-- Print Header -->
+    <div class="hidden print:block p-6 border-b-2 border-gray-800 mb-4">
+      <div class="flex justify-between items-end">
+        <h1 class="text-2xl font-bold">Aufgabenblatt: Funktionsgraphen</h1>
+        <div class="text-right">
+          <p>Name: _______________________</p>
+          <p class="mt-2">Datum: _______________________</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center no-print">
+      <p class="text-sm text-gray-600"><strong>Wichtig:</strong> Identifiziere die gesuchten Punkte (z. B. Nullstelle)
+        selbst im Graphen und lies ihre Koordinaten ab.</p>
+      <div class="flex gap-3">
+        <button onclick="window.print()"
+          class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow transition font-medium flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+              clip-rule="evenodd" />
+          </svg>
+          Drucken
+        </button>
+        <button onclick="generateWorksheet()"
+          class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg shadow transition font-medium">
+          Neues Blatt generieren
+        </button>
+      </div>
+    </div>
+
+    <!-- App Content -->
+    <div class="p-6">
+      <div id="worksheet-container" class="space-y-8">
+        <!-- Generierte Aufgaben landen hier -->
+      </div>
+
+      <!-- Global Actions -->
+      <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col items-center gap-4 no-print">
+        <button id="btn-check-all" onclick="checkAllAnswers()"
+          class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:scale-105 text-lg">
+          Verbleibende Antworten auswerten
+        </button>
+        <div id="final-score" class="text-2xl font-bold hidden mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- HILFSFUNKTIONEN ---
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function evaluateUserExpression(expr, xVal) {
+      try {
+        let s = expr.toLowerCase();
+        s = s.replace(/,/g, '.'); // Komma zu Punkt
+        s = s.replace(/\s+/g, ''); // Alle Leerzeichen entfernen
+        s = s.replace(/y=/g, ''); // "y=" entfernen
+        s = s.replace(/f\(x\)=/g, ''); // "f(x)=" entfernen
+        s = s.replace(/\^/g, '**'); // Potenzoperator für JS
+
+        // Implizite Multiplikation (z.B. 2x -> 2*x oder 2( -> 2*()
+        s = s.replace(/(\d)([xa-z(])/g, '$1*$2');
+        s = s.replace(/([x])(\()/g, '$1*$2'); // x( -> x*(
+
+        // x durch den Wert ersetzen (in Klammern für negative Werte)
+        s = s.split('x').join(`(${xVal})`);
+
+        return Function('"use strict";return (' + s + ')')();
+      } catch (e) {
+        return NaN; // Ungültige Formel
+      }
+    }
+
+    // --- SVG GRAPH GENERATOR ---
+    function createGraphHtml(funcs, highlightPoints = [], rangeX = 6, rangeY = 6) {
+      const w = 340; const h = 340;
+      const cx = w / 2; const cy = h / 2;
+      const scaleX = w / (2 * rangeX);
+      const scaleY = h / (2 * rangeY);
+
+      let svg = `<svg width="100%" viewBox="0 0 ${w} ${h}" class="max-w-[340px] border-2 border-gray-300 bg-white shadow-sm rounded-lg print-break mt-4">`;
+
+      // Grid
+      for (let i = -rangeX; i <= rangeX; i++) {
+        if (i === 0) continue;
+        let x = cx + i * scaleX;
+        svg += `<line x1="${x}" y1="0" x2="${x}" y2="${h}" stroke="#e5e7eb" stroke-width="1"/>`;
+        svg += `<text x="${x}" y="${cy + 14}" font-size="11" text-anchor="middle" fill="#9ca3af">${i}</text>`;
+      }
+      for (let i = -rangeY; i <= rangeY; i++) {
+        if (i === 0) continue;
+        let y = cy - i * scaleY;
+        svg += `<line x1="0" y1="${y}" x2="${w}" y2="${y}" stroke="#e5e7eb" stroke-width="1"/>`;
+        svg += `<text x="${cx - 6}" y="${y + 4}" font-size="11" text-anchor="end" fill="#9ca3af">${i}</text>`;
+      }
+
+      // Axes
+      svg += `<line x1="0" y1="${cy}" x2="${w}" y2="${cy}" stroke="#374151" stroke-width="2"/>`;
+      svg += `<line x1="${cx}" y1="0" x2="${cx}" y2="${h}" stroke="#374151" stroke-width="2"/>`;
+      svg += `<polygon points="${w - 8},${cy - 4} ${w},${cy} ${w - 8},${cy + 4}" fill="#374151"/>`; // X-Arrow
+      svg += `<polygon points="${cx - 4},8 ${cx},0 ${cx + 4},8" fill="#374151"/>`; // Y-Arrow
+      svg += `<text x="${w - 15}" y="${cy - 10}" font-size="12" font-style="italic" fill="#374151">x</text>`;
+      svg += `<text x="${cx + 10}" y="15" font-size="12" font-style="italic" fill="#374151">y</text>`;
+
+      // Functions
+      funcs.forEach(fObj => {
+        let pts = [];
+        for (let x = -rangeX; x <= rangeX; x += 0.05) {
+          let y = fObj.f(x);
+          if (y >= -rangeY - 3 && y <= rangeY + 3) {
+            pts.push(`${cx + x * scaleX},${cy - y * scaleY}`);
+          }
+        }
+        if (pts.length > 0) {
+          svg += `<polyline points="${pts.join(' ')}" fill="none" stroke="${fObj.color || '#d97706'}" stroke-width="3"/>`;
+        }
+      });
+
+      // Highlight Points
+      highlightPoints.forEach(p => {
+        svg += `<circle cx="${cx + p.x * scaleX}" cy="${cy - p.y * scaleY}" r="5" fill="${p.color || '#dc2626'}"/>`;
+        svg += `<circle cx="${cx + p.x * scaleX}" cy="${cy - p.y * scaleY}" r="3" fill="#ffffff"/>`; // Inner dot
+        if (p.label) {
+          let lx = cx + p.x * scaleX + (p.offX || 10);
+          let ly = cy - p.y * scaleY + (p.offY || -10);
+          svg += `<text x="${lx}" y="${ly}" font-size="16" font-weight="bold" font-family="serif" font-style="italic" fill="${p.color || '#dc2626'}">${p.label}</text>`;
+        }
+      });
+
+      svg += `</svg>`;
+      return svg;
+    }
+
+    // --- HTML INPUT GENERATOR ---
+    function getPointInputHtml(index, label, idPrefix) {
+      return `
+                <div class="flex items-center gap-2 mt-2 flex-wrap">
+                    <span class="font-bold text-lg text-gray-700">${label} (</span>
+                    <input type="number" step="0.5" id="input-${index}-${idPrefix}x" class="coord-input print-input" placeholder="x">
+                    <span class="font-bold text-lg text-gray-700">|</span>
+                    <input type="number" step="0.5" id="input-${index}-${idPrefix}y" class="coord-input print-input" placeholder="y">
+                    <span class="font-bold text-lg text-gray-700">)</span>
+                </div>
+            `;
+    }
+
+    // --- AUFGABEN-GENERATOREN ---
+
+    // 1. Lineare Funktion: Punkte ablesen
+    function genLinPoints() {
+      let m = getRandomItem([0.5, -0.5, 1, -1, 2, -2]);
+      let x_n = getRandomItem([-4, -2, 2, 4]); // Nullstelle
+      let b = -m * x_n; // Sicherstellen, dass b ganzzahlig oder .5 ist und Nullstelle exakt ist.
+
+      // Limit b to keep graph readable
+      if (b > 5) { b = 5; x_n = -b / m; }
+      if (b < -5) { b = -5; x_n = -b / m; }
+
+      let funcs = [{ f: (x) => m * x + b, color: '#2563eb' }];
+      // KEINE vorgegebenen Punkte! Schüler müssen selbst im Graphen suchen.
+      let points = [];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, points)}
+                    <div class="flex flex-col gap-4 w-full">
+                        ${getPointInputHtml('IDX', 'Nullstelle', 'n')}
+                        ${getPointInputHtml('IDX', 'y-Achsenabschnitt', 'sy')}
+                    </div>
+                </div>
+            `;
+
+      return {
+        topic: 'Lineare Funktion (Punkte)',
+        text: 'Identifiziere die **Nullstelle** und den **y-Achsenabschnitt** im Graphen und lies ihre Koordinaten ab.',
+        customHtml: html,
+        evalVars: [
+          { idSuffix: 'nx', expected: x_n },
+          { idSuffix: 'ny', expected: 0 },
+          { idSuffix: 'syx', expected: 0 },
+          { idSuffix: 'syy', expected: b }
+        ]
+      };
+    }
+
+    // 2. Quadratische Funktion: Punkte ablesen
+    function genQuadPoints() {
+      let a = getRandomItem([1, -1, 0.5, -0.5]);
+      let d = getRandomItem([-3, -2, -1, 1, 2, 3]);
+      let e = getRandomItem([-4, -3, -2, -1, 1, 2, 3, 4]);
+
+      let y_int = a * Math.pow(-d, 2) + e;
+      // Falls y_int out of bounds ist, passe e an
+      if (y_int > 6) e -= (y_int - 5);
+      if (y_int < -6) e += (-6 - y_int);
+      y_int = a * Math.pow(-d, 2) + e; // recalculate
+
+      let funcs = [{ f: (x) => a * Math.pow(x - d, 2) + e, color: '#9333ea' }];
+      // Keine Markierungen!
+      let points = [];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, points)}
+                    <div class="flex flex-col gap-4 w-full">
+                        ${getPointInputHtml('IDX', 'Scheitelpunkt', 's')}
+                        ${getPointInputHtml('IDX', 'y-Achsenabschnitt', 'sy')}
+                    </div>
+                </div>
+            `;
+
+      return {
+        topic: 'Quadratische Funktion (Punkte)',
+        text: 'Finde den **Scheitelpunkt** und den **y-Achsenabschnitt** der abgebildeten Parabel und bestimme ihre Koordinaten.',
+        customHtml: html,
+        evalVars: [
+          { idSuffix: 'sx', expected: d },
+          { idSuffix: 'sy', expected: e },
+          { idSuffix: 'syx', expected: 0 },
+          { idSuffix: 'syy', expected: y_int }
+        ]
+      };
+    }
+
+    // 3. Schnittpunkt zweier Geraden
+    function genLinIntersection() {
+      let sx = getRandomItem([-3, -2, -1, 1, 2, 3]);
+      let sy = getRandomItem([-3, -2, -1, 1, 2, 3]);
+
+      let m1 = getRandomItem([0.5, 1, 2]);
+      let b1 = sy - m1 * sx;
+
+      let m2 = getRandomItem([-0.5, -1, -2]);
+      let b2 = sy - m2 * sx;
+
+      let funcs = [
+        { f: (x) => m1 * x + b1, color: '#2563eb' },
+        { f: (x) => m2 * x + b2, color: '#059669' }
+      ];
+      // Keine Markierungen für den Schnittpunkt!
+      let points = [];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, points)}
+                    <div class="flex flex-col gap-4 w-full">
+                        ${getPointInputHtml('IDX', 'Schnittpunkt', 'p')}
+                    </div>
+                </div>
+            `;
+
+      return {
+        topic: 'Schnittpunkt (Linear)',
+        text: 'Die beiden Geraden schneiden sich in einem Punkt. Lies die exakten Koordinaten des **Schnittpunkts** ab.',
+        customHtml: html,
+        evalVars: [
+          { idSuffix: 'px', expected: sx },
+          { idSuffix: 'py', expected: sy }
+        ]
+      };
+    }
+
+    // 4. Exponentialfunktion: Punkte ablesen
+    function genExpPoints() {
+      let a = getRandomItem([2, 0.5]);
+      let c = getRandomItem([0.5, 1, 2, 3]);
+      if (a === 0.5 && c === 0.5) c = 4; // Bessere Skalierung
+
+      let funcs = [{ f: (x) => c * Math.pow(a, x), color: '#d97706' }];
+      // Den y-Achsenabschnitt verraten wir nicht!
+      // Da e-Funktionen aber oft durch krumme Zahlen gehen, markieren wir hier ausnahmsweise einen Punkt P als Ablesehilfe.
+      let points = [
+        { x: a === 2 ? 1 : -1, y: a === 2 ? c * 2 : c * 2, label: 'P', color: '#dc2626' }
+      ];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, points)}
+                    <div class="flex flex-col gap-4 w-full">
+                        ${getPointInputHtml('IDX', 'y-Achsenabschnitt', 'sy')}
+                        ${getPointInputHtml('IDX', 'Markierter Punkt P', 'p')}
+                    </div>
+                </div>
+            `;
+
+      return {
+        topic: 'Exponentialfunktion (Punkte)',
+        text: 'Finde den **y-Achsenabschnitt** im Graphen der Exponentialfunktion und bestimme zusätzlich die Koordinaten des markierten Hilfspunkts **P**.',
+        customHtml: html,
+        evalVars: [
+          { idSuffix: 'syx', expected: 0 },
+          { idSuffix: 'syy', expected: c },
+          { idSuffix: 'px', expected: a === 2 ? 1 : -1 },
+          { idSuffix: 'py', expected: c * 2 }
+        ]
+      };
+    }
+
+    // 5. Lineare Funktionsgleichung aufstellen
+    function genLinEquation() {
+      let m = getRandomItem([0.5, -0.5, 1, -1, 2, -2]);
+      let b = getRandomItem([-3, -2, -1, 1, 2, 3]);
+
+      let funcs = [{ f: (x) => m * x + b, color: '#2563eb' }];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, [])}
+                    <div class="flex flex-col gap-4 w-full mt-4">
+                        <div class="flex items-center gap-2 text-xl">
+                            <span class="font-serif italic">f(x) = </span>
+                            <input type="number" step="0.5" id="input-IDX-m" class="coord-input print-input" placeholder="m">
+                            <span class="font-serif italic">&middot; x + </span>
+                            <input type="number" step="0.5" id="input-IDX-b" class="coord-input print-input" placeholder="b">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      return {
+        topic: 'Funktionsgleichung bestimmen (Linear)',
+        text: 'Ermittle die Funktionsgleichung $f(x) = m \\cdot x + b$ der abgebildeten Geraden.',
+        customHtml: html,
+        evalVars: [
+          { idSuffix: 'm', expected: m },
+          { idSuffix: 'b', expected: b }
+        ]
+      };
+    }
+
+    // 6. Quadratische Gleichung aufstellen (Scheitelpunktform)
+    function genQuadEquation() {
+      let a = getRandomItem([1, -1]); // nicht gestreckt!
+      let d = getRandomItem([-3, -2, -1, 1, 2, 3]);
+      let e = getRandomItem([-4, -3, -2, -1, 1, 2, 3]);
+
+      let funcs = [{ f: (x) => a * Math.pow(x - d, 2) + e, color: '#9333ea' }];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, [])}
+                    <div class="flex flex-col gap-4 w-full mt-4">
+                        <div class="flex items-center gap-2 text-xl flex-wrap">
+                            <span class="font-serif italic">f(x) = </span>
+                            <input type="number" step="1" id="input-IDX-a" class="coord-input print-input" placeholder="a">
+                            <span class="font-serif italic">&middot; (x &minus; </span>
+                            <input type="number" step="1" id="input-IDX-d" class="coord-input print-input" placeholder="d">
+                            <span class="font-serif italic">)&sup2; + </span>
+                            <input type="number" step="1" id="input-IDX-e" class="coord-input print-input" placeholder="e">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      return {
+        topic: 'Funktionsgleichung bestimmen (Quadratisch)',
+        text: 'Es handelt sich um eine **nicht gestreckte** Parabel ($a = 1$ oder $a = -1$). Gib die Parameter der Scheitelpunktform $f(x) = a(x - d)^2 + e$ an.',
+        customHtml: html,
+        evalVars: [
+          { idSuffix: 'a', expected: a },
+          { idSuffix: 'd', expected: d },
+          { idSuffix: 'e', expected: e }
+        ]
+      };
+    }
+
+    // 7. Exponentialgleichung aufstellen
+    function genExpEquation() {
+      let a = getRandomItem([2, 0.5]);
+      let c = getRandomItem([1, 2, 3]);
+
+      let funcs = [{ f: (x) => c * Math.pow(a, x), color: '#d97706' }];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, [])}
+                    <div class="flex flex-col gap-4 w-full mt-4">
+                        <div class="flex items-center gap-2 text-xl">
+                            <span class="font-serif italic">f(x) = </span>
+                            <input type="number" step="0.5" id="input-IDX-c" class="coord-input print-input" placeholder="c">
+                            <span class="font-serif italic">&middot;</span>
+                            <input type="number" step="0.5" id="input-IDX-a" class="coord-input print-input" placeholder="a">
+                            <span class="font-serif italic"><sup>x</sup></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      return {
+        topic: 'Funktionsgleichung bestimmen (Exponential)',
+        text: 'Bestimme die Parameter der Exponentialfunktion der Form $f(x) = c \\cdot a^x$. <br><span class="text-sm text-gray-500">(Tipp: Lies zuerst den y-Achsenabschnitt $c$ ab!)</span>',
+        customHtml: html,
+        evalVars: [
+          { idSuffix: 'c', expected: c },
+          { idSuffix: 'a', expected: a }
+        ]
+      };
+    }
+
+    // 8. Nullstellen einer Parabel
+    function genQuadNullstellen() {
+      // (x - x1)(x - x2) = x^2 - (x1+x2)x + x1*x2
+      let x1 = getRandomItem([-4, -3, -2, -1, 1]);
+      let x2 = x1 + getRandomItem([2, 4, 6]); // Ensure some distance
+      if (x2 > 5) x2 = 5;
+
+      // Finde Scheitelpunkt, um zu checken ob es in y-Range passt
+      let d = (x1 + x2) / 2;
+      let a = 1;
+      let e = a * (d - x1) * (d - x2);
+
+      // Wenn zu tief, umdrehen
+      if (e < -6) {
+        a = -1;
+        e = a * (d - x1) * (d - x2);
+      }
+
+      let funcs = [{ f: (x) => a * (x - x1) * (x - x2), color: '#9333ea' }];
+      // Keine Markierungen der Nullstellen!
+      let points = [];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, points)}
+                    <div class="flex flex-col gap-4 w-full">
+                        ${getPointInputHtml('IDX', 'Linke Nullstelle', 'n1')}
+                        ${getPointInputHtml('IDX', 'Rechte Nullstelle', 'n2')}
+                    </div>
+                </div>
+            `;
+
+      return {
+        topic: 'Nullstellen (Quadratisch)',
+        text: 'Eine Parabel kann zwei Nullstellen haben. Identifiziere die beiden Schnittpunkte mit der x-Achse und trage die Koordinaten der linken und der rechten Nullstelle ein.',
+        customHtml: html,
+        evalVars: [
+          { idSuffix: 'n1x', expected: x1 },
+          { idSuffix: 'n1y', expected: 0 },
+          { idSuffix: 'n2x', expected: x2 },
+          { idSuffix: 'n2y', expected: 0 }
+        ]
+      };
+    }
+
+    // 9. Lineare Gleichung komplett selbst eingeben
+    function genLinEquationFull() {
+      let m = getRandomItem([0.5, -0.5, 1, -1, 2, -2, 1.5, -1.5]);
+      let b = getRandomItem([-3, -2, -1, 1, 2, 3]);
+
+      let funcs = [{ f: (x) => m * x + b, color: '#2563eb' }];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, [])}
+                    <div class="flex flex-col gap-4 w-full mt-4">
+                        <div class="flex items-center gap-2 text-xl w-full flex-wrap">
+                            <span class="font-serif italic whitespace-nowrap">f(x) = </span>
+                            <input type="text" id="input-IDX-full" class="flex-1 min-w-[200px] p-2 border-2 border-gray-300 rounded-md outline-none focus:border-amber-600 print-input" placeholder="z. B. 2x - 3">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      let expectedStr = `f(x) = ${m}x ${b < 0 ? '-' : '+'} ${Math.abs(b)}`.replace('1x', 'x').replace('-1x', '-x').replace('.5', ',5');
+
+      return {
+        topic: 'Funktionsgleichung ablesen (Komplett frei)',
+        text: 'Ermittle die Funktionsgleichung der Geraden und gib sie als ganzen Term in das Textfeld ein. <br><span class="text-sm text-gray-500">(z. B. 0,5x + 2 oder 2 - 3x)</span>',
+        customHtml: html,
+        evalVars: [],
+        fullEquationCheck: {
+          expectedF: (x) => m * x + b,
+          testPoints: [-2, 0, 2] // Algebraischer Test an 3 Stellen
+        },
+        expectedStr: expectedStr
+      };
+    }
+
+    // 10. Quadratische Gleichung komplett selbst eingeben
+    function genQuadEquationFull() {
+      let a = getRandomItem([1, -1]); // nicht gestreckt
+      let d = getRandomItem([-3, -2, -1, 1, 2, 3]);
+      let e = getRandomItem([-4, -3, -2, -1, 1, 2, 3]);
+
+      let funcs = [{ f: (x) => a * Math.pow(x - d, 2) + e, color: '#9333ea' }];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, [])}
+                    <div class="flex flex-col gap-4 w-full mt-4">
+                        <div class="flex items-center gap-2 text-xl w-full flex-wrap">
+                            <span class="font-serif italic whitespace-nowrap">f(x) = </span>
+                            <input type="text" id="input-IDX-full" class="flex-1 min-w-[200px] p-2 border-2 border-gray-300 rounded-md outline-none focus:border-amber-600 print-input" placeholder="z. B. -(x+2)^2 - 1">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      let expectedStr = `f(x) = ${a === -1 ? '-' : ''}(x ${d < 0 ? '+' : '-'} ${Math.abs(d)})^2 ${e < 0 ? '-' : '+'} ${Math.abs(e)}`;
+
+      return {
+        topic: 'Funktionsgleichung ablesen (Komplett frei)',
+        text: 'Ermittle die Funktionsgleichung der **nicht gestreckten** Parabel und gib sie komplett in der Scheitelpunktform ein. <br><span class="text-sm text-gray-500">(Nutze ^2 für das Quadrat, z. B. (x-3)^2 + 4)</span>',
+        customHtml: html,
+        evalVars: [],
+        fullEquationCheck: {
+          expectedF: (x) => a * Math.pow(x - d, 2) + e,
+          testPoints: [d - 1, d, d + 1]
+        },
+        expectedStr: expectedStr
+      };
+    }
+
+    // 11. Exponentialgleichung komplett selbst eingeben
+    function genExpEquationFull() {
+      let a = getRandomItem([2, 0.5]);
+      let c = getRandomItem([1, 2, 3]);
+
+      let funcs = [{ f: (x) => c * Math.pow(a, x), color: '#d97706' }];
+
+      let html = `
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    ${createGraphHtml(funcs, [])}
+                    <div class="flex flex-col gap-4 w-full mt-4">
+                        <div class="flex items-center gap-2 text-xl w-full flex-wrap">
+                            <span class="font-serif italic whitespace-nowrap">f(x) = </span>
+                            <input type="text" id="input-IDX-full" class="flex-1 min-w-[200px] p-2 border-2 border-gray-300 rounded-md outline-none focus:border-amber-600 print-input" placeholder="z. B. 3*2^x">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      let expectedStr = `f(x) = ${c} * ${a.toString().replace('.', ',')}^x`;
+
+      return {
+        topic: 'Funktionsgleichung ablesen (Komplett frei)',
+        text: 'Bestimme die Parameter der Exponentialfunktion ($c \\cdot a^x$) und gib die komplette Gleichung ein. <br><span class="text-sm text-gray-500">(Nutze * für Mal und ^x für hoch x, z. B. 2*0,5^x)</span>',
+        customHtml: html,
+        evalVars: [],
+        fullEquationCheck: {
+          expectedF: (x) => c * Math.pow(a, x),
+          testPoints: [-1, 0, 1]
+        },
+        expectedStr: expectedStr
+      };
+    }
+
+    // --- APP LOGIK ---
+
+    let currentQuestions = [];
+
+    function generateWorksheet() {
+      document.getElementById('final-score').classList.add('hidden');
+      document.getElementById('btn-check-all').classList.remove('hidden');
+
+      currentQuestions = [];
+
+      // Die 8 Aufgabentypen generieren
+      currentQuestions.push(genLinPoints());
+      currentQuestions.push(genQuadPoints());
+      currentQuestions.push(genExpPoints());
+      currentQuestions.push(genLinIntersection());
+
+      currentQuestions.push(genQuadNullstellen());
+      currentQuestions.push(genLinEquation());
+      currentQuestions.push(genQuadEquation());
+      currentQuestions.push(genExpEquation());
+
+      // Die 3 neuen freien Aufgabentypen generieren
+      currentQuestions.push(genLinEquationFull());
+      currentQuestions.push(genQuadEquationFull());
+      currentQuestions.push(genExpEquationFull());
+
+      // Initialisiere hasChecked status
+      currentQuestions.forEach(q => q.hasChecked = false);
+
+      renderWorksheet();
+    }
+
+    function renderWorksheet() {
+      const container = document.getElementById('worksheet-container');
+      container.innerHTML = '';
+
+      currentQuestions.forEach((q, index) => {
+        // Konvertiere Markdown-Bold zu HTML
+        let textHtml = q.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Konvertiere Inline-LaTeX
+        textHtml = textHtml.replace(/\$(.*?)\$/g, (match, formula) => {
+          try { return katex.renderToString(formula, { throwOnError: false }); }
+          catch (e) { return match; }
+        });
+
+        // Ersetze Platzhalter 'IDX' im HTML durch die echte index-Zahl
+        let customHtml = q.customHtml.replace(/IDX/g, index);
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question-box bg-white p-5 rounded-xl border-2 border-gray-100 shadow-sm transition-colors print-break relative';
+        qDiv.id = `question-div-${index}`;
+
+        qDiv.innerHTML = `
+                    <div class="flex gap-3 mb-3">
+                        <div class="font-bold text-amber-600 text-xl w-6 shrink-0">${index + 1}.</div>
+                        <div class="w-full">
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">${q.topic}</div>
+                            <div class="text-gray-800 text-lg mb-2">${textHtml}</div>
+                            
+                            ${customHtml}
+                            
+                            <div class="mt-6 flex flex-wrap items-center gap-3">
+                                <button id="btn-single-${index}" onclick="checkSingleAnswer(${index})" class="px-6 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 shadow transition-colors font-bold no-print whitespace-nowrap">Prüfen</button>
+                                <div id="feedback-${index}" class="ml-4 font-bold text-lg hidden no-print"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+        container.appendChild(qDiv);
+      });
+    }
+
+    window.checkSingleAnswer = function (index) {
+      const q = currentQuestions[index];
+      const feedbackEl = document.getElementById(`feedback-${index}`);
+      const boxEl = document.getElementById(`question-div-${index}`);
+      const btnEl = document.getElementById(`btn-single-${index}`);
+
+      let allCorrect = true;
+      let missingInput = false;
+
+      if (q.fullEquationCheck) {
+        // Auswertung für das freie Texteingabefeld
+        const inputEl = document.getElementById(`input-${index}-full`);
+        let expr = inputEl.value;
+
+        if (expr.trim() === '') {
+          missingInput = true;
+        } else {
+          for (let xVal of q.fullEquationCheck.testPoints) {
+            let expectedY = q.fullEquationCheck.expectedF(xVal);
+            let userY = evaluateUserExpression(expr, xVal);
+
+            // Wenn die Formel ungültig ist oder das Ergebnis stark abweicht -> Falsch
+            if (isNaN(userY) || Math.abs(userY - expectedY) > 0.05) {
+              allCorrect = false;
+              break;
+            }
+          }
+
+          if (!allCorrect) {
+            inputEl.classList.add('bg-red-100', 'border-red-400');
+          } else {
+            inputEl.classList.add('bg-green-100', 'border-green-400');
+          }
+          inputEl.disabled = true; // Lock input
+        }
+      } else {
+        // Auswertung für die aufgeteilten Felder
+        q.evalVars.forEach(ev => {
+          const inputEl = document.getElementById(`input-${index}-${ev.idSuffix}`);
+          if (!inputEl || inputEl.value.trim() === '') {
+            missingInput = true;
+            return;
+          }
+
+          let userVal = parseFloat(inputEl.value.replace(',', '.'));
+          let isCorrect = Math.abs(userVal - ev.expected) <= 0.05; // Toleranz 0.05
+
+          if (!isCorrect) {
+            allCorrect = false;
+            inputEl.classList.add('bg-red-100', 'border-red-400');
+          } else {
+            inputEl.classList.add('bg-green-100', 'border-green-400');
+          }
+          inputEl.disabled = true; // Lock input
+        });
+      }
+
+      if (missingInput) {
+        alert('Bitte fülle alle Felder für Aufgabe ' + (index + 1) + ' aus!');
+        return;
+      }
+
+      q.hasChecked = true;
+      btnEl.classList.add('hidden');
+      feedbackEl.classList.remove('hidden');
+
+      if (allCorrect) {
+        feedbackEl.innerHTML = '✓ Komplett Richtig!';
+        feedbackEl.className = 'ml-4 font-bold text-lg text-green-600 no-print';
+        boxEl.classList.add('border-green-300', 'bg-orange-50'); // Leicht getönter HG für Richtig
+        boxEl.classList.remove('border-gray-100');
+      } else {
+        if (q.fullEquationCheck) {
+          feedbackEl.innerHTML = `✗ Falsch oder nicht im passenden Format. <br><span class="text-sm font-normal text-gray-700">Erwartet wurde z. B.: <strong>${q.expectedStr}</strong></span>`;
+        } else {
+          feedbackEl.innerHTML = `✗ Leider nicht ganz richtig.`;
+        }
+        feedbackEl.className = 'ml-4 font-bold text-lg text-red-600 no-print';
+        boxEl.classList.add('border-red-300', 'bg-red-50');
+        boxEl.classList.remove('border-gray-100');
+      }
+
+      checkIfAllDone();
+    }
+
+    window.checkAllAnswers = function () {
+      currentQuestions.forEach((q, index) => {
+        if (!q.hasChecked) {
+          if (q.fullEquationCheck) {
+            const inputEl = document.getElementById(`input-${index}-full`);
+            if (inputEl && inputEl.value.trim() === '') {
+              inputEl.value = 'Falsch'; // Damit es als falsch gewertet wird
+            }
+          } else {
+            q.evalVars.forEach(ev => {
+              const inputEl = document.getElementById(`input-${index}-${ev.idSuffix}`);
+              if (inputEl && inputEl.value.trim() === '') {
+                inputEl.value = '999';
+              }
+            });
+          }
+          checkSingleAnswer(index);
+        }
+      });
+    }
+
+    function checkIfAllDone() {
+      const allChecked = currentQuestions.every(q => q.hasChecked);
+      if (allChecked) {
+        let score = currentQuestions.filter((q, index) => {
+          if (q.fullEquationCheck) {
+            const inputEl = document.getElementById(`input-${index}-full`);
+            let expr = inputEl.value;
+            let isCorrect = true;
+            for (let xVal of q.fullEquationCheck.testPoints) {
+              let expectedY = q.fullEquationCheck.expectedF(xVal);
+              let userY = evaluateUserExpression(expr, xVal);
+              if (isNaN(userY) || Math.abs(userY - expectedY) > 0.05) {
+                isCorrect = false; break;
+              }
+            }
+            return isCorrect;
+          } else {
+            return q.evalVars.every(ev => {
+              const inputEl = document.getElementById(`input-${index}-${ev.idSuffix}`);
+              let userVal = parseFloat(inputEl.value.replace(',', '.'));
+              return Math.abs(userVal - ev.expected) <= 0.05;
+            });
+          }
+        }).length;
+
+        const scoreEl = document.getElementById('final-score');
+        scoreEl.innerHTML = `Du hast ${score} von ${currentQuestions.length} Aufgaben komplett richtig gelöst!`;
+        scoreEl.className = `text-2xl font-bold mt-4 text-center ${score === currentQuestions.length ? 'text-green-600' : 'text-amber-600'}`;
+        scoreEl.classList.remove('hidden');
+
+        document.getElementById('btn-check-all').classList.add('hidden');
+      }
+    }
+
+    // --- Start ---
+    document.addEventListener('DOMContentLoaded', () => {
+      generateWorksheet();
+    });
+  </script>
+</body>
+
+</html>
