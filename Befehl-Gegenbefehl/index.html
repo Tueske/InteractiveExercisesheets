@@ -17,6 +17,12 @@
     body {
       background-color: #f3f4f6;
       font-family: system-ui, -apple-system, sans-serif;
+      transition: padding-bottom 0.3s;
+    }
+
+    /* Wenn Level 2 aktiv ist, Platz für die Tastatur lassen */
+    body.level-2-active {
+      padding-bottom: 280px;
     }
 
     .math-container {
@@ -41,49 +47,106 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+
+    /* Keyboard Button Hover */
+    .key-btn {
+      transition: background-color 0.1s, transform 0.1s;
+    }
+
+    .key-btn:active {
+      transform: scale(0.95);
+    }
   </style>
 </head>
 
 <body class="text-gray-800 min-h-screen p-4 md:p-8">
 
-  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden relative">
     <!-- Header -->
     <div class="bg-blue-600 text-white p-6 text-center">
       <h1 class="text-3xl font-bold mb-2">Befehl & Gegenbefehl</h1>
       <p class="text-blue-100 text-lg">Heben sich die beiden Operationen gegenseitig auf?</p>
     </div>
 
-    <!-- Instructions -->
-    <div class="p-6 bg-blue-50 border-b border-blue-100">
-      <p class="mb-2"><strong>Deine Aufgabe:</strong> Entscheide bei den folgenden 10 Gleichungen der Form <em>f(g(x)) =
-          x</em>, ob es sich um ein gültiges Befehl-Gegenbefehl-Paar handelt.</p>
-      <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-        <li>Manchmal passen Befehl und Gegenbefehl nicht zusammen.</li>
-        <li>Manchmal passen sie zwar zusammen, aber die verwendeten <strong>Zahlen/Parameter</strong> (wie die Basis
-          oder der Exponent) sind unterschiedlich!</li>
-      </ul>
+    <!-- Level Tabs -->
+    <div class="flex border-b border-gray-200 bg-gray-50">
+      <button onclick="switchLevel(1)" id="tab-1"
+        class="flex-1 py-4 text-center font-bold text-blue-600 border-b-4 border-blue-600 hover:bg-gray-100 transition-colors">
+        Level 1: Richtig / Falsch
+      </button>
+      <button onclick="switchLevel(2)" id="tab-2"
+        class="flex-1 py-4 text-center font-bold text-gray-500 border-b-4 border-transparent hover:bg-gray-100 transition-colors">
+        Level 2: Selber eingeben
+      </button>
     </div>
 
-    <!-- App Container -->
-    <div id="app-content" class="p-6">
-      <!-- Questions will be injected here -->
-      <div id="questions-container" class="space-y-6"></div>
+    <!-- ================= LEVEL 1 CONTAINER ================= -->
+    <div id="level-1-container" class="block">
+      <!-- Instructions -->
+      <div class="p-6 bg-blue-50 border-b border-blue-100">
+        <p class="mb-2"><strong>Deine Aufgabe:</strong> Entscheide bei den folgenden 10 Gleichungen der Form <em>f(g(x))
+            = x</em>, ob es sich um ein gültiges Befehl-Gegenbefehl-Paar handelt.</p>
+        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+          <li>Manchmal passen Befehl und Gegenbefehl nicht zusammen.</li>
+          <li>Manchmal passen sie zwar zusammen, aber die verwendeten <strong>Zahlen/Parameter</strong> (wie die Basis
+            oder der Exponent) sind unterschiedlich!</li>
+        </ul>
+      </div>
 
-      <!-- Controls -->
-      <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div id="score-display" class="text-xl font-bold text-gray-800 hidden">
-          <!-- Score will appear here -->
+      <!-- App Content L1 -->
+      <div class="p-6">
+        <div id="questions-container" class="space-y-6"></div>
+
+        <!-- Controls L1 -->
+        <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div id="score-display" class="text-xl font-bold text-gray-800 hidden"></div>
+          <div class="flex gap-4 ml-auto">
+            <button id="btn-restart" onclick="initGame()"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105">
+              Neue Aufgaben
+            </button>
+          </div>
         </div>
-        <div class="flex gap-4">
-          <button id="btn-check" onclick="checkAnswers()"
-            class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105">
-            Antworten überprüfen
-          </button>
-          <button id="btn-restart" onclick="initGame()"
-            class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105">
-            Neue Aufgaben
-          </button>
+      </div>
+    </div>
+
+    <!-- ================= LEVEL 2 CONTAINER ================= -->
+    <div id="level-2-container" class="hidden">
+      <!-- Instructions L2 -->
+      <div class="p-6 bg-purple-50 border-b border-purple-100">
+        <p class="mb-2"><strong>Deine Aufgabe:</strong> Trage den korrekten Gegenbefehl in die Lücke $\square$ ein,
+          damit die Gleichung stimmt!</p>
+        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+          <li>Beispiel: Bei <span id="inst-math-1"></span> musst du <strong>x - 5</strong> eingeben.</li>
+          <li>Beispiel: Bei <span id="inst-math-2"></span> musst du <strong>\sin^{-1}(x)</strong> eingeben.</li>
+          <li>Nutze die Bildschirm-Tastatur unten, um dir das Tippen zu erleichtern!</li>
+        </ul>
+      </div>
+
+      <!-- App Content L2 -->
+      <div class="p-6">
+        <div id="l2-questions-container" class="space-y-6"></div>
+
+        <!-- Controls L2 -->
+        <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div id="l2-score-display" class="text-xl font-bold text-gray-800 hidden"></div>
+          <div class="flex gap-4 ml-auto">
+            <button id="btn-l2-restart" onclick="initL2Game()"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105">
+              Neue Aufgaben
+            </button>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= VIRTUAL KEYBOARD (LEVEL 2) ================= -->
+  <div id="virtual-keyboard"
+    class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-300 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] hidden z-50 p-2 sm:p-4">
+    <div class="max-w-4xl mx-auto">
+      <div id="keyboard-grid" class="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:gap-2">
+        <!-- Keyboard buttons injected via JS -->
       </div>
     </div>
   </div>
@@ -103,11 +166,10 @@
       { id: 'arccos', display: (inner) => `\\cos^{-1}(${inner})`, type: 'trig' },
       { id: 'tan', display: (inner) => `\\tan(${inner})`, type: 'trig' },
       { id: 'arctan', display: (inner) => `\\tan^{-1}(${inner})`, type: 'trig' },
-      { id: 'exp', display: (inner, v) => `${v}^{${inner}}`, type: 'exp' }, // Basis v, Exponent x
-      { id: 'log', display: (inner, v) => `\\log_{${v}}(${inner})`, type: 'exp' } // Logarithmus zur Basis v
+      { id: 'exp', display: (inner, v) => `${v}^{${inner}}`, type: 'exp' },
+      { id: 'log', display: (inner, v) => `\\log_{${v}}(${inner})`, type: 'exp' }
     ];
 
-    // Zuweisung der korrekten Gegenbefehle
     const pairs = {
       'add': 'sub', 'sub': 'add',
       'mul': 'div', 'div': 'mul',
@@ -118,21 +180,63 @@
       'exp': 'log', 'log': 'exp'
     };
 
-    let currentQuestions = [];
-    let hasChecked = false;
+    // ================= LEVEL MANAGEMENT =================
+    let currentLevel = 1;
 
-    // --- Generator Logik ---
+    function switchLevel(level) {
+      currentLevel = level;
+      const tab1 = document.getElementById('tab-1');
+      const tab2 = document.getElementById('tab-2');
+      const con1 = document.getElementById('level-1-container');
+      const con2 = document.getElementById('level-2-container');
+      const kb = document.getElementById('virtual-keyboard');
+
+      if (level === 1) {
+        tab1.className = "flex-1 py-4 text-center font-bold text-blue-600 border-b-4 border-blue-600 hover:bg-gray-100 transition-colors";
+        tab2.className = "flex-1 py-4 text-center font-bold text-gray-500 border-b-4 border-transparent hover:bg-gray-100 transition-colors";
+        con1.classList.remove('hidden');
+        con2.classList.add('hidden');
+        kb.classList.add('hidden');
+        document.body.classList.remove('level-2-active');
+        initGame();
+      } else {
+        tab2.className = "flex-1 py-4 text-center font-bold text-purple-600 border-b-4 border-purple-600 hover:bg-gray-100 transition-colors";
+        tab1.className = "flex-1 py-4 text-center font-bold text-gray-500 border-b-4 border-transparent hover:bg-gray-100 transition-colors";
+        con1.classList.add('hidden');
+        con2.classList.remove('hidden');
+        kb.classList.remove('hidden');
+        document.body.classList.add('level-2-active');
+        initL2Game();
+      }
+    }
+
+
+    // ================= LEVEL 1 LOGIC =================
+    let l1Questions = [];
+
     function generateQuestions() {
       let questions = [];
-      // Genau 5 richtige und 5 falsche Aufgaben generieren
       let types = [true, true, true, true, true, false, false, false, false, false];
-      // Array mischen
       types.sort(() => Math.random() - 0.5);
 
+      let usageCounts = {};
+
       types.forEach(isCorrect => {
-        let innerIndex = Math.floor(Math.random() * funcs.length);
-        let innerFunc = funcs[innerIndex];
-        let innerVal = Math.floor(Math.random() * 8) + 2; // Parameter zwischen 2 und 9
+        // Filtere verfügbare Funktionen, sodass keine Paar-Familie öfter als 2-mal vorkommt
+        let availableFuncs = funcs.filter(f => {
+          let pairGroup = [f.id, pairs[f.id]].sort().join('-');
+          return (usageCounts[pairGroup] || 0) < 2;
+        });
+        if (availableFuncs.length === 0) availableFuncs = funcs; // Fallback zur Sicherheit
+
+        let innerIndex = Math.floor(Math.random() * availableFuncs.length);
+        let innerFunc = availableFuncs[innerIndex];
+
+        // Nutzung erfassen
+        let pairGroup = [innerFunc.id, pairs[innerFunc.id]].sort().join('-');
+        usageCounts[pairGroup] = (usageCounts[pairGroup] || 0) + 1;
+
+        let innerVal = Math.floor(Math.random() * 8) + 2;
         let outerFunc, outerVal;
         let explanation = "";
 
@@ -140,19 +244,14 @@
 
         if (isCorrect) {
           outerFunc = funcs.find(f => f.id === pairs[innerFunc.id]);
-          outerVal = innerVal; // Parameter müssen exakt gleich sein
+          outerVal = innerVal;
           explanation = "Korrekt! Die Befehle sind gegensätzlich und die Parameter stimmen überein.";
         } else {
-          // Wenn falsch, entscheide zufällig ob falscher Parameter (falls anwendbar) oder falsche Funktion
           if (Math.random() > 0.5 && innerFunc.type !== 'trig') {
-            // Falscher Parameter (Trigonometrische Fkt haben keine Parameter)
             outerFunc = funcs.find(f => f.id === pairs[innerFunc.id]);
-            do {
-              outerVal = Math.floor(Math.random() * 8) + 2;
-            } while (outerVal === innerVal);
+            do { outerVal = Math.floor(Math.random() * 8) + 2; } while (outerVal === innerVal);
             explanation = `Falsch! Zwar sind es Gegenbefehle, aber die Parameter (${innerVal} und ${outerVal}) unterscheiden sich.`;
           } else {
-            // Komplett falsche Funktion
             do {
               let outerIndex = Math.floor(Math.random() * funcs.length);
               outerFunc = funcs[outerIndex];
@@ -161,144 +260,358 @@
             explanation = "Falsch! Diese beiden Operationen sind keine Gegenbefehle zueinander.";
           }
         }
-
         let expr = outerFunc.display(innerStr, outerVal) + ' = x';
-        questions.push({
-          latex: expr,
-          correct: isCorrect,
-          userChoice: null,
-          explanation: explanation
-        });
+        questions.push({ latex: expr, correct: isCorrect, userChoice: null, explanation: explanation, hasChecked: false });
       });
       return questions;
     }
 
-    // --- UI Rendering ---
     function renderQuestions() {
       const container = document.getElementById('questions-container');
       container.innerHTML = '';
-
-      currentQuestions.forEach((q, index) => {
+      l1Questions.forEach((q, index) => {
         const questionDiv = document.createElement('div');
         questionDiv.className = `p-4 rounded-xl border-2 transition-all ${getBorderColor(index)}`;
-
-        // Render content
         questionDiv.innerHTML = `
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="flex-1 overflow-x-auto">
                             <span class="text-gray-500 font-bold mr-4">${index + 1}.</span>
                             <span id="math-${index}" class="math-container inline-block"></span>
                         </div>
-                        
-                        <div class="flex gap-2 min-w-max">
+                        <div class="flex flex-wrap gap-2 min-w-max items-center">
                             <button onclick="selectOption(${index}, true)" 
-                                id="btn-true-${index}"
                                 class="px-4 py-2 rounded-lg font-medium border-2 transition-colors ${getBtnStyle(index, true)}"
-                                ${hasChecked ? 'disabled' : ''}>
-                                Richtig
-                            </button>
+                                ${q.hasChecked ? 'disabled' : ''}>Richtig</button>
                             <button onclick="selectOption(${index}, false)" 
-                                id="btn-false-${index}"
                                 class="px-4 py-2 rounded-lg font-medium border-2 transition-colors ${getBtnStyle(index, false)}"
-                                ${hasChecked ? 'disabled' : ''}>
-                                Falsch
-                            </button>
+                                ${q.hasChecked ? 'disabled' : ''}>Falsch</button>
+                            ${!q.hasChecked ? `<button onclick="checkL1Single(${index})" class="ml-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 shadow transition-colors font-bold">Prüfen</button>` : ''}
                         </div>
                     </div>
-                    ${hasChecked ? `
+                    ${q.hasChecked ? `
                         <div class="mt-4 p-3 rounded-lg text-sm ${q.correct === q.userChoice ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
                             <strong>${q.correct === q.userChoice ? '✓ Gut gemacht!' : '✗ Fehler!'}</strong> ${q.explanation}
                         </div>
                     ` : ''}
                 `;
         container.appendChild(questionDiv);
-
-        // Render KaTeX after element is in DOM
-        katex.render(q.latex, document.getElementById(`math-${index}`), {
-          throwOnError: false,
-          displayMode: true
-        });
+        katex.render(q.latex, document.getElementById(`math-${index}`), { throwOnError: false, displayMode: true });
       });
     }
 
-    // Hilfsfunktionen für das Styling
     function getBtnStyle(index, isTrueButton) {
-      const q = currentQuestions[index];
+      const q = l1Questions[index];
       const isSelected = q.userChoice === isTrueButton;
-
-      if (hasChecked) {
-        // Auswertungsmodus
-        if (isSelected) {
-          if (q.userChoice === q.correct) return isTrueButton ? 'bg-green-500 border-green-500 text-white' : 'bg-green-500 border-green-500 text-white';
-          return 'bg-red-500 border-red-500 text-white opacity-50';
-        }
-        // Zeige korrekte Antwort an, falls nicht ausgewählt
+      if (q.hasChecked) {
+        if (isSelected) return q.userChoice === q.correct ? 'bg-green-500 border-green-500 text-white' : 'bg-red-500 border-red-500 text-white opacity-50';
         if (q.correct === isTrueButton) return 'bg-green-100 border-green-500 text-green-700';
         return 'bg-gray-100 border-gray-200 text-gray-400 opacity-50 cursor-not-allowed';
       } else {
-        // Auswahlmodus
-        if (isSelected) {
-          return isTrueButton ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-600 border-gray-600 text-white';
-        }
+        if (isSelected) return isTrueButton ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-600 border-gray-600 text-white';
         return 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50';
       }
     }
 
     function getBorderColor(index) {
-      const q = currentQuestions[index];
-      if (!hasChecked) {
-        return q.userChoice !== null ? 'border-blue-200 bg-white' : 'border-gray-100 bg-white';
-      }
+      const q = l1Questions[index];
+      if (!q.hasChecked) return q.userChoice !== null ? 'border-blue-200 bg-white' : 'border-gray-100 bg-white';
       return q.correct === q.userChoice ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50';
     }
 
-    // --- Interaction ---
     window.selectOption = function (index, value) {
-      if (hasChecked) return;
-      currentQuestions[index].userChoice = value;
+      if (l1Questions[index].hasChecked) return;
+      l1Questions[index].userChoice = value;
       renderQuestions();
     }
 
-    window.checkAnswers = function () {
-      // Prüfen ob alle beantwortet sind
-      const unanswered = currentQuestions.filter(q => q.userChoice === null).length;
-      if (unanswered > 0) {
-        alert(`Bitte beantworte noch die restlichen ${unanswered} Gleichungen, bevor du auswertest.`);
+    window.checkL1Single = function (index) {
+      if (l1Questions[index].userChoice === null) {
+        alert("Bitte wähle zuerst 'Richtig' oder 'Falsch' aus.");
         return;
       }
-
-      hasChecked = true;
-
-      const score = currentQuestions.filter(q => q.correct === q.userChoice).length;
-      const scoreDisplay = document.getElementById('score-display');
-
-      scoreDisplay.innerHTML = `Du hast <span class="${score > 7 ? 'text-green-600' : score > 4 ? 'text-yellow-600' : 'text-red-600'}">${score} von 10</span> richtig!`;
-      scoreDisplay.classList.remove('hidden');
-
-      document.getElementById('btn-check').classList.add('hidden');
-      document.getElementById('btn-restart').classList.remove('hidden');
-
+      l1Questions[index].hasChecked = true;
       renderQuestions();
+      checkL1Completed();
+    }
 
-      // Scroll back up to see results smoothly
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function checkL1Completed() {
+      const allChecked = l1Questions.every(q => q.hasChecked);
+      if (allChecked) {
+        const score = l1Questions.filter(q => q.correct === q.userChoice).length;
+        const sd = document.getElementById('score-display');
+        sd.innerHTML = `Du hast <span class="${score > 7 ? 'text-green-600' : score > 4 ? 'text-yellow-600' : 'text-red-600'}">${score} von 10</span> richtig!`;
+        sd.classList.remove('hidden');
+      }
     }
 
     window.initGame = function () {
-      hasChecked = false;
-      currentQuestions = generateQuestions();
-
+      l1Questions = generateQuestions();
       document.getElementById('score-display').classList.add('hidden');
-      document.getElementById('btn-check').classList.remove('hidden');
-      document.getElementById('btn-restart').classList.add('hidden');
-
       renderQuestions();
     }
 
-    // --- Initialize ---
-    // Warten bis alles geladen ist
+
+    // ================= LEVEL 2 LOGIC =================
+    let l2Questions = [];
+    let activeInputIndex = null;
+
+    function getExpectedL2Answers(funcId, val) {
+      let ans = [];
+      switch (funcId) {
+        case 'add': ans = [`x-${val}`, `-${val}+x`]; break;
+        case 'sub': ans = [`x+${val}`, `${val}+x`]; break;
+        case 'mul': ans = [`x/${val}`, `\\frac{x}{${val}}`, `x*1/${val}`, `1/${val}*x`, `1/${val}x`]; break;
+        case 'div': ans = [`x*${val}`, `x\\cdot${val}`, `${val}*x`, `${val}\\cdot x`, `${val}x`]; break;
+        case 'pow': ans = [`\\sqrt[${val}]{x}`, `x^{1/${val}}`, `x^(1/${val})`]; break;
+        case 'root': ans = [`x^${val}`, `x^{${val}}`]; break;
+        case 'sin': ans = [`\\sin^{-1}(x)`, `arcsin(x)`, `\\arcsin(x)`, `sin^{-1}(x)`, `sin^-1(x)`]; break;
+        case 'arcsin': ans = [`\\sin(x)`, `sin(x)`]; break;
+        case 'cos': ans = [`\\cos^{-1}(x)`, `arccos(x)`, `\\arccos(x)`, `cos^{-1}(x)`, `cos^-1(x)`]; break;
+        case 'arccos': ans = [`\\cos(x)`, `cos(x)`]; break;
+        case 'tan': ans = [`\\tan^{-1}(x)`, `arctan(x)`, `\\arctan(x)`, `tan^{-1}(x)`, `tan^-1(x)`]; break;
+        case 'arctan': ans = [`\\tan(x)`, `tan(x)`]; break;
+        case 'exp': ans = [`\\log_{${val}}(x)`, `log_{${val}}(x)`, `\\log_${val}(x)`, `log_${val}(x)`]; break;
+        case 'log': ans = [`${val}^x`, `${val}^{x}`]; break;
+      }
+      return ans;
+    }
+
+    function generateL2Questions() {
+      let questions = [];
+      let usageCounts = {};
+
+      for (let i = 0; i < 10; i++) {
+        // Filtere verfügbare Funktionen, sodass keine Paar-Familie öfter als 2-mal vorkommt
+        let availableFuncs = funcs.filter(f => {
+          let pairGroup = [f.id, pairs[f.id]].sort().join('-');
+          return (usageCounts[pairGroup] || 0) < 2;
+        });
+        if (availableFuncs.length === 0) availableFuncs = funcs; // Fallback zur Sicherheit
+
+        let funcIndex = Math.floor(Math.random() * availableFuncs.length);
+        let func = availableFuncs[funcIndex];
+
+        // Nutzung erfassen
+        let pairGroup = [func.id, pairs[func.id]].sort().join('-');
+        usageCounts[pairGroup] = (usageCounts[pairGroup] || 0) + 1;
+
+        let val = Math.floor(Math.random() * 8) + 2;
+
+        // Wir generieren die Gleichung: Befehl(Lücke) = x
+        let questionLatex = func.display('\\square', val) + ' = x';
+        let expected = getExpectedL2Answers(func.id, val);
+
+        questions.push({
+          latex: questionLatex,
+          expected: expected,
+          userInput: '',
+          isCorrect: null,
+          hasChecked: false
+        });
+      }
+      return questions;
+    }
+
+    function renderL2Questions() {
+      const container = document.getElementById('l2-questions-container');
+      container.innerHTML = '';
+
+      l2Questions.forEach((q, index) => {
+        const qDiv = document.createElement('div');
+        let bgClass = !q.hasChecked ? 'border-gray-200 bg-white' :
+          (q.isCorrect ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50');
+
+        qDiv.className = `p-4 rounded-xl border-2 transition-all ${bgClass} flex flex-col sm:flex-row sm:items-center gap-4`;
+
+        let feedbackHtml = '';
+        if (q.hasChecked) {
+          feedbackHtml = q.isCorrect
+            ? `<div class="text-green-700 font-bold mt-2 sm:mt-0 sm:ml-4 flex-shrink-0">✓ Richtig!</div>`
+            : `<div class="text-red-700 mt-2 sm:mt-0 sm:ml-4 text-sm flex-shrink-0">
+                             <strong>✗ Falsch!</strong><br>Erwartet: <span id="exp-math-${index}"></span>
+                           </div>`;
+        }
+
+        qDiv.innerHTML = `
+                    <div class="flex-1 flex items-center min-w-0">
+                        <span class="text-gray-500 font-bold mr-4 flex-shrink-0">${index + 1}.</span>
+                        <div class="flex-1 overflow-x-auto overflow-y-hidden flex items-center">
+                            <span id="l2-math-${index}" class="math-container inline-block whitespace-nowrap"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col flex-shrink-0 w-full sm:w-auto relative">
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="l2-input-${index}" 
+                                value="${q.userInput.replace(/"/g, '&quot;')}"
+                                onfocus="focusL2Input(${index})" 
+                                oninput="handleL2Input(${index})"
+                                class="flex-1 sm:w-48 border-2 border-gray-300 rounded p-2 text-lg font-mono outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+                                ${q.hasChecked ? 'disabled' : ''}
+                                placeholder="Gegenbefehl...">
+                            ${!q.hasChecked ? `<button onclick="checkL2Single(${index})" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 shadow transition-colors font-bold whitespace-nowrap">Prüfen</button>` : ''}
+                        </div>
+                        <div class="h-8 mt-1 flex items-center overflow-x-auto">
+                            <span id="l2-preview-${index}" class="text-gray-600"></span>
+                        </div>
+                    </div>
+                    ${feedbackHtml}
+                `;
+        container.appendChild(qDiv);
+
+        // Render Math
+        katex.render(q.latex, document.getElementById(`l2-math-${index}`), { throwOnError: false, displayMode: true });
+
+        if (q.userInput) updateL2Preview(index, q.userInput);
+
+        if (q.hasChecked && !q.isCorrect) {
+          katex.render(q.expected[0], document.getElementById(`exp-math-${index}`), { throwOnError: false });
+        }
+      });
+    }
+
+    window.focusL2Input = function (index) {
+      activeInputIndex = index;
+    }
+
+    window.handleL2Input = function (index) {
+      const val = document.getElementById(`l2-input-${index}`).value;
+      l2Questions[index].userInput = val;
+      updateL2Preview(index, val);
+    }
+
+    window.updateL2Preview = function (index, val) {
+      const previewContainer = document.getElementById(`l2-preview-${index}`);
+      if (!val || val.trim() === '') {
+        previewContainer.innerHTML = '';
+        return;
+      }
+      try {
+        katex.render(val, previewContainer, { throwOnError: false });
+      } catch (e) {
+        previewContainer.innerHTML = '<span class="text-red-400 text-sm">...</span>';
+      }
+    }
+
+    function normalizeForCheck(str) {
+      return str.replace(/\s+/g, '') // Leerzeichen entfernen
+        .replace(/\\cdot/g, '*')
+        .replace(/\\arcsin/g, 'arcsin')
+        .replace(/\\arccos/g, 'arccos')
+        .replace(/\\arctan/g, 'arctan')
+        .replace(/\(x\)/g, 'x'); // Behandle (x) wie x
+    }
+
+    window.checkL2Single = function (index) {
+      const q = l2Questions[index];
+      if (q.userInput.trim() === '') {
+        alert("Bitte gib einen Gegenbefehl ein.");
+        return;
+      }
+      const normInput = normalizeForCheck(q.userInput);
+      q.isCorrect = q.expected.some(exp => normalizeForCheck(exp) === normInput);
+      q.hasChecked = true;
+      renderL2Questions();
+      checkL2Completed();
+    }
+
+    function checkL2Completed() {
+      const allChecked = l2Questions.every(q => q.hasChecked);
+      if (allChecked) {
+        const score = l2Questions.filter(q => q.isCorrect).length;
+        const sd = document.getElementById('l2-score-display');
+        sd.innerHTML = `Du hast <span class="${score > 7 ? 'text-green-600' : score > 4 ? 'text-yellow-600' : 'text-red-600'}">${score} von 10</span> richtig!`;
+        sd.classList.remove('hidden');
+      }
+    }
+
+    window.initL2Game = function () {
+      activeInputIndex = null;
+      l2Questions = generateL2Questions();
+
+      document.getElementById('l2-score-display').classList.add('hidden');
+
+      renderL2Questions();
+
+      // Set initial focus
+      setTimeout(() => {
+        const firstInput = document.getElementById('l2-input-0');
+        if (firstInput) firstInput.focus();
+      }, 100);
+    }
+
+    // ================= VIRTUAL KEYBOARD =================
+    const kbLayout = [
+      { label: '1', insert: '1' }, { label: '2', insert: '2' }, { label: '3', insert: '3' }, { label: '4', insert: '4' }, { label: '5', insert: '5' },
+      { label: '6', insert: '6' }, { label: '7', insert: '7' }, { label: '8', insert: '8' }, { label: '9', insert: '9' }, { label: '0', insert: '0' },
+
+      { label: '+', insert: '+' }, { label: '-', insert: '-' }, { label: '·', insert: '\\cdot ' }, { label: '/', insert: '/' }, { label: 'x', insert: 'x', classes: 'font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 border-blue-300' },
+      { label: '(', insert: '(' }, { label: ')', insert: ')' }, { label: '□²', insert: '^{2}' }, { label: '□^□', insert: '^{}', offset: -1 }, { label: '⌫', action: 'backspace', classes: 'bg-red-100 text-red-700 font-bold hover:bg-red-200 border-red-300' },
+
+      { label: '√', insert: '\\sqrt{}', offset: -1 }, { label: 'ⁿ√', insert: '\\sqrt[]{}', offset: -3 }, { label: 'sin', insert: '\\sin(' }, { label: 'cos', insert: '\\cos(' }, { label: 'tan', insert: '\\tan(' },
+      { label: 'log_□', insert: '\\log_{}()', offset: -3 }, { label: 'sin⁻¹', insert: '\\sin^{-1}(' }, { label: 'cos⁻¹', insert: '\\cos^{-1}(' }, { label: 'tan⁻¹', insert: '\\tan^{-1}(' }, { label: 'Space', insert: ' ' }
+    ];
+
+    function renderKeyboard() {
+      const grid = document.getElementById('keyboard-grid');
+      kbLayout.forEach(btn => {
+        const b = document.createElement('button');
+        b.className = `key-btn p-2 rounded border bg-gray-50 hover:bg-gray-200 font-mono text-sm sm:text-base flex items-center justify-center h-10 sm:h-12 ${btn.classes || 'border-gray-300'}`;
+        b.innerText = btn.label;
+
+        b.onclick = (e) => {
+          e.preventDefault(); // Prevent losing focus
+          if (btn.action === 'backspace') {
+            handleBackspace();
+          } else {
+            insertAtCursor(btn.insert, btn.offset || 0);
+          }
+        };
+
+        // Prevent button mousedown from stealing focus from input
+        b.onmousedown = (e) => e.preventDefault();
+        grid.appendChild(b);
+      });
+    }
+
+    function insertAtCursor(text, offsetFromEnd) {
+      if (activeInputIndex === null || l2Questions[activeInputIndex].hasChecked) return;
+      const input = document.getElementById(`l2-input-${activeInputIndex}`);
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      input.value = input.value.substring(0, start) + text + input.value.substring(end);
+
+      const newPos = start + text.length + offsetFromEnd;
+      input.setSelectionRange(newPos, newPos);
+      handleL2Input(activeInputIndex); // Update model & preview
+      input.focus();
+    }
+
+    function handleBackspace() {
+      if (activeInputIndex === null || l2Questions[activeInputIndex].hasChecked) return;
+      const input = document.getElementById(`l2-input-${activeInputIndex}`);
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      if (start === end && start > 0) {
+        input.value = input.value.substring(0, start - 1) + input.value.substring(end);
+        input.setSelectionRange(start - 1, start - 1);
+      } else if (start !== end) {
+        input.value = input.value.substring(0, start) + input.value.substring(end);
+        input.setSelectionRange(start, start);
+      }
+      handleL2Input(activeInputIndex);
+      input.focus();
+    }
+
+
+    // ================= INITIALIZATION =================
     document.addEventListener('DOMContentLoaded', () => {
-      initGame();
+      // Render Math in instructions
+      katex.render('(\\square) + 5 = x', document.getElementById('inst-math-1'), { throwOnError: false });
+      katex.render('\\sin(\\square) = x', document.getElementById('inst-math-2'), { throwOnError: false });
+
+      renderKeyboard();
+      switchLevel(1); // Start with Level 1
     });
   </script>
 </body>
