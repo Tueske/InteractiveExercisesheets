@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Befehl & Gegenbefehl - interaktive Übung</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .math-container {
+      font-size: 1.25rem;
+      padding: 0.5rem;
+    }
+
+    /* Custom scrollbar for aesthetic */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+    <!-- Header -->
+    <div class="bg-blue-600 text-white p-6 text-center">
+      <h1 class="text-3xl font-bold mb-2">Befehl & Gegenbefehl</h1>
+      <p class="text-blue-100 text-lg">Heben sich die beiden Operationen gegenseitig auf?</p>
+    </div>
+
+    <!-- Instructions -->
+    <div class="p-6 bg-blue-50 border-b border-blue-100">
+      <p class="mb-2"><strong>Deine Aufgabe:</strong> Entscheide bei den folgenden 10 Gleichungen der Form <em>f(g(x)) =
+          x</em>, ob es sich um ein gültiges Befehl-Gegenbefehl-Paar handelt.</p>
+      <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+        <li>Manchmal passen Befehl und Gegenbefehl nicht zusammen.</li>
+        <li>Manchmal passen sie zwar zusammen, aber die verwendeten <strong>Zahlen/Parameter</strong> (wie die Basis
+          oder der Exponent) sind unterschiedlich!</li>
+      </ul>
+    </div>
+
+    <!-- App Container -->
+    <div id="app-content" class="p-6">
+      <!-- Questions will be injected here -->
+      <div id="questions-container" class="space-y-6"></div>
+
+      <!-- Controls -->
+      <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div id="score-display" class="text-xl font-bold text-gray-800 hidden">
+          <!-- Score will appear here -->
+        </div>
+        <div class="flex gap-4">
+          <button id="btn-check" onclick="checkAnswers()"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105">
+            Antworten überprüfen
+          </button>
+          <button id="btn-restart" onclick="initGame()"
+            class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:scale-105">
+            Neue Aufgaben
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Definition der mathematischen Operationen ---
+    const funcs = [
+      { id: 'add', display: (inner, v) => `(${inner}) + ${v}`, type: 'arithmetic' },
+      { id: 'sub', display: (inner, v) => `(${inner}) - ${v}`, type: 'arithmetic' },
+      { id: 'mul', display: (inner, v) => `(${inner}) \\cdot ${v}`, type: 'arithmetic' },
+      { id: 'div', display: (inner, v) => `\\frac{${inner}}{${v}}`, type: 'arithmetic' },
+      { id: 'pow', display: (inner, v) => `(${inner})^{${v}}`, type: 'arithmetic' },
+      { id: 'root', display: (inner, v) => `\\sqrt[${v}]{${inner}}`, type: 'arithmetic' },
+      { id: 'sin', display: (inner) => `\\sin(${inner})`, type: 'trig' },
+      { id: 'arcsin', display: (inner) => `\\sin^{-1}(${inner})`, type: 'trig' },
+      { id: 'cos', display: (inner) => `\\cos(${inner})`, type: 'trig' },
+      { id: 'arccos', display: (inner) => `\\cos^{-1}(${inner})`, type: 'trig' },
+      { id: 'tan', display: (inner) => `\\tan(${inner})`, type: 'trig' },
+      { id: 'arctan', display: (inner) => `\\tan^{-1}(${inner})`, type: 'trig' },
+      { id: 'exp', display: (inner, v) => `${v}^{${inner}}`, type: 'exp' }, // Basis v, Exponent x
+      { id: 'log', display: (inner, v) => `\\log_{${v}}(${inner})`, type: 'exp' } // Logarithmus zur Basis v
+    ];
+
+    // Zuweisung der korrekten Gegenbefehle
+    const pairs = {
+      'add': 'sub', 'sub': 'add',
+      'mul': 'div', 'div': 'mul',
+      'pow': 'root', 'root': 'pow',
+      'sin': 'arcsin', 'arcsin': 'sin',
+      'cos': 'arccos', 'arccos': 'cos',
+      'tan': 'arctan', 'arctan': 'tan',
+      'exp': 'log', 'log': 'exp'
+    };
+
+    let currentQuestions = [];
+    let hasChecked = false;
+
+    // --- Generator Logik ---
+    function generateQuestions() {
+      let questions = [];
+      // Genau 5 richtige und 5 falsche Aufgaben generieren
+      let types = [true, true, true, true, true, false, false, false, false, false];
+      // Array mischen
+      types.sort(() => Math.random() - 0.5);
+
+      types.forEach(isCorrect => {
+        let innerIndex = Math.floor(Math.random() * funcs.length);
+        let innerFunc = funcs[innerIndex];
+        let innerVal = Math.floor(Math.random() * 8) + 2; // Parameter zwischen 2 und 9
+        let outerFunc, outerVal;
+        let explanation = "";
+
+        let innerStr = innerFunc.display('x', innerVal);
+
+        if (isCorrect) {
+          outerFunc = funcs.find(f => f.id === pairs[innerFunc.id]);
+          outerVal = innerVal; // Parameter müssen exakt gleich sein
+          explanation = "Korrekt! Die Befehle sind gegensätzlich und die Parameter stimmen überein.";
+        } else {
+          // Wenn falsch, entscheide zufällig ob falscher Parameter (falls anwendbar) oder falsche Funktion
+          if (Math.random() > 0.5 && innerFunc.type !== 'trig') {
+            // Falscher Parameter (Trigonometrische Fkt haben keine Parameter)
+            outerFunc = funcs.find(f => f.id === pairs[innerFunc.id]);
+            do {
+              outerVal = Math.floor(Math.random() * 8) + 2;
+            } while (outerVal === innerVal);
+            explanation = `Falsch! Zwar sind es Gegenbefehle, aber die Parameter (${innerVal} und ${outerVal}) unterscheiden sich.`;
+          } else {
+            // Komplett falsche Funktion
+            do {
+              let outerIndex = Math.floor(Math.random() * funcs.length);
+              outerFunc = funcs[outerIndex];
+            } while (outerFunc.id === pairs[innerFunc.id] || outerFunc.id === innerFunc.id);
+            outerVal = innerVal;
+            explanation = "Falsch! Diese beiden Operationen sind keine Gegenbefehle zueinander.";
+          }
+        }
+
+        let expr = outerFunc.display(innerStr, outerVal) + ' = x';
+        questions.push({
+          latex: expr,
+          correct: isCorrect,
+          userChoice: null,
+          explanation: explanation
+        });
+      });
+      return questions;
+    }
+
+    // --- UI Rendering ---
+    function renderQuestions() {
+      const container = document.getElementById('questions-container');
+      container.innerHTML = '';
+
+      currentQuestions.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = `p-4 rounded-xl border-2 transition-all ${getBorderColor(index)}`;
+
+        // Render content
+        questionDiv.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1 overflow-x-auto">
+                            <span class="text-gray-500 font-bold mr-4">${index + 1}.</span>
+                            <span id="math-${index}" class="math-container inline-block"></span>
+                        </div>
+                        
+                        <div class="flex gap-2 min-w-max">
+                            <button onclick="selectOption(${index}, true)" 
+                                id="btn-true-${index}"
+                                class="px-4 py-2 rounded-lg font-medium border-2 transition-colors ${getBtnStyle(index, true)}"
+                                ${hasChecked ? 'disabled' : ''}>
+                                Richtig
+                            </button>
+                            <button onclick="selectOption(${index}, false)" 
+                                id="btn-false-${index}"
+                                class="px-4 py-2 rounded-lg font-medium border-2 transition-colors ${getBtnStyle(index, false)}"
+                                ${hasChecked ? 'disabled' : ''}>
+                                Falsch
+                            </button>
+                        </div>
+                    </div>
+                    ${hasChecked ? `
+                        <div class="mt-4 p-3 rounded-lg text-sm ${q.correct === q.userChoice ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            <strong>${q.correct === q.userChoice ? '✓ Gut gemacht!' : '✗ Fehler!'}</strong> ${q.explanation}
+                        </div>
+                    ` : ''}
+                `;
+        container.appendChild(questionDiv);
+
+        // Render KaTeX after element is in DOM
+        katex.render(q.latex, document.getElementById(`math-${index}`), {
+          throwOnError: false,
+          displayMode: true
+        });
+      });
+    }
+
+    // Hilfsfunktionen für das Styling
+    function getBtnStyle(index, isTrueButton) {
+      const q = currentQuestions[index];
+      const isSelected = q.userChoice === isTrueButton;
+
+      if (hasChecked) {
+        // Auswertungsmodus
+        if (isSelected) {
+          if (q.userChoice === q.correct) return isTrueButton ? 'bg-green-500 border-green-500 text-white' : 'bg-green-500 border-green-500 text-white';
+          return 'bg-red-500 border-red-500 text-white opacity-50';
+        }
+        // Zeige korrekte Antwort an, falls nicht ausgewählt
+        if (q.correct === isTrueButton) return 'bg-green-100 border-green-500 text-green-700';
+        return 'bg-gray-100 border-gray-200 text-gray-400 opacity-50 cursor-not-allowed';
+      } else {
+        // Auswahlmodus
+        if (isSelected) {
+          return isTrueButton ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-600 border-gray-600 text-white';
+        }
+        return 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50';
+      }
+    }
+
+    function getBorderColor(index) {
+      const q = currentQuestions[index];
+      if (!hasChecked) {
+        return q.userChoice !== null ? 'border-blue-200 bg-white' : 'border-gray-100 bg-white';
+      }
+      return q.correct === q.userChoice ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50';
+    }
+
+    // --- Interaction ---
+    window.selectOption = function (index, value) {
+      if (hasChecked) return;
+      currentQuestions[index].userChoice = value;
+      renderQuestions();
+    }
+
+    window.checkAnswers = function () {
+      // Prüfen ob alle beantwortet sind
+      const unanswered = currentQuestions.filter(q => q.userChoice === null).length;
+      if (unanswered > 0) {
+        alert(`Bitte beantworte noch die restlichen ${unanswered} Gleichungen, bevor du auswertest.`);
+        return;
+      }
+
+      hasChecked = true;
+
+      const score = currentQuestions.filter(q => q.correct === q.userChoice).length;
+      const scoreDisplay = document.getElementById('score-display');
+
+      scoreDisplay.innerHTML = `Du hast <span class="${score > 7 ? 'text-green-600' : score > 4 ? 'text-yellow-600' : 'text-red-600'}">${score} von 10</span> richtig!`;
+      scoreDisplay.classList.remove('hidden');
+
+      document.getElementById('btn-check').classList.add('hidden');
+      document.getElementById('btn-restart').classList.remove('hidden');
+
+      renderQuestions();
+
+      // Scroll back up to see results smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.initGame = function () {
+      hasChecked = false;
+      currentQuestions = generateQuestions();
+
+      document.getElementById('score-display').classList.add('hidden');
+      document.getElementById('btn-check').classList.remove('hidden');
+      document.getElementById('btn-restart').classList.add('hidden');
+
+      renderQuestions();
+    }
+
+    // --- Initialize ---
+    // Warten bis alles geladen ist
+    document.addEventListener('DOMContentLoaded', () => {
+      initGame();
+    });
+  </script>
+</body>
+
+</html>
