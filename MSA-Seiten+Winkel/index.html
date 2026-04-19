@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BBR Training: Dreiecksberechnungen</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .math-container {
+      font-size: 1.15rem;
+    }
+
+    /* Druck-Optimierung */
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-border {
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .print-break {
+        page-break-inside: avoid;
+      }
+
+      .question-box {
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+        padding: 1rem !important;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        border: none !important;
+        border-bottom: 1px dotted #000 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        appearance: none;
+      }
+
+      svg {
+        page-break-inside: avoid;
+        overflow: visible !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl print-border overflow-hidden pb-8">
+    <!-- Header -->
+    <div class="bg-fuchsia-600 text-white p-6 text-center print-border no-print">
+      <h1 class="text-3xl font-bold mb-2">BBR Training: Dreiecksberechnungen</h1>
+      <p class="text-fuchsia-100 text-lg">Pythagoras, Sinus, Kosinus, Tangens & Sinussatz</p>
+    </div>
+
+    <!-- Print Header -->
+    <div class="hidden print:block p-6 border-b-2 border-gray-800 mb-4">
+      <div class="flex justify-between items-end">
+        <h1 class="text-2xl font-bold">Aufgabenblatt: Dreiecke berechnen</h1>
+        <div class="text-right">
+          <p>Name: _______________________</p>
+          <p class="mt-2">Datum: _______________________</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center no-print">
+      <p class="text-sm text-gray-600"><strong>Wichtig:</strong> Wähle zuerst das direkte, passende Werkzeug aus und
+        berechne dann den fehlenden Wert. <br>Runde deine Ergebnisse auf <strong>zwei Nachkommastellen</strong> (bei
+        Winkeln werden auch ganze Zahlen akzeptiert).</p>
+      <div class="flex gap-3">
+        <button onclick="window.print()"
+          class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow transition font-medium flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+              clip-rule="evenodd" />
+          </svg>
+          Drucken
+        </button>
+        <button onclick="generateWorksheet()"
+          class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white px-4 py-2 rounded-lg shadow transition font-medium">
+          Neues Blatt generieren
+        </button>
+      </div>
+    </div>
+
+    <!-- App Content -->
+    <div class="p-6">
+      <div id="worksheet-container" class="space-y-6">
+        <!-- Generierte Aufgaben landen hier -->
+      </div>
+
+      <!-- Global Actions -->
+      <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col items-center gap-4 no-print">
+        <button id="btn-check-all" onclick="checkAllAnswers()"
+          class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:scale-105 text-lg">
+          Verbleibende Antworten auswerten
+        </button>
+        <div id="final-score" class="text-2xl font-bold hidden mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- HILFSFUNKTIONEN ---
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function round2(num) {
+      return Math.round(num * 100) / 100;
+    }
+
+    function formatNum(num) {
+      return Number.isInteger(num) ? num.toString() : num.toFixed(2).replace('.', ',');
+    }
+
+    function toRad(deg) {
+      return deg * Math.PI / 180;
+    }
+
+    function toDeg(rad) {
+      return rad * 180 / Math.PI;
+    }
+
+    // --- SVG GRAFIK GENERATOREN ---
+    function getRightTriangleSVG(labels) {
+      // labels: {a, b, c, alpha, beta} wo jeder Wert ein String ist (z.B. "5", "?", "")
+      return `
+                <svg width="240" height="180" viewBox="0 0 240 180" class="mt-2 mb-2 print-break">
+                    <!-- Triangle -->
+                    <polygon points="40,140 200,140 200,40" fill="#fae8ff" stroke="#a21caf" stroke-width="3" stroke-linejoin="round"/>
+                    
+                    <!-- Right Angle at bottom right -->
+                    <rect x="185" y="125" width="15" height="15" fill="none" stroke="#a21caf" stroke-width="2"/>
+                    <circle cx="192.5" cy="132.5" r="2" fill="#a21caf"/>
+                    
+                    <!-- Alpha Arc (bottom left) -->
+                    ${labels.alpha ? `<path d="M 70 140 A 30 30 0 0 0 65 124" fill="none" stroke="#a21caf" stroke-width="2"/>` : ''}
+                    
+                    <!-- Beta Arc (top right) -->
+                    ${labels.beta ? `<path d="M 200 70 A 30 30 0 0 0 184 65" fill="none" stroke="#a21caf" stroke-width="2"/>` : ''}
+                    
+                    <!-- Text Labels -->
+                    <text x="120" y="160" font-family="sans-serif" font-size="14" text-anchor="middle" fill="${labels.b === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.b === '?' ? 'bold' : 'normal'}">${labels.b ? labels.b : ''}</text>
+                    <text x="210" y="95" font-family="sans-serif" font-size="14" text-anchor="start" fill="${labels.a === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.a === '?' ? 'bold' : 'normal'}">${labels.a ? labels.a : ''}</text>
+                    <text x="105" y="80" font-family="sans-serif" font-size="14" text-anchor="end" fill="${labels.c === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.c === '?' ? 'bold' : 'normal'}">${labels.c ? labels.c : ''}</text>
+                    
+                    <text x="75" y="130" font-family="sans-serif" font-size="14" text-anchor="start" fill="${labels.alpha === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.alpha === '?' ? 'bold' : 'normal'}">${labels.alpha ? labels.alpha + (labels.alpha !== '?' ? '°' : '') : ''}</text>
+                    <text x="175" y="60" font-family="sans-serif" font-size="14" text-anchor="end" fill="${labels.beta === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.beta === '?' ? 'bold' : 'normal'}">${labels.beta ? labels.beta + (labels.beta !== '?' ? '°' : '') : ''}</text>
+                </svg>
+            `;
+    }
+
+    function getGeneralTriangleSVG(labels) {
+      // General Triangle points: (40, 140), (220, 140), (150, 40)
+      return `
+                <svg width="260" height="180" viewBox="0 0 260 180" class="mt-2 mb-2 print-break">
+                    <!-- Triangle -->
+                    <polygon points="40,140 220,140 150,40" fill="#fae8ff" stroke="#a21caf" stroke-width="3" stroke-linejoin="round"/>
+                    
+                    <!-- Alpha Arc (bottom left) -->
+                    ${labels.alpha ? `<path d="M 70 140 A 30 30 0 0 0 62 120" fill="none" stroke="#a21caf" stroke-width="2"/>` : ''}
+                    
+                    <!-- Beta Arc (bottom right) -->
+                    ${labels.beta ? `<path d="M 190 140 A 30 30 0 0 1 198 120" fill="none" stroke="#a21caf" stroke-width="2"/>` : ''}
+                    
+                    <!-- Gamma Arc (top) -->
+                    ${labels.gamma ? `<path d="M 135 60 A 30 30 0 0 1 165 60" fill="none" stroke="#a21caf" stroke-width="2"/>` : ''}
+                    
+                    <!-- Text Labels -->
+                    <text x="130" y="160" font-family="sans-serif" font-size="14" text-anchor="middle" fill="${labels.c === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.c === '?' ? 'bold' : 'normal'}">${labels.c ? labels.c : ''}</text>
+                    <text x="195" y="85" font-family="sans-serif" font-size="14" text-anchor="start" fill="${labels.a === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.a === '?' ? 'bold' : 'normal'}">${labels.a ? labels.a : ''}</text>
+                    <text x="85" y="85" font-family="sans-serif" font-size="14" text-anchor="end" fill="${labels.b === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.b === '?' ? 'bold' : 'normal'}">${labels.b ? labels.b : ''}</text>
+                    
+                    <text x="75" y="130" font-family="sans-serif" font-size="14" text-anchor="start" fill="${labels.alpha === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.alpha === '?' ? 'bold' : 'normal'}">${labels.alpha ? labels.alpha + (labels.alpha !== '?' ? '°' : '') : ''}</text>
+                    <text x="185" y="130" font-family="sans-serif" font-size="14" text-anchor="end" fill="${labels.beta === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.beta === '?' ? 'bold' : 'normal'}">${labels.beta ? labels.beta + (labels.beta !== '?' ? '°' : '') : ''}</text>
+                    <text x="150" y="80" font-family="sans-serif" font-size="14" text-anchor="middle" fill="${labels.gamma === '?' ? '#ef4444' : '#1f2937'}" font-weight="${labels.gamma === '?' ? 'bold' : 'normal'}">${labels.gamma ? labels.gamma + (labels.gamma !== '?' ? '°' : '') : ''}</text>
+                </svg>
+            `;
+    }
+
+    // --- AUFGABEN-GENERATOREN ---
+
+    // 1. Pythagoras: Hypotenuse gesucht
+    function genPythagorasHyp() {
+      let a = getRandomInt(3, 12);
+      let b = getRandomInt(3, 12);
+      let c = round2(Math.sqrt(a * a + b * b));
+
+      let labels = { a: formatNum(a), b: formatNum(b), c: '?', alpha: '', beta: '' };
+
+      return {
+        topic: 'Rechtwinkliges Dreieck',
+        text: 'Gegeben sind zwei Katheten. Berechne die fehlende Seite.',
+        customHtml: getRightTriangleSVG(labels),
+        expectedMethod: 'pythagoras',
+        expectedValue: c,
+        unit: 'cm'
+      };
+    }
+
+    // 2. Pythagoras: Kathete gesucht
+    function genPythagorasKat() {
+      // Tripel nehmen, damit c garantiert größer ist als a/b
+      let a = getRandomInt(5, 12);
+      let b = getRandomInt(5, 12);
+      let c = Math.ceil(Math.sqrt(a * a + b * b)) + getRandomInt(1, 4); // c is larger
+      let ans = round2(Math.sqrt(c * c - a * a));
+
+      let labels = { a: formatNum(a), b: '?', c: formatNum(c), alpha: '', beta: '' };
+
+      return {
+        topic: 'Rechtwinkliges Dreieck',
+        text: 'Gegeben sind die Hypotenuse und eine Kathete. Berechne die fehlende Seite.',
+        customHtml: getRightTriangleSVG(labels),
+        expectedMethod: 'pythagoras',
+        expectedValue: ans,
+        unit: 'cm'
+      };
+    }
+
+    // 3. Sinus (Gegenkathete gesucht)
+    function genSinusSeite() {
+      let alpha = getRandomInt(30, 60);
+      let c = getRandomInt(8, 20);
+      let a = round2(c * Math.sin(toRad(alpha)));
+
+      let labels = { a: '?', b: '', c: formatNum(c), alpha: formatNum(alpha), beta: '' };
+
+      return {
+        topic: 'Rechtwinkliges Dreieck',
+        text: 'Gegeben sind ein Winkel und die Hypotenuse. Berechne die markierte Kathete.',
+        customHtml: getRightTriangleSVG(labels),
+        expectedMethod: 'sinus',
+        expectedValue: a,
+        unit: 'cm'
+      };
+    }
+
+    // 4. Kosinus (Ankathete gesucht)
+    function genKosinusSeite() {
+      let alpha = getRandomInt(30, 60);
+      let c = getRandomInt(8, 20);
+      let b = round2(c * Math.cos(toRad(alpha)));
+
+      let labels = { a: '', b: '?', c: formatNum(c), alpha: formatNum(alpha), beta: '' };
+
+      return {
+        topic: 'Rechtwinkliges Dreieck',
+        text: 'Gegeben sind ein Winkel und die Hypotenuse. Berechne die markierte Kathete.',
+        customHtml: getRightTriangleSVG(labels),
+        expectedMethod: 'kosinus',
+        expectedValue: b,
+        unit: 'cm'
+      };
+    }
+
+    // 5. Tangens (Winkel gesucht)
+    function genTangensWinkel() {
+      let a = getRandomInt(4, 15);
+      let b = getRandomInt(4, 15);
+      let alpha = round2(toDeg(Math.atan(a / b)));
+
+      let labels = { a: formatNum(a), b: formatNum(b), c: '', alpha: '?', beta: '' };
+
+      return {
+        topic: 'Rechtwinkliges Dreieck',
+        text: 'Gegeben sind beide Katheten. Berechne den markierten Winkel.',
+        customHtml: getRightTriangleSVG(labels),
+        expectedMethod: 'tangens',
+        expectedValue: alpha,
+        unit: '°'
+      };
+    }
+
+    // 6. Sinus (Winkel gesucht)
+    function genSinusWinkel() {
+      let c = getRandomInt(10, 25);
+      let a = getRandomInt(4, c - 2);
+      let alpha = round2(toDeg(Math.asin(a / c)));
+
+      let labels = { a: formatNum(a), b: '', c: formatNum(c), alpha: '?', beta: '' };
+
+      return {
+        topic: 'Rechtwinkliges Dreieck',
+        text: 'Gegeben sind Gegenkathete und Hypotenuse. Berechne den markierten Winkel.',
+        customHtml: getRightTriangleSVG(labels),
+        expectedMethod: 'sinus',
+        expectedValue: alpha,
+        unit: '°'
+      };
+    }
+
+    // 7. Sinussatz (Seite gesucht im Allg. Dreieck)
+    function genSinussatzSeite() {
+      let alpha = getRandomInt(40, 80);
+      let beta = getRandomInt(30, 70);
+      let a = getRandomInt(10, 30);
+
+      // a / sin(alpha) = b / sin(beta) => b = a * sin(beta) / sin(alpha)
+      let b = round2(a * Math.sin(toRad(beta)) / Math.sin(toRad(alpha)));
+
+      let labels = { a: formatNum(a), b: '?', c: '', alpha: formatNum(alpha), beta: formatNum(beta), gamma: '' };
+
+      return {
+        topic: 'Allgemeines Dreieck',
+        text: 'Gegeben sind zwei Winkel und eine gegenüberliegende Seite. Berechne die zweite Seite.',
+        customHtml: getGeneralTriangleSVG(labels),
+        expectedMethod: 'sinussatz',
+        expectedValue: b,
+        unit: 'cm'
+      };
+    }
+
+    // 8. Sinussatz (Winkel gesucht im Allg. Dreieck)
+    function genSinussatzWinkel() {
+      // Wir müssen aufpassen, dass a > b ist, damit der Winkel beta eindeutig spitz ist.
+      let alpha = getRandomInt(50, 100);
+      let a = getRandomInt(20, 40);
+      let b = getRandomInt(10, a - 2); // b < a => beta < alpha
+
+      // sin(beta) = b * sin(alpha) / a
+      let sinBeta = b * Math.sin(toRad(alpha)) / a;
+      let beta = round2(toDeg(Math.asin(sinBeta)));
+
+      let labels = { a: formatNum(a), b: formatNum(b), c: '', alpha: formatNum(alpha), beta: '?', gamma: '' };
+
+      return {
+        topic: 'Allgemeines Dreieck',
+        text: 'Gegeben sind zwei Seiten und ein gegenüberliegender Winkel. Berechne den markierten Winkel.',
+        customHtml: getGeneralTriangleSVG(labels),
+        expectedMethod: 'sinussatz',
+        expectedValue: beta,
+        unit: '°'
+      };
+    }
+
+    // 9. Innenwinkelsumme (Allgemeines Dreieck)
+    function genInnenwinkelsumme() {
+      let alpha = getRandomInt(30, 80);
+      let beta = getRandomInt(30, 80);
+      let gamma = 180 - alpha - beta;
+
+      let missing = getRandomInt(0, 2);
+      let aStr = missing === 0 ? '?' : formatNum(alpha);
+      let bStr = missing === 1 ? '?' : formatNum(beta);
+      let gStr = missing === 2 ? '?' : formatNum(gamma);
+      let ans = missing === 0 ? alpha : (missing === 1 ? beta : gamma);
+
+      let labels = { a: '', b: '', c: '', alpha: aStr, beta: bStr, gamma: gStr };
+
+      return {
+        topic: 'Allgemeines Dreieck (Winkel)',
+        text: 'Gegeben sind zwei Innenwinkel des Dreiecks. Berechne den fehlenden dritten Winkel.',
+        customHtml: getGeneralTriangleSVG(labels),
+        expectedMethod: 'innenwinkelsumme',
+        expectedValue: ans,
+        unit: '°'
+      };
+    }
+
+    // 10. Innenwinkelsumme (Rechtwinkliges Dreieck)
+    function genInnenwinkelsummeRecht() {
+      let alpha = getRandomInt(20, 70);
+      let beta = 90 - alpha;
+
+      let missing = Math.random() > 0.5 ? 'alpha' : 'beta';
+      let aStr = missing === 'alpha' ? '?' : formatNum(alpha);
+      let bStr = missing === 'beta' ? '?' : formatNum(beta);
+      let ans = missing === 'alpha' ? alpha : beta;
+
+      let labels = { a: '', b: '', c: '', alpha: aStr, beta: bStr };
+
+      return {
+        topic: 'Rechtwinkliges Dreieck (Winkel)',
+        text: 'Gegeben ist ein Winkel (zusätzlich zum rechten Winkel). Berechne den fehlenden, markierten Winkel.',
+        customHtml: getRightTriangleSVG(labels),
+        expectedMethod: 'innenwinkelsumme',
+        expectedValue: ans,
+        unit: '°'
+      };
+    }
+
+
+    // --- APP LOGIK ---
+
+    let currentQuestions = [];
+
+    function generateWorksheet() {
+      document.getElementById('final-score').classList.add('hidden');
+      document.getElementById('btn-check-all').classList.remove('hidden');
+
+      currentQuestions = [];
+
+      let generators = [
+        genPythagorasHyp, genPythagorasKat,
+        genSinusSeite, genKosinusSeite, genTangensWinkel, genSinusWinkel,
+        genSinussatzSeite, genSinussatzWinkel,
+        genInnenwinkelsumme, genInnenwinkelsummeRecht
+      ];
+
+      // Mischen für mehr Abwechslung
+      generators.sort(() => Math.random() - 0.5);
+
+      // 8 Aufgaben für ein schönes DIN A4 Blatt auswählen
+      generators.slice(0, 8).forEach(gen => {
+        currentQuestions.push(gen());
+      });
+
+      // Initialisiere hasChecked status
+      currentQuestions.forEach(q => q.hasChecked = false);
+
+      renderWorksheet();
+    }
+
+    function renderWorksheet() {
+      const container = document.getElementById('worksheet-container');
+      container.innerHTML = '';
+
+      currentQuestions.forEach((q, index) => {
+        // Konvertiere Markdown-Bold zu HTML
+        let textHtml = q.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question-box bg-white p-5 rounded-xl border-2 border-gray-100 shadow-sm transition-colors print-break relative flex flex-col md:flex-row gap-6';
+        qDiv.id = `question-div-${index}`;
+
+        qDiv.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex gap-3 mb-3">
+                            <div class="font-bold text-fuchsia-600 text-xl w-6 shrink-0">${index + 1}.</div>
+                            <div class="w-full">
+                                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">${q.topic}</div>
+                                <div class="text-gray-800 text-lg mb-4">${textHtml}</div>
+                                
+                                <div class="space-y-4">
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                                        <span class="font-bold text-gray-600 w-24">Werkzeug:</span>
+                                        <select id="input-${index}-method" class="flex-1 border-2 border-gray-300 rounded-lg p-2 focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-200 outline-none text-lg print-input bg-white cursor-pointer">
+                                            <option value="">-- Bitte wählen --</option>
+                                            <option value="pythagoras">Satz des Pythagoras</option>
+                                            <option value="sinus">Sinus (Winkelfunktion)</option>
+                                            <option value="kosinus">Kosinus (Winkelfunktion)</option>
+                                            <option value="tangens">Tangens (Winkelfunktion)</option>
+                                            <option value="sinussatz">Sinussatz</option>
+                                            <option value="innenwinkelsumme">Innenwinkelsumme (180°)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                                        <span class="font-bold text-gray-600 w-24">Ergebnis:</span>
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" step="0.01" id="input-${index}-val" class="border-2 border-gray-300 rounded-lg p-2 w-32 focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-200 outline-none text-lg print-input" placeholder="...">
+                                            ${q.unit ? `<span class="text-gray-600 font-medium">${q.unit}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 flex items-center gap-3">
+                                    <button id="btn-single-${index}" onclick="checkSingleAnswer(${index})" class="px-6 py-2 bg-fuchsia-500 text-white rounded-lg hover:bg-fuchsia-600 shadow transition-colors font-bold no-print whitespace-nowrap">Prüfen</button>
+                                    <div id="feedback-${index}" class="font-bold text-lg hidden no-print"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center min-w-[240px]">
+                        ${q.customHtml ? q.customHtml : ''}
+                    </div>
+                `;
+
+        container.appendChild(qDiv);
+      });
+    }
+
+    window.checkSingleAnswer = function (index) {
+      const q = currentQuestions[index];
+      const feedbackEl = document.getElementById(`feedback-${index}`);
+      const boxEl = document.getElementById(`question-div-${index}`);
+      const btnEl = document.getElementById(`btn-single-${index}`);
+
+      const selectEl = document.getElementById(`input-${index}-method`);
+      const inputEl = document.getElementById(`input-${index}-val`);
+
+      if (selectEl.value === '' || inputEl.value.trim() === '') {
+        alert('Bitte wähle zuerst das Werkzeug aus und trage das Ergebnis ein!');
+        return;
+      }
+
+      // Auswertung Werkzeug
+      let isMethodCorrect = (selectEl.value === q.expectedMethod);
+
+      // Auswertung Zahl
+      let userVal = parseFloat(inputEl.value.replace(',', '.'));
+
+      // Erweiterte Toleranz für Rundungen (auch auf ganze Zahlen)
+      let exactMatch = Math.abs(userVal - q.expectedValue) <= 0.05;
+      let roundedMatch = Math.abs(userVal - Math.round(q.expectedValue)) <= 0.01;
+      let rounded1Match = Math.abs(userVal - Math.round(q.expectedValue * 10) / 10) <= 0.01;
+
+      let isValCorrect = exactMatch || roundedMatch || rounded1Match;
+
+      q.hasChecked = true;
+      inputEl.disabled = true;
+      selectEl.disabled = true;
+      btnEl.classList.add('hidden');
+      feedbackEl.classList.remove('hidden');
+
+      if (isMethodCorrect && isValCorrect) {
+        feedbackEl.innerHTML = '✓ Komplett Richtig!';
+        feedbackEl.className = 'ml-4 font-bold text-lg text-green-600 no-print';
+        boxEl.classList.add('border-green-300', 'bg-fuchsia-50');
+        boxEl.classList.remove('border-gray-100');
+        selectEl.classList.add('border-green-400', 'bg-green-50');
+        inputEl.classList.add('border-green-400', 'bg-green-50');
+      } else {
+        let errorMsg = '✗ Falsch. ';
+        if (!isMethodCorrect) {
+          errorMsg += `<br><span class="text-sm font-normal">Das beste Werkzeug war: <strong>${selectEl.querySelector(`option[value="${q.expectedMethod}"]`).innerText}</strong></span>`;
+          selectEl.classList.add('border-red-400', 'bg-red-50');
+        } else {
+          selectEl.classList.add('border-green-400', 'bg-green-50');
+        }
+
+        if (!isValCorrect) {
+          errorMsg += `<br><span class="text-sm font-normal">Das richtige Ergebnis ist: <strong>${formatNum(q.expectedValue)}</strong></span>`;
+          inputEl.classList.add('border-red-400', 'bg-red-50');
+        } else {
+          inputEl.classList.add('border-green-400', 'bg-green-50');
+        }
+
+        feedbackEl.innerHTML = errorMsg;
+        feedbackEl.className = 'ml-4 font-bold text-lg text-red-600 no-print';
+        boxEl.classList.add('border-red-300', 'bg-red-50');
+        boxEl.classList.remove('border-gray-100');
+      }
+
+      checkIfAllDone();
+    }
+
+    window.checkAllAnswers = function () {
+      currentQuestions.forEach((q, index) => {
+        if (!q.hasChecked) {
+          const selectEl = document.getElementById(`input-${index}-method`);
+          const inputEl = document.getElementById(`input-${index}-val`);
+
+          if (selectEl.value === '') selectEl.value = 'falsch';
+          if (inputEl.value.trim() === '') inputEl.value = '999999';
+
+          checkSingleAnswer(index);
+        }
+      });
+    }
+
+    function checkIfAllDone() {
+      const allChecked = currentQuestions.every(q => q.hasChecked);
+      if (allChecked) {
+        let score = currentQuestions.filter((q, index) => {
+          const selectEl = document.getElementById(`input-${index}-method`);
+          const inputEl = document.getElementById(`input-${index}-val`);
+
+          let userVal = parseFloat(inputEl.value.replace(',', '.'));
+
+          let exactMatch = Math.abs(userVal - q.expectedValue) <= 0.05;
+          let roundedMatch = Math.abs(userVal - Math.round(q.expectedValue)) <= 0.01;
+          let rounded1Match = Math.abs(userVal - Math.round(q.expectedValue * 10) / 10) <= 0.01;
+
+          return (selectEl.value === q.expectedMethod) && (exactMatch || roundedMatch || rounded1Match);
+        }).length;
+
+        const scoreEl = document.getElementById('final-score');
+        scoreEl.innerHTML = `Du hast ${score} von ${currentQuestions.length} Aufgaben komplett richtig gelöst!`;
+        scoreEl.className = `text-2xl font-bold mt-4 text-center ${score === currentQuestions.length ? 'text-green-600' : 'text-fuchsia-600'}`;
+        scoreEl.classList.remove('hidden');
+
+        document.getElementById('btn-check-all').classList.add('hidden');
+      }
+    }
+
+    // --- Start ---
+    document.addEventListener('DOMContentLoaded', () => {
+      generateWorksheet();
+    });
+  </script>
+</body>
+
+</html>
