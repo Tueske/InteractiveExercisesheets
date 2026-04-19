@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BBR Training: Lineare Funktionen & Wahrscheinlichkeit</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .math-container {
+      font-size: 1.15rem;
+    }
+
+    /* Druck-Optimierung: Versteckt Buttons und formatiert für DIN A4 Papier */
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-border {
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .print-break {
+        page-break-inside: avoid;
+      }
+
+      .question-box {
+        border: 1px solid #ccc !important;
+        margin-bottom: 1rem !important;
+        padding: 1rem !important;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        border: none !important;
+        border-bottom: 1px dotted #000 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+
+      svg {
+        page-break-inside: avoid;
+        overflow: visible !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 min-h-screen p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl print-border overflow-hidden pb-8">
+    <!-- Header -->
+    <div class="bg-rose-600 text-white p-6 text-center print-border no-print">
+      <h1 class="text-3xl font-bold mb-2">BBR Training: Funktionen & Wahrscheinlichkeit</h1>
+      <p class="text-rose-100 text-lg">Terme, Nullstellen, Graphen, Laplace, Prozente & Baumdiagramme</p>
+    </div>
+
+    <!-- Print Header (Nur sichtbar auf dem Ausdruck) -->
+    <div class="hidden print:block p-6 border-b-2 border-gray-800 mb-4">
+      <div class="flex justify-between items-end">
+        <h1 class="text-2xl font-bold">Aufgabenblatt: Lineare Funktionen & Wahrscheinlichkeit</h1>
+        <div class="text-right">
+          <p>Name: _______________________</p>
+          <p class="mt-2">Datum: _______________________</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center no-print">
+      <p class="text-sm text-gray-600"><strong>Wichtig:</strong> Runde bei Brüchen (Wahrscheinlichkeit) auf max. 2
+        Nachkommastellen (z.B. 33,33).</p>
+      <div class="flex gap-3">
+        <button onclick="window.print()"
+          class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow transition font-medium flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+              clip-rule="evenodd" />
+          </svg>
+          Drucken
+        </button>
+        <button onclick="generateWorksheet()"
+          class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg shadow transition font-medium">
+          Neues Blatt generieren
+        </button>
+      </div>
+    </div>
+
+    <!-- App Content -->
+    <div class="p-6">
+      <div id="worksheet-container" class="space-y-6">
+        <!-- Generierte Aufgaben landen hier -->
+      </div>
+
+      <!-- Global Actions -->
+      <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col items-center gap-4 no-print">
+        <button id="btn-check-all" onclick="checkAllAnswers()"
+          class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:scale-105 text-lg">
+          Verbleibende Antworten auswerten
+        </button>
+        <div id="final-score" class="text-2xl font-bold hidden mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- HILFSFUNKTIONEN ---
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getUniqueLetters(count) {
+      const letters = ['p', 'q', 'v', 'w', 'k', 'm', 'n', 't', 'z', 'u'];
+      let shuffled = letters.sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function round(num) {
+      return Math.round(num * 100) / 100;
+    }
+
+    // --- AUFGABEN-GENERATOREN (FUNKTIONEN & TERME) ---
+
+    // 1. Termwert berechnen (Werte einsetzen)
+    function genTermwert() {
+      let m = getRandomInt(2, 6);
+      let b = getRandomInt(3, 12);
+      let val = getRandomInt(4, 9);
+      let letters = getUniqueLetters(1);
+      let v = letters[0];
+      let ans = m * val - b;
+
+      return {
+        topic: 'Terme (Werte einsetzen)',
+        text: `Gegeben ist der Term $T(${v}) = ${m}${v} - ${b}$. Setze den Wert ein und berechne das Ergebnis für $${v} = ${val}$.`,
+        answer: ans,
+        unit: ''
+      };
+    }
+
+    // 2. Nullstelle berechnen
+    function genNullstelle() {
+      let m = getRandomInt(2, 5);
+      let ans = getRandomInt(2, 8); // Das wird die glatte Nullstelle
+      let b = m * ans;
+      let letters = getUniqueLetters(1);
+      let x = letters[0];
+
+      return {
+        topic: 'Lineare Funktionen (Nullstelle)',
+        text: `Berechne die Nullstelle der Funktion $f(${x}) = ${m}${x} - ${b}$. <br><span class="text-sm text-gray-500">(Tipp: Setze die Funktion mit 0 gleich und löse nach $${x}$ auf)</span>`,
+        answer: ans,
+        unit: ''
+      };
+    }
+
+    // 3. Modellieren / Rückwärtsrechnen
+    function genSachaufgabe() {
+      let m = getRandomInt(2, 5); // Preis pro km
+      let b = getRandomInt(4, 15); // Grundgebühr
+      let ans = getRandomInt(6, 20); // Gefahrene km
+      let total = m * ans + b;
+      let letters = getUniqueLetters(1);
+      let k = letters[0];
+
+      return {
+        topic: 'Sachsituationen (Rückwärtsrechnen)',
+        text: `Ein Taxiunternehmen berechnet $${b}$ € Grundgebühr und $${m}$ € pro gefahrenem Kilometer ($${k}$). Die Formel lautet: $y = ${m}${k} + ${b}$. <br>Du bezahlst am Ende genau $${total}$ €. Wie viele Kilometer bist du gefahren?`,
+        answer: ans,
+        unit: 'km'
+      };
+    }
+
+    // 4. Graph ablesen (Steigung)
+    function genGraph() {
+      let b = getRandomInt(1, 2);
+      let m_opts = [0.5, 1, 1.5, 2];
+      let m = m_opts[Math.floor(Math.random() * m_opts.length)];
+      let ans = m;
+
+      // Koordinatensystem SVG generieren
+      let gridHtml = '';
+      for (let i = 0; i <= 6; i++) {
+        // Vertical lines
+        gridHtml += `<line x1="${30 + i * 30}" y1="10" x2="${30 + i * 30}" y2="190" stroke="#e5e7eb" stroke-width="1"/>`;
+        // Horizontal lines
+        gridHtml += `<line x1="30" y1="${190 - i * 30}" x2="210" y2="${190 - i * 30}" stroke="#e5e7eb" stroke-width="1"/>`;
+        // Labels
+        if (i > 0) {
+          gridHtml += `<text x="${30 + i * 30}" y="205" font-size="10" text-anchor="middle" fill="#6b7280">${i}</text>`;
+          gridHtml += `<text x="20" y="${190 - i * 30 + 3}" font-size="10" text-anchor="end" fill="#6b7280">${i}</text>`;
+        }
+      }
+
+      let y_start = 190 - (b * 30);
+      let y_end = 190 - ((b + 5 * m) * 30);
+
+      let html = `
+                <svg width="240" height="220" viewBox="0 0 240 220" class="mt-4 print-break">
+                    ${gridHtml}
+                    <!-- Achsen -->
+                    <line x1="30" y1="190" x2="220" y2="190" stroke="#1f2937" stroke-width="2"/>
+                    <line x1="30" y1="10" x2="30" y2="190" stroke="#1f2937" stroke-width="2"/>
+                    <!-- Achsen-Pfeile -->
+                    <polygon points="220,187 225,190 220,193" fill="#1f2937"/>
+                    <polygon points="27,10 30,5 33,10" fill="#1f2937"/>
+                    
+                    <!-- Funktionsgraph -->
+                    <line x1="30" y1="${y_start}" x2="${30 + 5 * 30}" y2="${y_end}" stroke="#e11d48" stroke-width="3"/>
+                    
+                    <!-- Hilfspunkte -->
+                    <circle cx="30" cy="${y_start}" r="3" fill="#9f1239"/>
+                    <circle cx="${30 + 2 * 30}" cy="${190 - (b + 2 * m) * 30}" r="3" fill="#9f1239"/>
+                </svg>
+            `;
+
+      return {
+        topic: 'Graphen interpretieren',
+        text: `Bestimme die **Steigung $m$** der abgebildeten linearen Funktion. <br><span class="text-sm text-gray-500">(Tipp: Zeichne ein Steigungsdreieck: $m = \\frac{\\text{hoch}}{\\text{rechts}}$)</span>`,
+        customHtml: html,
+        answer: ans,
+        unit: ''
+      };
+    }
+
+    // --- AUFGABEN-GENERATOREN (WAHRSCHEINLICHKEIT) ---
+
+    // 5. Laplace (Urne in Prozent)
+    function genUrne() {
+      let totals = [10, 20, 25, 50];
+      let total = totals[Math.floor(Math.random() * totals.length)];
+      let red = getRandomInt(2, total - 2);
+      let blue = total - red;
+      let ans = (red / total) * 100;
+
+      let html = `
+                <div class="flex items-center gap-6 mt-4 ml-2 print-break p-4 border-2 border-gray-200 rounded-lg max-w-xs bg-gray-50">
+                    <div class="flex-1">
+                        <div class="font-bold text-lg mb-1">Los-Urne:</div>
+                        <div class="text-gray-700">🔴 ${red} Rote Kugeln</div>
+                        <div class="text-gray-700">🔵 ${blue} Blaue Kugeln</div>
+                    </div>
+                    <div class="text-3xl">🗳️</div>
+                </div>
+            `;
+
+      return {
+        topic: 'Wahrscheinlichkeit (Laplace)',
+        text: `Wie hoch ist die Wahrscheinlichkeit, blind eine **rote** Kugel aus der Urne zu ziehen? Gib das Ergebnis in **Prozent** an.`,
+        customHtml: html,
+        answer: ans,
+        unit: '%'
+      };
+    }
+
+    // 6. Gegenwahrscheinlichkeit
+    function genGegen() {
+      let p = getRandomInt(5, 45); // Gewinnchance
+      let ans = 100 - p;
+
+      return {
+        topic: 'Gegenwahrscheinlichkeit',
+        text: `Die Gewinnchance bei einem Rubbellos liegt bei $${p}\\%$. Wie hoch ist die Wahrscheinlichkeit für eine Niete (kein Gewinn)?`,
+        answer: ans,
+        unit: '%'
+      };
+    }
+
+    // 7. Mehrstufig / Baumdiagramm (Produktregel)
+    function genBaum() {
+      let p_win = getRandomInt(2, 4); // z.B. 2 oder 3
+      let p_total = 5;
+      let pct_win = (p_win / p_total) * 100;
+      let pct_lose = 100 - pct_win;
+      let ans = round((pct_win / 100) * (pct_win / 100) * 100);
+
+      let html = `
+                <svg width="280" height="150" viewBox="0 0 280 150" class="mt-4 print-break">
+                    <!-- Start -->
+                    <circle cx="30" cy="75" r="5" fill="#1f2937"/>
+                    
+                    <!-- Äste Stufe 1 -->
+                    <line x1="30" y1="75" x2="100" y2="30" stroke="#4b5563" stroke-width="2"/>
+                    <line x1="30" y1="75" x2="100" y2="120" stroke="#4b5563" stroke-width="2"/>
+                    
+                    <!-- Labels Stufe 1 -->
+                    <text x="60" y="45" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#e11d48" font-weight="bold">${pct_win}%</text>
+                    <text x="60" y="115" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#4b5563">${pct_lose}%</text>
+                    <text x="110" y="35" font-family="sans-serif" font-size="14" font-weight="bold">Treffer</text>
+                    <text x="110" y="125" font-family="sans-serif" font-size="14">Niete</text>
+
+                    <!-- Äste Stufe 2 (nur oberer Ast) -->
+                    <line x1="160" y1="30" x2="220" y2="10" stroke="#e11d48" stroke-width="3" stroke-dasharray="4,4"/>
+                    <line x1="160" y1="30" x2="220" y2="50" stroke="#4b5563" stroke-width="2" stroke-dasharray="4,4"/>
+                    
+                    <text x="190" y="15" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#e11d48" font-weight="bold">${pct_win}%</text>
+                    <text x="230" y="15" font-family="sans-serif" font-size="14" font-weight="bold" fill="#e11d48">Treffer</text>
+                </svg>
+            `;
+
+      return {
+        topic: 'Baumdiagramm (Produktregel)',
+        text: `Ein Glücksrad wird **zweimal** gedreht. Die Chance für einen Treffer liegt bei jeder Drehung bei $${pct_win}\\%$. <br>Wie groß ist die Wahrscheinlichkeit für den Pfad "Treffer - Treffer"? <span class="text-sm text-gray-500">(Schreibe die Wahrscheinlichkeiten als Zahl ohne % auf und multipliziere entlang des Pfades!)</span>`,
+        customHtml: html,
+        answer: ans,
+        unit: '%'
+      };
+    }
+
+    // 8. Laplace (Würfel)
+    function genWuerfel() {
+      let threshold = getRandomInt(3, 5);
+      let count = 6 - threshold;
+      let ans = round((count / 6) * 100);
+
+      return {
+        topic: 'Wahrscheinlichkeit (Würfel)',
+        text: `Ein normaler, fairer Spielwürfel (Zahlen 1 bis 6) wird einmal geworfen. <br>Wie hoch ist die Wahrscheinlichkeit, eine Zahl **größer als ${threshold}** zu würfeln? <br><span class="text-sm text-gray-500">(Tipp: Berechne den Bruch und gib das Ergebnis in Prozent an.)</span>`,
+        answer: ans,
+        unit: '%'
+      };
+    }
+
+
+    // --- APP LOGIK ---
+
+    let currentQuestions = [];
+
+    function generateWorksheet() {
+      document.getElementById('final-score').classList.add('hidden');
+      document.getElementById('btn-check-all').classList.remove('hidden');
+
+      currentQuestions = [];
+
+      // 4 Funktionen / Terme
+      currentQuestions.push(genTermwert());
+      currentQuestions.push(genNullstelle());
+      currentQuestions.push(genSachaufgabe());
+      currentQuestions.push(genGraph());
+
+      // 4 Wahrscheinlichkeit
+      currentQuestions.push(genUrne());
+      currentQuestions.push(genWuerfel());
+      currentQuestions.push(genGegen());
+      currentQuestions.push(genBaum());
+
+      // Initialisiere hasChecked status
+      currentQuestions.forEach(q => q.hasChecked = false);
+
+      renderWorksheet();
+    }
+
+    function renderWorksheet() {
+      const container = document.getElementById('worksheet-container');
+      container.innerHTML = '';
+
+      currentQuestions.forEach((q, index) => {
+        // Konvertiere Markdown-Bold zu HTML
+        let textHtml = q.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Konvertiere Inline-LaTeX
+        textHtml = textHtml.replace(/\$(.*?)\$/g, (match, formula) => {
+          try { return katex.renderToString(formula, { throwOnError: false }); }
+          catch (e) { return match; }
+        });
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question-box bg-white p-5 rounded-xl border-2 border-gray-100 shadow-sm transition-colors print-break relative';
+        qDiv.id = `question-div-${index}`;
+
+        qDiv.innerHTML = `
+                    <div class="flex gap-3 mb-3">
+                        <div class="font-bold text-rose-600 text-xl w-6 shrink-0">${index + 1}.</div>
+                        <div class="w-full">
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">${q.topic}</div>
+                            <div class="text-gray-800 text-lg mb-2">${textHtml}</div>
+                            
+                            ${q.latex ? `<div id="math-${index}" class="math-container my-3 ml-2 text-rose-900"></div>` : ''}
+                            ${q.customHtml ? q.customHtml : ''}
+                            
+                            <div class="mt-6 flex flex-wrap items-center gap-3">
+                                <span class="font-bold text-gray-600">Lösung:</span>
+                                <input type="number" step="0.01" id="input-${index}" class="border-2 border-gray-300 rounded-lg p-2 w-32 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none text-lg print-input" placeholder="Ergebnis">
+                                ${q.unit ? `<span class="text-gray-600 font-medium">${q.unit}</span>` : ''}
+                                
+                                <button id="btn-single-${index}" onclick="checkSingleAnswer(${index})" class="ml-2 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 shadow transition-colors font-bold no-print whitespace-nowrap">Prüfen</button>
+                                
+                                <div id="feedback-${index}" class="ml-4 font-bold text-lg hidden no-print"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+        container.appendChild(qDiv);
+
+        if (q.latex) {
+          katex.render(q.latex, document.getElementById(`math-${index}`), {
+            throwOnError: false, displayMode: true
+          });
+        }
+      });
+    }
+
+    window.checkSingleAnswer = function (index) {
+      const q = currentQuestions[index];
+      const inputEl = document.getElementById(`input-${index}`);
+      const feedbackEl = document.getElementById(`feedback-${index}`);
+      const boxEl = document.getElementById(`question-div-${index}`);
+      const btnEl = document.getElementById(`btn-single-${index}`);
+
+      if (inputEl.value.trim() === '') {
+        alert('Bitte trage zuerst ein Ergebnis für Aufgabe ' + (index + 1) + ' ein!');
+        return;
+      }
+
+      // Ersetze Komma durch Punkt für deutsche Eingabe
+      let userVal = parseFloat(inputEl.value.replace(',', '.'));
+
+      // Toleranz-Logik: Erlaubt kleine Rundungsfehler bei Brüchen und Prozenten (Toleranz +/- 0.2)
+      let diff = Math.abs(userVal - q.answer);
+      let isCorrect = diff <= 0.2;
+
+      q.hasChecked = true;
+      inputEl.disabled = true;
+      btnEl.classList.add('hidden');
+      feedbackEl.classList.remove('hidden');
+
+      if (isCorrect) {
+        feedbackEl.innerHTML = '✓ Richtig' + (diff > 0.01 ? ` <span class="text-sm font-normal text-gray-500">(Exakt: ${q.answer})</span>` : '');
+        feedbackEl.className = 'ml-4 font-bold text-lg text-green-600 no-print';
+        boxEl.classList.add('border-green-300', 'bg-green-50');
+        boxEl.classList.remove('border-gray-100');
+      } else {
+        feedbackEl.innerHTML = `✗ Falsch (Richtig wäre: ${q.answer})`;
+        feedbackEl.className = 'ml-4 font-bold text-lg text-red-600 no-print';
+        boxEl.classList.add('border-red-300', 'bg-red-50');
+        boxEl.classList.remove('border-gray-100');
+      }
+
+      checkIfAllDone();
+    }
+
+    window.checkAllAnswers = function () {
+      // Geht durch alle noch nicht geprüften Aufgaben und wertet sie aus
+      currentQuestions.forEach((q, index) => {
+        if (!q.hasChecked) {
+          const inputEl = document.getElementById(`input-${index}`);
+          if (inputEl.value.trim() === '') {
+            inputEl.value = '0'; // Falls nichts eingetragen wurde, ist es automatisch falsch
+          }
+          checkSingleAnswer(index);
+        }
+      });
+    }
+
+    function checkIfAllDone() {
+      const allChecked = currentQuestions.every(q => q.hasChecked);
+      if (allChecked) {
+        let score = currentQuestions.filter((q, idx) => {
+          let userVal = parseFloat(document.getElementById(`input-${idx}`).value.replace(',', '.'));
+          return Math.abs(userVal - q.answer) <= 0.2;
+        }).length;
+
+        const scoreEl = document.getElementById('final-score');
+        scoreEl.innerHTML = `Du hast ${score} von ${currentQuestions.length} Aufgaben richtig gelöst!`;
+        scoreEl.className = `text-2xl font-bold mt-4 text-center ${score === currentQuestions.length ? 'text-green-600' : 'text-rose-600'}`;
+        scoreEl.classList.remove('hidden');
+
+        document.getElementById('btn-check-all').classList.add('hidden');
+      }
+    }
+
+    // --- Start ---
+    document.addEventListener('DOMContentLoaded', () => {
+      generateWorksheet();
+    });
+  </script>
+</body>
+
+</html>
