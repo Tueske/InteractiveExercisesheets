@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBR Prüfungsvorbereitung: Basisaufgaben & Pythagoras</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        
+        .math-container {
+            font-size: 1.15rem;
+        }
+
+        /* Druck-Optimierung: Versteckt Buttons und formatiert für DIN A4 Papier */
+        @media print {
+            body { background-color: white; padding: 0; margin: 0; }
+            .no-print { display: none !important; }
+            .print-border { border: none !important; box-shadow: none !important; }
+            .print-break { page-break-inside: avoid; }
+            .question-box { border: 1px solid #ccc !important; margin-bottom: 1rem !important; padding: 1rem !important; }
+            input[type="text"], input[type="number"] {
+                border: none !important;
+                border-bottom: 1px dotted #000 !important;
+                border-radius: 0 !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+            svg { page-break-inside: avoid; overflow: visible !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl print-border overflow-hidden pb-8">
+        <!-- Header -->
+        <div class="bg-indigo-600 text-white p-6 text-center print-border no-print">
+            <h1 class="text-3xl font-bold mb-2">BBR Training: Basisaufgaben & Pythagoras</h1>
+            <p class="text-indigo-100 text-lg">Gleichungen, Diagramme und der Satz des Pythagoras</p>
+        </div>
+        
+        <!-- Print Header (Nur sichtbar auf dem Ausdruck) -->
+        <div class="hidden print:block p-6 border-b-2 border-gray-800 mb-4">
+            <div class="flex justify-between items-end">
+                <h1 class="text-2xl font-bold">Aufgabenblatt: BBR Basis & Pythagoras</h1>
+                <div class="text-right">
+                    <p>Name: _______________________</p>
+                    <p class="mt-2">Datum: _______________________</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center no-print">
+            <p class="text-sm text-gray-600">Löse die Aufgaben direkt hier am Gerät oder drucke sie als Arbeitsblatt aus.</p>
+            <div class="flex gap-3">
+                <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow transition font-medium flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
+                    Drucken
+                </button>
+                <button onclick="generateWorksheet()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow transition font-medium">
+                    Neues Blatt generieren
+                </button>
+            </div>
+        </div>
+
+        <!-- App Content -->
+        <div class="p-6">
+            <div id="worksheet-container" class="space-y-6">
+                <!-- Generierte Aufgaben landen hier -->
+            </div>
+
+            <!-- Global Actions -->
+            <div class="mt-10 pt-6 border-t border-gray-200 flex flex-col items-center gap-4 no-print">
+                <button id="btn-check-all" onclick="checkAllAnswers()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:scale-105 text-lg">
+                    Verbleibende Antworten auswerten
+                </button>
+                <div id="final-score" class="text-2xl font-bold hidden mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- HILFSFUNKTIONEN ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // --- AUFGABEN-GENERATOREN ---
+
+        // 1. Punkt vor Strich (z.B. 15 + 4*3 - 8:2)
+        function genPvS() {
+            let b = getRandomInt(2, 6);
+            let c = getRandomInt(2, 5);
+            let e = getRandomInt(2, 5);
+            let d = e * getRandomInt(2, 5);
+            let a = getRandomInt(10, 30);
+            let ans = a + (b * c) - (d / e);
+            return {
+                topic: 'Rechenregeln',
+                text: 'Berechne das Ergebnis. Achte auf "Punkt vor Strich"!',
+                latex: `${a} + ${b} \\cdot ${c} - ${d} : ${e}`,
+                answer: ans
+            };
+        }
+
+        // 2. Klammern (z.B. 5*(12-4) + 6)
+        function genKlammer() {
+            let a = getRandomInt(2, 6);
+            let c = getRandomInt(2, 8);
+            let b = c + getRandomInt(3, 9);
+            let d = getRandomInt(2, 15);
+            let ans = a * (b - c) + d;
+            return {
+                topic: 'Rechenregeln',
+                text: 'Berechne das Ergebnis. Die Klammer hat Vorrang!',
+                latex: `${a} \\cdot (${b} - ${c}) + ${d}`,
+                answer: ans
+            };
+        }
+
+        // 3. Gleichung Typ 1 (z.B. 3x + 10 = 40)
+        function genEq1() {
+            let a = getRandomInt(2, 8);
+            let x = getRandomInt(2, 12);
+            let b = getRandomInt(5, 20);
+            let sign = Math.random() > 0.5 ? '+' : '-';
+            let c = sign === '+' ? (a * x + b) : (a * x - b);
+            return {
+                topic: 'Gleichungen',
+                text: 'Löse die einfache Gleichung nach $x$ auf:',
+                latex: `${a}x ${sign} ${b} = ${c}`,
+                answer: x
+            };
+        }
+
+        // 4. Gleichung Typ 2 (z.B. 2x - 5 = 3x + 7)
+        function genEq2() {
+            let x = getRandomInt(2, 10);
+            let c = getRandomInt(1, 4);
+            let a = c + getRandomInt(1, 4);
+            let b = getRandomInt(2, 12);
+            let isMinus = Math.random() > 0.5;
+            let d;
+            let latexStr = "";
+            if (isMinus) {
+                b = getRandomInt(1, x * (a-c) - 1);
+                d = x * (a-c) - b;
+                latexStr = `${a}x - ${b} = ${c}x + ${d}`;
+            } else {
+                d = x * (a-c) + b;
+                latexStr = `${a}x + ${b} = ${c}x + ${d}`;
+            }
+            return {
+                topic: 'Gleichungen',
+                text: 'Löse die Gleichung ($x$ befindet sich auf beiden Seiten):',
+                latex: latexStr,
+                answer: x
+            };
+        }
+
+        // --- PYTHAGORAS MIT SVGs ---
+        function getTriangleSVG(bottomLbl, leftLbl, hypLbl, isHypUnknown, isLeftUnknown, isBottomUnknown) {
+            // Viel Platz für Labels: viewBox="0 0 240 160" (40px margin links, 40px unten etc.)
+            return `
+                <svg width="240" height="160" viewBox="0 0 240 160" class="mt-4 print-break">
+                    <!-- Dreieck -->
+                    <polygon points="50,20 50,120 170,120" fill="#e0e7ff" stroke="#4f46e5" stroke-width="3" stroke-linejoin="round"/>
+                    
+                    <!-- Rechter Winkel -->
+                    <rect x="50" y="105" width="15" height="15" fill="transparent" stroke="#4f46e5" stroke-width="2"/>
+                    <circle cx="58" cy="112" r="2" fill="#4f46e5"/>
+                    
+                    <!-- Labels -->
+                    <!-- Unten Kathete -->
+                    <text x="110" y="145" font-family="sans-serif" font-size="15" text-anchor="middle" ${isBottomUnknown ? 'font-weight="bold" fill="#ef4444"' : ''}>${bottomLbl}</text>
+                    
+                    <!-- Linke Kathete -->
+                    <text x="40" y="75" font-family="sans-serif" font-size="15" text-anchor="end" ${isLeftUnknown ? 'font-weight="bold" fill="#ef4444"' : ''}>${leftLbl}</text>
+                    
+                    <!-- Hypotenuse -->
+                    <text x="120" y="60" font-family="sans-serif" font-size="15" text-anchor="start" ${isHypUnknown ? 'font-weight="bold" fill="#ef4444"' : ''}>${hypLbl}</text>
+                </svg>
+            `;
+        }
+
+        // 5. Pythagoras (Hypotenuse gesucht, Variable unbekannt, Rechte Winkel Prüfung erforderlich)
+        function genPythHyp() {
+            const triples = [[3,4,5], [5,12,13], [6,8,10], [9,12,15], [8,15,17]];
+            const t = triples[Math.floor(Math.random() * triples.length)];
+            const letterSets = [['a','b','c'], ['x','y','z'], ['p','q','r'], ['u','v','w'], ['e','f','g']];
+            const letters = letterSets[Math.floor(Math.random() * letterSets.length)].sort(() => Math.random() - 0.5);
+            
+            let bottomLbl = `${letters[0]} = ${t[0]}`;
+            let leftLbl = `${letters[1]} = ${t[1]}`;
+            let hypLbl = `${letters[2]} = ?`;
+
+            return {
+                topic: 'Pythagoras',
+                text: `Gegeben ist das abgebildete rechtwinklige Dreieck. Berechne die fehlende Seitenlänge $${letters[2]}$. <br><span class="text-sm text-gray-500">(Tipp: Wo ist der rechte Winkel und welche Seite suchst du?)</span>`,
+                customHtml: getTriangleSVG(bottomLbl, leftLbl, hypLbl, true, false, false),
+                answer: t[2],
+                unit: 'cm'
+            };
+        }
+
+        // 6. Pythagoras (Kathete gesucht, Variable unbekannt, Rechte Winkel Prüfung erforderlich)
+        function genPythKat() {
+            const triples = [[3,4,5], [5,12,13], [6,8,10], [9,12,15], [8,15,17]];
+            const t = triples[Math.floor(Math.random() * triples.length)];
+            const letterSets = [['a','b','c'], ['x','y','z'], ['p','q','r'], ['u','v','w'], ['k','l','m']];
+            const letters = letterSets[Math.floor(Math.random() * letterSets.length)].sort(() => Math.random() - 0.5);
+            
+            const seekBottom = Math.random() > 0.5;
+            
+            let bottomLbl = seekBottom ? `${letters[0]} = ?` : `${letters[0]} = ${t[0]}`;
+            let leftLbl = seekBottom ? `${letters[1]} = ${t[1]}` : `${letters[1]} = ?`;
+            let hypLbl = `${letters[2]} = ${t[2]}`;
+            let seekVar = seekBottom ? letters[0] : letters[1];
+            let ans = seekBottom ? t[0] : t[1];
+
+            return {
+                topic: 'Pythagoras',
+                text: `Gegeben ist das abgebildete rechtwinklige Dreieck. Berechne die fehlende Seitenlänge $${seekVar}$. <br><span class="text-sm text-gray-500">(Tipp: Wo ist der rechte Winkel und welche Seite suchst du?)</span>`,
+                customHtml: getTriangleSVG(bottomLbl, leftLbl, hypLbl, false, !seekBottom, seekBottom),
+                answer: ans,
+                unit: 'cm'
+            };
+        }
+
+        // 7. Pythagoras Sachaufgabe (Leiter an Wand)
+        function genPythLeiter() {
+            const scenarios = [
+                {b: 3, c: 5, a: 4},
+                {b: 5, c: 13, a: 12},
+                {b: 6, c: 10, a: 8},
+                {b: 9, c: 15, a: 12}
+            ];
+            const t = scenarios[Math.floor(Math.random() * scenarios.length)];
+            let html = `
+                <svg width="260" height="180" viewBox="0 0 260 180" class="mt-4 print-break">
+                    <!-- Wall -->
+                    <rect x="50" y="20" width="10" height="110" fill="#9ca3af" />
+                    <!-- Ground -->
+                    <rect x="50" y="130" width="160" height="6" fill="#4b5563" />
+                    <!-- Ladder -->
+                    <line x1="60" y1="40" x2="160" y2="130" stroke="#b45309" stroke-width="6" stroke-linecap="round"/>
+                    
+                    <text x="110" y="155" font-family="sans-serif" font-size="14" text-anchor="middle">Abstand = ${t.b} m</text>
+                    <text x="125" y="70" font-family="sans-serif" font-size="14" text-anchor="middle" transform="rotate(-42, 125, 70)">Leiter = ${t.c} m</text>
+                    <text x="40" y="80" font-family="sans-serif" font-size="14" font-weight="bold" fill="#ef4444" text-anchor="end">Höhe = ?</text>
+                </svg>
+            `;
+            return {
+                topic: 'Pythagoras (Sachaufgabe)',
+                text: `Eine $${t.c}\\text{ m}$ lange Leiter steht am Boden $${t.b}\\text{ m}$ von der Hauswand entfernt. Wie hoch reicht die Leiter an der Wand?`,
+                customHtml: html,
+                answer: t.a,
+                unit: 'm'
+            };
+        }
+
+        // 8. Pythagoras Sachaufgabe (Luftlinie im Rechteck)
+        function genPythLuftlinie() {
+            const scenarios = [
+                {a: 40, b: 30, c: 50},
+                {a: 120, b: 50, c: 130},
+                {a: 80, b: 60, c: 100},
+                {a: 15, b: 8, c: 17}
+            ];
+            const t = scenarios[Math.floor(Math.random() * scenarios.length)];
+            let html = `
+                <svg width="260" height="180" viewBox="0 0 260 180" class="mt-4 print-break">
+                    <!-- Path -->
+                    <polyline points="40,140 180,140 180,40" fill="none" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Luftlinie -->
+                    <line x1="40" y1="140" x2="180" y2="40" stroke="#ef4444" stroke-width="3" stroke-dasharray="6,4"/>
+                    <circle cx="40" cy="140" r="4" fill="#2563eb"/>
+                    <circle cx="180" cy="40" r="4" fill="#ef4444"/>
+                    
+                    <text x="110" y="165" font-family="sans-serif" font-size="14" text-anchor="middle">Osten = ${t.a} m</text>
+                    <text x="195" y="95" font-family="sans-serif" font-size="14" text-anchor="start">Norden = ${t.b} m</text>
+                    <text x="95" y="80" font-family="sans-serif" font-size="14" text-anchor="middle" font-weight="bold" fill="#ef4444" transform="rotate(-35, 95, 80)">Luftlinie = ?</text>
+                </svg>
+            `;
+            return {
+                topic: 'Pythagoras (Sachaufgabe)',
+                text: `Du läufst auf einem Platz $${t.a}\\text{ m}$ nach Osten und $${t.b}\\text{ m}$ nach Norden. Wie weit bist du in Luftlinie (diagonal) vom Start entfernt?`,
+                customHtml: html,
+                answer: t.c,
+                unit: 'm'
+            };
+        }
+
+        // 9. Diagramme
+        function genBarChart() {
+            let vals = [getRandomInt(1,5)*10, getRandomInt(1,5)*10, getRandomInt(1,5)*10];
+            let ans = vals[1] + vals[2];
+            let html = `
+                <div class="flex items-end gap-6 h-32 mt-4 ml-6 border-l-2 border-b-2 border-gray-600 p-2 pt-8 relative w-48 print-break">
+                    <div class="absolute left-[-28px] top-0 text-xs text-gray-500">50</div>
+                    <div class="absolute left-[-28px] top-[20%] text-xs text-gray-500">40</div>
+                    <div class="absolute left-[-28px] top-[40%] text-xs text-gray-500">30</div>
+                    <div class="absolute left-[-28px] top-[60%] text-xs text-gray-500">20</div>
+                    <div class="absolute left-[-28px] top-[80%] text-xs text-gray-500">10</div>
+                    <div class="absolute left-0 top-[0%] w-full border-t border-dashed border-gray-200 -z-10"></div>
+                    <div class="absolute left-0 top-[20%] w-full border-t border-dashed border-gray-200 -z-10"></div>
+                    <div class="absolute left-0 top-[40%] w-full border-t border-dashed border-gray-200 -z-10"></div>
+                    <div class="absolute left-0 top-[60%] w-full border-t border-dashed border-gray-200 -z-10"></div>
+                    <div class="absolute left-0 top-[80%] w-full border-t border-dashed border-gray-200 -z-10"></div>
+                    <div class="flex flex-col items-center justify-end h-full w-full">
+                        <div class="bg-indigo-300 w-8 border border-indigo-500" style="height: ${(vals[0]/50)*100}%;"></div>
+                        <span class="text-xs mt-1 absolute -bottom-5">Apr</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-end h-full w-full">
+                        <div class="bg-indigo-300 w-8 border border-indigo-500" style="height: ${(vals[1]/50)*100}%;"></div>
+                        <span class="text-xs mt-1 absolute -bottom-5">Mai</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-end h-full w-full">
+                        <div class="bg-indigo-300 w-8 border border-indigo-500" style="height: ${(vals[2]/50)*100}%;"></div>
+                        <span class="text-xs mt-1 absolute -bottom-5">Jun</span>
+                    </div>
+                </div>
+            `;
+            return {
+                topic: 'Diagramme',
+                text: 'Das Säulendiagramm zeigt Verkaufszahlen. Wie viele Stück wurden im **Mai und Juni zusammen** verkauft?',
+                customHtml: html,
+                answer: ans,
+                unit: 'Stück'
+            };
+        }
+
+        function genPieChart() {
+            let totals = [100, 200, 300, 400, 500];
+            let total = totals[Math.floor(Math.random() * totals.length)];
+            let percents = [20, 25, 40, 50, 75, 80];
+            let percent = percents[Math.floor(Math.random() * percents.length)];
+            let ans = (total * percent) / 100;
+
+            let html = `
+                <div class="flex items-center gap-6 mt-4 ml-2 print-break">
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#4f46e5 0% ${percent}%, #e5e7eb ${percent}% 100%);" class="border-2 border-gray-400"></div>
+                    <div>
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 bg-indigo-600 border border-black"></div> <span class="text-sm font-medium">Gaming (${percent}%)</span></div>
+                        <div class="flex items-center gap-2 mt-2"><div class="w-4 h-4 bg-gray-200 border border-black"></div> <span class="text-sm font-medium">Sport (${100 - percent}%)</span></div>
+                    </div>
+                </div>
+            `;
+            return {
+                topic: 'Diagramme',
+                text: `**${total} Jugendliche** wurden nach ihrem Hobby gefragt. Wie viele Jugendliche (in Stückzahlen) haben für "Gaming" gestimmt?`,
+                customHtml: html,
+                answer: ans,
+                unit: 'Personen'
+            };
+        }
+
+        // --- APP LOGIK ---
+        
+        let currentQuestions = [];
+
+        function generateWorksheet() {
+            document.getElementById('final-score').classList.add('hidden');
+            document.getElementById('btn-check-all').classList.remove('hidden');
+
+            let basisGen1 = [genPvS, genKlammer];
+            let basisGen2 = [genEq1, genEq2];
+            let diagGen = [genBarChart, genPieChart];
+
+            currentQuestions = [];
+            
+            // 50% Basis (4 Aufgaben)
+            currentQuestions.push(basisGen1[getRandomInt(0, 1)]());
+            currentQuestions.push(basisGen2[getRandomInt(0, 1)]());
+            currentQuestions.push(diagGen[0]()); // Säule
+            currentQuestions.push(diagGen[1]()); // Kreis
+            
+            // 50% Pythagoras (4 Aufgaben)
+            currentQuestions.push(genPythHyp());
+            currentQuestions.push(genPythKat());
+            currentQuestions.push(genPythLeiter());
+            currentQuestions.push(genPythLuftlinie());
+
+            // Initialisiere hasChecked status
+            currentQuestions.forEach(q => q.hasChecked = false);
+
+            renderWorksheet();
+        }
+
+        function renderWorksheet() {
+            const container = document.getElementById('worksheet-container');
+            container.innerHTML = '';
+
+            currentQuestions.forEach((q, index) => {
+                // Konvertiere Markdown-Bold zu HTML
+                let textHtml = q.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                // Konvertiere Inline-LaTeX (z.B. $c = 5\text{ cm}$) in gerendertes KaTeX-HTML!
+                textHtml = textHtml.replace(/\$(.*?)\$/g, (match, formula) => {
+                    try {
+                        return katex.renderToString(formula, {throwOnError: false});
+                    } catch (e) {
+                        return match; // Fallback falls Syntaxfehler
+                    }
+                });
+
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-box bg-white p-5 rounded-xl border-2 border-gray-100 shadow-sm transition-colors print-break relative';
+                qDiv.id = `question-div-${index}`;
+
+                qDiv.innerHTML = `
+                    <div class="flex gap-3 mb-3">
+                        <div class="font-bold text-indigo-600 text-xl w-6 shrink-0">${index + 1}.</div>
+                        <div class="w-full">
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">${q.topic}</div>
+                            <div class="text-gray-800 text-lg mb-2">${textHtml}</div>
+                            
+                            ${q.latex ? `<div id="math-${index}" class="math-container my-3 ml-2 text-indigo-900"></div>` : ''}
+                            ${q.customHtml ? q.customHtml : ''}
+                            
+                            <div class="mt-6 flex flex-wrap items-center gap-3">
+                                <span class="font-bold text-gray-600">Lösung:</span>
+                                <input type="number" step="0.1" id="input-${index}" class="border-2 border-gray-300 rounded-lg p-2 w-32 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none text-lg print-input" placeholder="Ergebnis">
+                                ${q.unit ? `<span class="text-gray-600 font-medium">${q.unit}</span>` : ''}
+                                
+                                <button id="btn-single-${index}" onclick="checkSingleAnswer(${index})" class="ml-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 shadow transition-colors font-bold no-print whitespace-nowrap">Prüfen</button>
+                                
+                                <div id="feedback-${index}" class="ml-4 font-bold text-lg hidden no-print"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(qDiv);
+
+                if (q.latex) {
+                    katex.render(q.latex, document.getElementById(`math-${index}`), {
+                        throwOnError: false,
+                        displayMode: true
+                    });
+                }
+            });
+        }
+
+        window.checkSingleAnswer = function(index) {
+            const q = currentQuestions[index];
+            const inputEl = document.getElementById(`input-${index}`);
+            const feedbackEl = document.getElementById(`feedback-${index}`);
+            const boxEl = document.getElementById(`question-div-${index}`);
+            const btnEl = document.getElementById(`btn-single-${index}`);
+            
+            if (inputEl.value.trim() === '') {
+                alert('Bitte trage zuerst ein Ergebnis für Aufgabe ' + (index+1) + ' ein!');
+                return;
+            }
+
+            // Ersetze Komma durch Punkt für deutsche Eingabe
+            let userVal = parseFloat(inputEl.value.replace(',', '.'));
+            let isCorrect = (userVal === q.answer);
+
+            q.hasChecked = true;
+            inputEl.disabled = true;
+            btnEl.classList.add('hidden');
+            feedbackEl.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackEl.innerHTML = '✓ Richtig';
+                feedbackEl.className = 'ml-4 font-bold text-lg text-green-600 no-print';
+                boxEl.classList.add('border-green-300', 'bg-green-50');
+                boxEl.classList.remove('border-gray-100');
+            } else {
+                feedbackEl.innerHTML = `✗ Falsch (Richtig: ${q.answer})`;
+                feedbackEl.className = 'ml-4 font-bold text-lg text-red-600 no-print';
+                boxEl.classList.add('border-red-300', 'bg-red-50');
+                boxEl.classList.remove('border-gray-100');
+            }
+            
+            checkIfAllDone();
+        }
+
+        window.checkAllAnswers = function() {
+            // Geht durch alle noch nicht geprüften Aufgaben und wertet sie aus
+            currentQuestions.forEach((q, index) => {
+                if (!q.hasChecked) {
+                    const inputEl = document.getElementById(`input-${index}`);
+                    if (inputEl.value.trim() === '') {
+                        inputEl.value = '0'; // Falls nichts eingetragen wurde, ist es automatisch falsch
+                    }
+                    checkSingleAnswer(index);
+                }
+            });
+        }
+
+        function checkIfAllDone() {
+            const allChecked = currentQuestions.every(q => q.hasChecked);
+            if (allChecked) {
+                let score = currentQuestions.filter((q, idx) => {
+                    let userVal = parseFloat(document.getElementById(`input-${idx}`).value.replace(',', '.'));
+                    return userVal === q.answer;
+                }).length;
+                
+                const scoreEl = document.getElementById('final-score');
+                scoreEl.innerHTML = `Du hast ${score} von ${currentQuestions.length} Aufgaben richtig gelöst!`;
+                scoreEl.className = `text-2xl font-bold mt-4 text-center ${score === currentQuestions.length ? 'text-green-600' : 'text-indigo-600'}`;
+                scoreEl.classList.remove('hidden');
+                
+                document.getElementById('btn-check-all').classList.add('hidden');
+            }
+        }
+
+        // --- Start ---
+        document.addEventListener('DOMContentLoaded', () => {
+            generateWorksheet();
+        });
+    </script>
+</body>
+</html>
